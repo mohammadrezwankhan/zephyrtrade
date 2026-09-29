@@ -1,0 +1,23 @@
+{
+  "schema_version": 1,
+  "application": "ZephyrTrade Champion",
+  "data_kind": "user_assumptions_not_live",
+  "name": "Higher shortfall penalty",
+  "input": {
+    "capacity": 30,
+    "da": 400,
+    "up": 900,
+    "down": 250,
+    "hours": 1,
+    "scenarios": [
+      2,
+      8,
+      20
+    ],
+    "probabilities": [
+      0.2,
+      0.5,
+      0.3
+    ]
+  }
+}

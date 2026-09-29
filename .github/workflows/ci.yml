@@ -1,0 +1,52 @@
+name: ci
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+
+permissions:
+  contents: read
+
+jobs:
+  quality:
+    runs-on: ubuntu-latest
+    strategy:
+      fail-fast: false
+      matrix:
+        python-version: ["3.11", "3.12"]
+
+    steps:
+      - name: Check out repository
+        uses: actions/checkout@v4
+
+      - name: Set up Python
+        uses: actions/setup-python@v5
+        with:
+          python-version: ${{ matrix.python-version }}
+          cache: pip
+
+      - name: Install project and development dependencies
+        run: python -m pip install -e ".[dev]"
+
+      - name: Lint
+        run: python -m ruff check src tests
+
+      - name: Check formatting
+        run: python -m ruff format --check src tests
+
+      - name: Test with warnings as errors
+        run: python -m pytest -W error
+
+      - name: Set up Node for browser numerical tests
+        uses: actions/setup-node@v4
+        with:
+          node-version: "22"
+
+      - name: Browser numerical and Python parity checks
+        run: |
+          node --test tests/browser/engine.test.cjs
+          python scripts/verify_engines.py
+
+      - name: Build source and wheel distributions
+        run: python -m build

@@ -1,0 +1,24 @@
+ZEPHYRTRADE CHAMPION 1.1.0 - LOCAL RESEARCH CANDIDATE
+
+FASTEST START
+Extract this ZIP. Open ZephyrTrade-Champion.html in your browser.
+There is no installation for the portable HTML.
+On Windows, OPEN_CHAMPION_WINDOWS.bat opens the same file.
+
+OPTIONAL PYTHON CROSS-CHECK
+Run START_PYTHON_WINDOWS.bat (Python 3.11+ required).
+The first setup downloads Python packages into a separate environment.
+Keep its window open. Browse to http://127.0.0.1:8765.
+Never expose this service to the public internet.
+
+WHAT YOU GET
+Overview, Strategy lab, Model arena, Data explorer, Method & evidence.
+CSV and JSON exports. Named local scenarios. Light and dark themes.
+Source code, existing research data, a Python wheel, tests and audit evidence.
+
+IMPORTANT
+The data is synthetic. This is not a live trading app and cannot submit orders.
+Save scenario JSON backups. Browser storage is not a cloud backup.
+Normal-browser file opening and native persistence need your acceptance check.
+Read README.md and docs/champion/AUDIT_AND_RELEASE.md for verified results,
+blocked checks, training warnings and the release checklist.

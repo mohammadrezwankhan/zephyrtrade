@@ -1,0 +1,96 @@
+{
+  "application": "ZephyrTrade Champion",
+  "version": "1.1.0",
+  "candidate_id": "zephyrtrade-1.1.0-f1267a51f318",
+  "prepared_at_utc": "2026-09-28T21:33:39.847438+00:00",
+  "source_archive": "ZephyrTrade.zip",
+  "source_archive_sha256": "59ea37ed94e6c2ba7bb298cfc19605e46844910d39b94f5f04c71c59d4592a0c",
+  "source_commit": null,
+  "identity_basis": "SHA256 of sorted relative implementation paths and file SHA256 values; no source commit invented",
+  "implementation_fingerprint": "f1267a51f318662b9474dfe6813c42c58ed7f74640deca70c8f77ffd41a7bbbc",
+  "implementation_file_sha256": {
+    ".github/workflows/ci.yml": "510052f3928e3e3ddacf39a4739a6f2947c23999f23d5d1262eddfc02bfc5960",
+    "MANIFEST.in": "b35dca23ff825e5899110f72320d4ab19120728e79958821deaaeb15446446e2",
+    "OPEN_CHAMPION_WINDOWS.bat": "1f95202a99640174e1d02296b952876e9deff2f39d9bdf43916d37431b30c2b7",
+    "START_PYTHON_WINDOWS.bat": "e776bb7caeb3fa4441f1bb9d9403b021c60690d38e0735a3c619aade2022f2c0",
+    "ZephyrTrade-Champion.html": "7134e91c9f55284e63a78541a3089214a02ebcb4b5bd115afcfd08f726f21c0c",
+    "pyproject.toml": "bbfe72b734eb8373efbb30c853ad3c24bf2ed129d4101c1f0138d03f043ae336",
+    "requirements-tested.txt": "a1cfbd228592e1e1afb3107adcf18ea0c64b5c270f7787ad379b080a145aeb07",
+    "requirements.txt": "abf6bf1840c6a99af87e2ae4e382afa5f84ce59e5ea2c422d34d0e18f3107c53",
+    "scripts/build_app.py": "2371a0c5a6380fab2cedb0323a7bd57ade1092002bf224c852cc08fa83a5755b",
+    "scripts/check_browser.py": "4a338debffb95a1f65ea91a8ea0d7094499c3da42e66c950ba8961f792d24fc4",
+    "scripts/smoke_research.py": "7ada5104007e657ee060cf63bb01e6e48e65da6c9422390ab95fbf4748064d66",
+    "scripts/verify_engines.py": "7c5504e4aa8c07adf3aa598263ad98aefd7ea8af66aebf704bcfbe89d210e87f",
+    "src/zephyrtrade/__init__.py": "c5c59ac19457bf143671f80b22d2d4f0c42ed9ac0ea5dda95ef173cac11a2839",
+    "src/zephyrtrade/app.py": "6f6954f8850d1ca4dcf5f91415150cac56d72b3949a9223c8fbfd698db583674",
+    "src/zephyrtrade/data_loader.py": "a27f47536c276190d5fa9838a1f6886871aee622a295571da1a081a2f4604728",
+    "src/zephyrtrade/direct.py": "4d00b47553736de9f9fa38bf205556bfa8322301ff10c3da695e8bccaa316b5b",
+    "src/zephyrtrade/evaluate.py": "0c245bba442d6969e701fc779576a01e0f5ceaa87fead0963189c412f926e40b",
+    "src/zephyrtrade/models.py": "8a2892b9d012508ac0ad1ee45cc8d0358a1843d1019cb2ce59e42b919b3a857f",
+    "src/zephyrtrade/optimize.py": "3d35fe4b37112ca4584bc39574326b57eb36b658ac2f616f96ef8b7bafee4998",
+    "src/zephyrtrade/phase2.py": "3ee759aae477b73b7989ce188ee1c0d8db066e95cedc5b19a75f05b37b995e64",
+    "src/zephyrtrade/phase3.py": "fa15864b665c4b14b5c6328b6fcf681857a5308ec4ea0dfaeb9c891f447bf62e",
+    "src/zephyrtrade/pipeline.py": "ab79942d841e7240c095af9852e153909e3d84720498812f2b86da9d146ee827",
+    "src/zephyrtrade/preprocessing.py": "00d5c63d57b244ada2399be49ab214e6530067af229365eca7c97ba9af0544b7",
+    "src/zephyrtrade/web/app.js": "277b658ca1b1843b525f6261d6316b98380e85ab8245df9b589c303feae82820",
+    "src/zephyrtrade/web/engine.js": "d8f1b79dc0ce6d71a487b90d5a82aec9ee2b1f1fa7cbcd0a6e8eb973c14937e4",
+    "src/zephyrtrade/web/index.html": "407e0c1791dcef0fc11ac400c07e25efa252af01fc5162c119ea42b86a5022a1",
+    "src/zephyrtrade/web/snapshot.js": "4affeca05ff3f01a7fb2e938b78b584d4bba762b30a5ac703db10b92d6cbbc2b",
+    "src/zephyrtrade/web/styles.css": "306246a450b5c4157a5121335a3f96d17929a6c856c4559064d13001eb0811b0",
+    "start-python.sh": "79b442d04aea3182f6f12c110541d3afa0fee19f57a3ebe20772bf5a2e042df0",
+    "tests/browser/engine.test.cjs": "26fca5dfe733e550f544fa05906438658ac2bd7cac3a1e581311f0e6fd281873",
+    "tests/test_app.py": "61d5a0afdeb7011006c6a4380a55197436c94c14ca890e65e99bdd7a709af103",
+    "tests/test_data_loader.py": "5ae3b38cb8ab0c926659165c79091ef2244794ee45677377e6faa286a7d5cbf7",
+    "tests/test_direct.py": "370c76bb1886af20cc174a2fa576b539fdedebc9e10635c39fc900c84ff2a44f",
+    "tests/test_evaluate.py": "7278eeb950ce1461a3862cbcd7fe64603aa528b605c4502c67d3d99c5895e846",
+    "tests/test_models.py": "90d62f780896395d98490d09785f27d40066d7744ca8fefbac8a42b53917df80",
+    "tests/test_optimize.py": "0f9cc544a3a5e10f6bec3d07a655418ffd166a3cd3bb4808fc55eb85835e3f0e",
+    "tests/test_pipeline.py": "f0fe9115f1c1356eb29ceba9eb7006e784a2a955493d3d7db0ddd61e96c55762",
+    "tests/test_preprocessing.py": "e6776c2f2df8027126ceb151d3066130039a9904c85eba12b832e61eb365e542",
+    "tests/test_repair_regressions.py": "afad9b9a7d8ccc347d57aa6e871a2b05c8cae0e72cc95e72f35297a99bde2d47",
+    "tests/test_snapshot.py": "ca22b8c99b6942f2d5f97096edb64620e6edaac5113a1771e56652ca55bcfe6c"
+  },
+  "artifact_sha256": {
+    "ZephyrTrade-Champion.html": "7134e91c9f55284e63a78541a3089214a02ebcb4b5bd115afcfd08f726f21c0c",
+    "dist/zephyrtrade-1.1.0-py3-none-any.whl": "8d59d05b71c7c69ac34084f738495ef4b8be414833367784eb41b1f24515773e"
+  },
+  "verification": {
+    "python_tests": {
+      "status": "PASS",
+      "count": 86
+    },
+    "javascript_cases": {
+      "status": "PASS",
+      "count": 13
+    },
+    "browser_harness_checks": {
+      "status": "PASS",
+      "count": 23,
+      "limitation": "set_content with Storage double; no native file/localhost navigation"
+    },
+    "scipy_parity_cases": {
+      "status": "PASS",
+      "count": 120
+    },
+    "saved_revenue_comparisons": {
+      "status": "PASS",
+      "count": 34992
+    },
+    "wheel_build_and_install": {
+      "status": "PASS",
+      "limitation": "Linux with existing scientific dependencies"
+    },
+    "protected_source_files": {
+      "status": "PASS",
+      "count": 65
+    },
+    "full_default_training": "INCONCLUSIVE",
+    "reduced_training_smoke": "Completed; four Lasso convergence warnings",
+    "native_browser_and_persistence": "BLOCKED",
+    "ruff_and_declared_hosted_ci": "BLOCKED",
+    "human_uat": "NOT RUN"
+  },
+  "release_gate": "BLOCKED for unrestricted release; local research candidate supplied for acceptance testing",
+  "production_status": "Not deployed; no remote changes or live orders",
+  "approval_required": "Human acceptance, declared CI, scientific-scope acceptance and separate action-specific production authorization"
+}

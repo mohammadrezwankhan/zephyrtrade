@@ -1,0 +1,68 @@
+/opt/pyvenv/lib/python3.13/site-packages/sklearn/linear_model/_coordinate_descent.py:716: ConvergenceWarning: Objective did not converge. You might want to increase the number of iterations, check the scale of the features or consider increasing regularisation. Duality gap: 1.688e+01, tolerance: 1.056e-01
+  model = cd_fast.enet_coordinate_descent(
+/opt/pyvenv/lib/python3.13/site-packages/sklearn/linear_model/_coordinate_descent.py:716: ConvergenceWarning: Objective did not converge. You might want to increase the number of iterations, check the scale of the features or consider increasing regularisation. Duality gap: 6.800e+01, tolerance: 2.296e-01
+  model = cd_fast.enet_coordinate_descent(
+/opt/pyvenv/lib/python3.13/site-packages/sklearn/linear_model/_coordinate_descent.py:716: ConvergenceWarning: Objective did not converge. You might want to increase the number of iterations, check the scale of the features or consider increasing regularisation. Duality gap: 1.735e+00, tolerance: 3.832e-01
+  model = cd_fast.enet_coordinate_descent(
+/opt/pyvenv/lib/python3.13/site-packages/sklearn/linear_model/_coordinate_descent.py:716: ConvergenceWarning: Objective did not converge. You might want to increase the number of iterations, check the scale of the features or consider increasing regularisation. Duality gap: 4.529e-01, tolerance: 1.056e-01
+  model = cd_fast.enet_coordinate_descent(
+Fitting Linear OLS...
+Fitting Polynomial OLS...
+Fitting Locally weighted linear...
+Fitting Polynomial Ridge...
+Fitting Polynomial Lasso...
+Fitting K-means local Ridge...
+Phase 2 complete.
+           model                   label   rmse_mw    mae_mw        r2  rmse_rank
+lasso_polynomial        Polynomial Lasso  1.654803  1.254942  0.946970          1
+      linear_ols              Linear OLS  2.332385  1.911296  0.894651          2
+ clustered_ridge     K-means local Ridge  2.564934  2.075445  0.872596          3
+ridge_polynomial        Polynomial Ridge  8.429688  7.471615 -0.376114          4
+locally_weighted Locally weighted linear  9.746671  7.625063 -0.839687          5
+ persistence_24h     24-hour persistence 10.658980  8.684172 -1.200203          6
+  polynomial_ols          Polynomial OLS 14.086005 12.701358 -2.842440          7
+           model                   label  total_revenue_dkk  mean_revenue_dkk_per_interval  perfect_foresight_revenue_dkk  revenue_capture_pct  revenue_regret_dkk  mean_offer_mw  mean_signed_imbalance_mw  total_absolute_imbalance_mwh  revenue_rank
+lasso_polynomial        Polynomial Lasso       1.382770e+06                    6913.852320                   1.403281e+06            98.538394        20510.440487      15.816211                  0.561983                    255.326648             1
+ clustered_ridge     K-means local Ridge       1.364327e+06                    6821.634642                   1.403281e+06            97.224079        38953.976096      18.045300                 -1.667106                    383.755687             2
+      linear_ols              Linear OLS       1.363666e+06                    6818.332325                   1.403281e+06            97.177013        39614.439564      18.122015                 -1.743822                    385.438027             3
+ridge_polynomial        Polynomial Ridge       1.289329e+06                    6446.642574                   1.403281e+06            91.879574       113952.389698      21.688310                 -5.310117                   1099.894435             4
+locally_weighted Locally weighted linear       1.277044e+06                    6385.220158                   1.403281e+06            91.004162       126236.872989      12.365866                  4.012328                   1528.209074             5
+ persistence_24h     24-hour persistence       1.254723e+06                    6273.612789                   1.403281e+06            89.413499       148558.346765      12.774968                  3.603226                   1819.132629             6
+  polynomial_ols          Polynomial OLS       1.223584e+06                    6117.918484                   1.403281e+06            87.194495       179697.207668      24.553300                 -8.175106                   1755.820221             7
+Phase 3 complete.
+Selected direct regression: {'loss': 'squared_error', 'quantile': None, 'max_leaf_nodes': 7, 'inner_holdout_revenue_dkk': 1234669.5947686443, 'inner_holdout_rmse_mw': 4.625119869777094}
+Selected direct classification: {'n_brackets': 3, 'max_leaf_nodes': 7, 'decision_quantile': 0.5, 'inner_holdout_revenue_dkk': 1265959.3048013474, 'inner_holdout_rmse_mw': 2.832102644685912}
+                 strategy                               label model_family  rmse_mw   mae_mw        r2  total_revenue_dkk  mean_revenue_dkk_per_interval  perfect_foresight_revenue_dkk  revenue_capture_pct  revenue_regret_dkk  mean_offer_mw  mean_signed_imbalance_mw  total_absolute_imbalance_mwh  revenue_rank
+        perfect_foresight                   Perfect foresight       oracle 0.000000 0.000000  1.000000       1.403281e+06                    7016.404523                   1.403281e+06           100.000000            0.000000      16.378194                  0.000000                      0.000000             1
+    direct_classification Model 2: bid-bracket classification       direct 3.691615 3.009679  0.736085       1.346571e+06                    6732.853624                   1.403281e+06            95.958744        56710.179823      17.087063                 -0.708869                    601.935745             2
+        direct_regression      Model 2: continuous regression       direct 4.175837 3.341862  0.662310       1.338501e+06                    6692.503387                   1.403281e+06            95.383659        64780.227048      17.375372                 -0.997178                    668.372487             3
+indirect_locally_weighted      Model 1: predict then optimize     indirect 9.874298 7.641045 -0.888182       1.277044e+06                    6385.220158                   1.403281e+06            91.004162       126236.872989      12.365866                  4.012328                   1528.209074             4
+{
+  "status": "PASS",
+  "scope": "New synthetic Jan-Feb 2023; default Phase 2; reduced-grid 10-iteration Phase 3",
+  "original_backtest_retrained": false,
+  "phase2_outputs": {
+    "prediction_metrics": "/mnt/data/work/reduced-training-smoke/phase2/prediction_metrics.csv",
+    "revenue_metrics": "/mnt/data/work/reduced-training-smoke/phase2/revenue_metrics.csv",
+    "regularization_path": "/mnt/data/work/reduced-training-smoke/phase2/regularization_path.csv",
+    "coefficient_analysis": "/mnt/data/work/reduced-training-smoke/phase2/coefficient_analysis.csv",
+    "cluster_selection": "/mnt/data/work/reduced-training-smoke/phase2/cluster_selection.csv",
+    "test_predictions": "/mnt/data/work/reduced-training-smoke/phase2/test_predictions.csv.gz",
+    "summary": "/mnt/data/work/reduced-training-smoke/phase2/summary.json",
+    "figure_forecast_metrics": "/mnt/data/work/reduced-training-smoke/figures/phase2_forecast_rmse.png",
+    "figure_revenue_regret": "/mnt/data/work/reduced-training-smoke/figures/phase2_revenue_regret.png",
+    "figure_coefficients": "/mnt/data/work/reduced-training-smoke/figures/phase2_regularized_coefficients.png",
+    "figure_cluster_selection": "/mnt/data/work/reduced-training-smoke/figures/phase2_cluster_selection.png"
+  },
+  "phase3_outputs": {
+    "regression_selection": "/mnt/data/work/reduced-training-smoke/phase3/regression_selection.csv",
+    "classification_selection": "/mnt/data/work/reduced-training-smoke/phase3/classification_selection.csv",
+    "strategy_comparison": "/mnt/data/work/reduced-training-smoke/phase3/strategy_comparison.csv",
+    "test_predictions": "/mnt/data/work/reduced-training-smoke/phase3/test_direct_predictions.csv.gz",
+    "summary": "/mnt/data/work/reduced-training-smoke/phase3/summary.json",
+    "figure_revenue_regret": "/mnt/data/work/reduced-training-smoke/figures/phase3_strategy_revenue_regret.png",
+    "figure_offers": "/mnt/data/work/reduced-training-smoke/figures/phase3_offer_timeseries.png",
+    "figure_confusion": "/mnt/data/work/reduced-training-smoke/figures/phase3_confusion_matrix.png",
+    "figure_cumulative_delta": "/mnt/data/work/reduced-training-smoke/figures/phase3_cumulative_revenue_delta.png"
+  }
+}

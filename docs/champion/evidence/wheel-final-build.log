@@ -1,0 +1,87 @@
+running bdist_wheel
+running build
+running build_py
+copying src/zephyrtrade/phase2.py -> build/lib/zephyrtrade
+copying src/zephyrtrade/evaluate.py -> build/lib/zephyrtrade
+copying src/zephyrtrade/phase3.py -> build/lib/zephyrtrade
+copying src/zephyrtrade/preprocessing.py -> build/lib/zephyrtrade
+copying src/zephyrtrade/app.py -> build/lib/zephyrtrade
+copying src/zephyrtrade/optimize.py -> build/lib/zephyrtrade
+copying src/zephyrtrade/direct.py -> build/lib/zephyrtrade
+copying src/zephyrtrade/pipeline.py -> build/lib/zephyrtrade
+copying src/zephyrtrade/data_loader.py -> build/lib/zephyrtrade
+copying src/zephyrtrade/models.py -> build/lib/zephyrtrade
+copying src/zephyrtrade/__init__.py -> build/lib/zephyrtrade
+running egg_info
+writing src/zephyrtrade.egg-info/PKG-INFO
+writing dependency_links to src/zephyrtrade.egg-info/dependency_links.txt
+writing entry points to src/zephyrtrade.egg-info/entry_points.txt
+writing requirements to src/zephyrtrade.egg-info/requires.txt
+writing top-level names to src/zephyrtrade.egg-info/top_level.txt
+reading manifest file 'src/zephyrtrade.egg-info/SOURCES.txt'
+reading manifest template 'MANIFEST.in'
+warning: no files found matching '*.log' under directory 'docs/champion'
+warning: no files found matching '*.txt' under directory 'docs/champion'
+adding license file 'LICENSE'
+writing manifest file 'src/zephyrtrade.egg-info/SOURCES.txt'
+copying src/zephyrtrade/web/index.html -> build/lib/zephyrtrade/web
+copying src/zephyrtrade/web/styles.css -> build/lib/zephyrtrade/web
+copying src/zephyrtrade/web/engine.js -> build/lib/zephyrtrade/web
+copying src/zephyrtrade/web/snapshot.js -> build/lib/zephyrtrade/web
+copying src/zephyrtrade/web/app.js -> build/lib/zephyrtrade/web
+copying src/zephyrtrade/web/app.js -> build/lib/zephyrtrade/web
+copying src/zephyrtrade/web/engine.js -> build/lib/zephyrtrade/web
+copying src/zephyrtrade/web/index.html -> build/lib/zephyrtrade/web
+copying src/zephyrtrade/web/snapshot.js -> build/lib/zephyrtrade/web
+copying src/zephyrtrade/web/styles.css -> build/lib/zephyrtrade/web
+installing to build/bdist.linux-x86_64/wheel
+running install
+running install_lib
+creating build/bdist.linux-x86_64/wheel
+creating build/bdist.linux-x86_64/wheel/zephyrtrade
+copying build/lib/zephyrtrade/phase2.py -> build/bdist.linux-x86_64/wheel/./zephyrtrade
+copying build/lib/zephyrtrade/evaluate.py -> build/bdist.linux-x86_64/wheel/./zephyrtrade
+copying build/lib/zephyrtrade/phase3.py -> build/bdist.linux-x86_64/wheel/./zephyrtrade
+copying build/lib/zephyrtrade/preprocessing.py -> build/bdist.linux-x86_64/wheel/./zephyrtrade
+copying build/lib/zephyrtrade/app.py -> build/bdist.linux-x86_64/wheel/./zephyrtrade
+creating build/bdist.linux-x86_64/wheel/zephyrtrade/web
+copying build/lib/zephyrtrade/web/engine.js -> build/bdist.linux-x86_64/wheel/./zephyrtrade/web
+copying build/lib/zephyrtrade/web/index.html -> build/bdist.linux-x86_64/wheel/./zephyrtrade/web
+copying build/lib/zephyrtrade/web/snapshot.js -> build/bdist.linux-x86_64/wheel/./zephyrtrade/web
+copying build/lib/zephyrtrade/web/styles.css -> build/bdist.linux-x86_64/wheel/./zephyrtrade/web
+copying build/lib/zephyrtrade/web/app.js -> build/bdist.linux-x86_64/wheel/./zephyrtrade/web
+copying build/lib/zephyrtrade/optimize.py -> build/bdist.linux-x86_64/wheel/./zephyrtrade
+copying build/lib/zephyrtrade/direct.py -> build/bdist.linux-x86_64/wheel/./zephyrtrade
+copying build/lib/zephyrtrade/pipeline.py -> build/bdist.linux-x86_64/wheel/./zephyrtrade
+copying build/lib/zephyrtrade/data_loader.py -> build/bdist.linux-x86_64/wheel/./zephyrtrade
+copying build/lib/zephyrtrade/models.py -> build/bdist.linux-x86_64/wheel/./zephyrtrade
+copying build/lib/zephyrtrade/__init__.py -> build/bdist.linux-x86_64/wheel/./zephyrtrade
+running install_egg_info
+Copying src/zephyrtrade.egg-info to build/bdist.linux-x86_64/wheel/./zephyrtrade-1.1.0-py3.13.egg-info
+running install_scripts
+creating build/bdist.linux-x86_64/wheel/zephyrtrade-1.1.0.dist-info/WHEEL
+creating '/mnt/data/ZephyrTrade_Champion/dist/.tmp-wu2hiiyj/zephyrtrade-1.1.0-py3-none-any.whl' and adding 'build/bdist.linux-x86_64/wheel' to it
+adding 'zephyrtrade/__init__.py'
+adding 'zephyrtrade/app.py'
+adding 'zephyrtrade/data_loader.py'
+adding 'zephyrtrade/direct.py'
+adding 'zephyrtrade/evaluate.py'
+adding 'zephyrtrade/models.py'
+adding 'zephyrtrade/optimize.py'
+adding 'zephyrtrade/phase2.py'
+adding 'zephyrtrade/phase3.py'
+adding 'zephyrtrade/pipeline.py'
+adding 'zephyrtrade/preprocessing.py'
+adding 'zephyrtrade/web/app.js'
+adding 'zephyrtrade/web/engine.js'
+adding 'zephyrtrade/web/index.html'
+adding 'zephyrtrade/web/snapshot.js'
+adding 'zephyrtrade/web/styles.css'
+adding 'zephyrtrade-1.1.0.dist-info/licenses/LICENSE'
+adding 'zephyrtrade-1.1.0.dist-info/METADATA'
+adding 'zephyrtrade-1.1.0.dist-info/WHEEL'
+adding 'zephyrtrade-1.1.0.dist-info/entry_points.txt'
+adding 'zephyrtrade-1.1.0.dist-info/top_level.txt'
+adding 'zephyrtrade-1.1.0.dist-info/RECORD'
+removing build/bdist.linux-x86_64/wheel
+zephyrtrade-1.1.0-py3-none-any.whl

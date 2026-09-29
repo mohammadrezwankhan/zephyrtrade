@@ -1,0 +1,136 @@
+{
+  "status": "PASS",
+  "harness": "Chromium set_content; in-memory Storage double; no file or localhost browser navigation",
+  "browser": "144.0.7559.96",
+  "checks": [
+    {
+      "check": "Initial snapshot and nine strategies",
+      "status": "PASS",
+      "details": "3888 hours, full-precision revenue agrees; one set_content load 0.251s (not network performance)."
+    },
+    {
+      "check": "Three chart modes and benchmark disclosure",
+      "status": "PASS",
+      "details": ""
+    },
+    {
+      "check": "Period and strategy changes recompute metrics",
+      "status": "PASS",
+      "details": "168 retained hours in 7-day window"
+    },
+    {
+      "check": "Invalid date ordering rejected; one-day window recovers",
+      "status": "PASS",
+      "details": ""
+    },
+    {
+      "check": "Empty date range has explicit recovery",
+      "status": "PASS",
+      "details": ""
+    },
+    {
+      "check": "Nine-row model ranking and comparison CSV payload",
+      "status": "PASS",
+      "details": ""
+    },
+    {
+      "check": "Ledger pagination, search, empty state and filtered CSV payload",
+      "status": "PASS",
+      "details": ""
+    },
+    {
+      "check": "Dirty assumptions, draft navigation retention, invalid prices and recovery",
+      "status": "PASS",
+      "details": ""
+    },
+    {
+      "check": "Quarter-hour settlement scaling in UI",
+      "status": "PASS",
+      "details": ""
+    },
+    {
+      "check": "Scenario save and escaped names through Storage test double",
+      "status": "PASS",
+      "details": "Native durable storage NOT verified in this harness."
+    },
+    {
+      "check": "Scenario JSON and revenue-curve CSV payloads",
+      "status": "PASS",
+      "details": ""
+    },
+    {
+      "check": "Invalid import rejected; valid JSON imports and recalculates",
+      "status": "PASS",
+      "details": ""
+    },
+    {
+      "check": "Storage failure is not reported as a successful save",
+      "status": "PASS",
+      "details": "Fault injection into explicit Storage double."
+    },
+    {
+      "check": "Delete confirmation and in-memory storage update",
+      "status": "PASS",
+      "details": ""
+    },
+    {
+      "check": "Saved-record hydration and loading",
+      "status": "PASS",
+      "details": "Fixture rehydration, not an OS/browser persistence claim."
+    },
+    {
+      "check": "Unavailable optional solver leads to setup, not fabricated success",
+      "status": "PASS",
+      "details": ""
+    },
+    {
+      "check": "Provenance JSON exposes source hashes and exclusions",
+      "status": "PASS",
+      "details": ""
+    },
+    {
+      "check": "Dialog focus entry, Escape and focus return",
+      "status": "PASS",
+      "details": ""
+    },
+    {
+      "check": "Responsive overflow check across five pages and five viewports",
+      "status": "PASS",
+      "details": "1440, 1024, 768, 390, 320 CSS px; emulation only."
+    },
+    {
+      "check": "Light theme and mobile-accessible theme toggle",
+      "status": "PASS",
+      "details": ""
+    },
+    {
+      "check": "Reduced-motion preference respected",
+      "status": "PASS",
+      "details": "0s"
+    },
+    {
+      "check": "Visible controls have DOM labels or accessible-name sources",
+      "status": "PASS",
+      "details": "No screen-reader or full WCAG conformance claim."
+    },
+    {
+      "check": "No uncaught JavaScript exceptions across exercised journeys",
+      "status": "PASS",
+      "details": ""
+    }
+  ],
+  "javascript_errors": [],
+  "browser_download_events": [
+    "ZephyrTrade-model-comparison.csv",
+    "ZephyrTrade-persistence_24h-2024-12-15.csv",
+    "ZephyrTrade-scenario.json",
+    "ZephyrTrade-revenue-curve.csv",
+    "ZephyrTrade-provenance.json"
+  ],
+  "limitations": [
+    "Native persistent storage and real file opening blocked by administrator policy",
+    "Actual browser-to-Python navigation blocked; Python HTTP API tested separately",
+    "Screenshots are actual rendered app, not a concept mockup",
+    "Human UAT, real devices and assistive-technology testing not performed"
+  ]
+}

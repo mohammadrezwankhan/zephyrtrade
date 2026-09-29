@@ -1,0 +1,1 @@
+The first full-pipeline smoke command was interrupted by the container tool 20-second time limit on a combined call. Phase-2 partial artifacts exist; no completion or child exit status was captured. This is an interrupted execution, not a pass. A fresh isolated retry follows.

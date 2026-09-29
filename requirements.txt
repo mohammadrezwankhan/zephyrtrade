@@ -1,0 +1,3 @@
+# The dependency source of truth is pyproject.toml.
+-e .[dev]
+

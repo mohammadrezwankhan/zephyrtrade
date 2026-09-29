@@ -1,0 +1,527 @@
+[
+  {
+    "path": ".gitignore",
+    "size": 398,
+    "sha256": "1a42432431b7d623c83c994920f2a400caad23d11f423a9cd38cdd57a71f59ae"
+  },
+  {
+    "path": "CHANGELOG.md",
+    "size": 1291,
+    "sha256": "21eade326a09a3dd037efb703674729e5fd74f3ba814659f300edaf62f15ceff"
+  },
+  {
+    "path": "CITATION.cff",
+    "size": 257,
+    "sha256": "654b853b0bea46c4e772133161ccc7a70dd8d9c15a1c111adaaf795b97b04d26"
+  },
+  {
+    "path": "CONTRIBUTING.md",
+    "size": 1486,
+    "sha256": "5e6b26610f6242bdea60aa541080b45d1387d32aed2b8edff50e76ed34364172"
+  },
+  {
+    "path": "LICENSE",
+    "size": 1082,
+    "sha256": "1ae12f8abc7be1b1fbdce2fb18c7b4b20e77e1c386a6be430a788e4c7605978f"
+  },
+  {
+    "path": "MANIFEST.in",
+    "size": 100,
+    "sha256": "c0f3f5d9f6b5500eb0f997c4fd878030cf303c309559af9dce53e4797e8830f1"
+  },
+  {
+    "path": "pyproject.toml",
+    "size": 1489,
+    "sha256": "30c1946c3732e3a349803300e3d2437db85dcf9b3dd52a05f15ce54e03df8e54"
+  },
+  {
+    "path": "README.md",
+    "size": 10086,
+    "sha256": "388b8f6d4c5e0aed656cac9bf293f86da11389d743d2068bf0dec7637a1ec28b"
+  },
+  {
+    "path": "requirements.txt",
+    "size": 63,
+    "sha256": "abf6bf1840c6a99af87e2ae4e382afa5f84ce59e5ea2c422d34d0e18f3107c53"
+  },
+  {
+    "path": ".github/workflows/ci.yml",
+    "size": 885,
+    "sha256": "3ce9ce679d2deef95c1c7e0d3dcee56f1c9a6d2d572deabfe3b8e53d9cf131b7"
+  },
+  {
+    "path": ".vs/slnx.sqlite",
+    "size": 90112,
+    "sha256": "9162aee656a449e587b5b0aded249f3d1472277aec42f6f377be0537237e4ae1"
+  },
+  {
+    "path": ".vs/VSWorkspaceState.json",
+    "size": 78,
+    "sha256": "f8315c8ace58425aeca40c1c17b3be8d50894c55f561cd7e36266da5d5ea3d72"
+  },
+  {
+    "path": ".vs/ZephyrTrade.slnx/FileContentIndex/b77c9b0d-43ec-4629-85ac-7a17c8de9818.vsidx",
+    "size": 163985,
+    "sha256": "e82a30a58f83e8a2e392f365ec35293b63bf19251639180386fe4910610da93a"
+  },
+  {
+    "path": ".vs/ZephyrTrade.slnx/v18/.wsuo",
+    "size": 15360,
+    "sha256": "3ba5f9faa37f6cd8f54838a416e138417142d6946871e1a79b8d8532064c5f3a"
+  },
+  {
+    "path": ".vs/ZephyrTrade.slnx/v18/DocumentLayout.backup.json",
+    "size": 268,
+    "sha256": "0c0161c301900195d95302d41009df1b40fc1bfccd9b23de3bfae4c148d1e77b"
+  },
+  {
+    "path": ".vs/ZephyrTrade.slnx/v18/DocumentLayout.json",
+    "size": 541,
+    "sha256": "5dea68e173dd27c4d947c92930067e9c2a2cc93e166be4031bf806b1a3862a6c"
+  },
+  {
+    "path": "artifacts/phase2/cluster_selection.csv",
+    "size": 234,
+    "sha256": "92ca2f7e46e1e3eaa3e11b8aa3547b7e8f94823088201bb98b4a60837669edf5"
+  },
+  {
+    "path": "artifacts/phase2/coefficient_analysis.csv",
+    "size": 21836,
+    "sha256": "97c39f10608b043bac66ca9ba4bb054ff8a0e3f04c9edcc054fa154d408a6bb9"
+  },
+  {
+    "path": "artifacts/phase2/prediction_metrics.csv",
+    "size": 688,
+    "sha256": "bf57c47b07f92c253df0ff26a2794e986b1317bf91856c7c7240f2bfbc47ff6f"
+  },
+  {
+    "path": "artifacts/phase2/regularization_path.csv",
+    "size": 2132,
+    "sha256": "8f0647fb7487af212ef77837573b948c11890af26fa713678ad97bfd55552f33"
+  },
+  {
+    "path": "artifacts/phase2/revenue_metrics.csv",
+    "size": 1497,
+    "sha256": "652bea19a2998b8ec9553cfc4884862bd453a9b7435d9ee1b872455dd412452d"
+  },
+  {
+    "path": "artifacts/phase2/summary.json",
+    "size": 10218,
+    "sha256": "1f9d85ba217671447597457fc1147f534763e3393dd6e1d1615b490995b58f6d"
+  },
+  {
+    "path": "artifacts/phase2/test_predictions.csv.gz",
+    "size": 865157,
+    "sha256": "082476e06d676874f92332b1347393f5eb5f35bb64f19750362f506050a4ae72"
+  },
+  {
+    "path": "artifacts/phase3/classification_selection.csv",
+    "size": 7901,
+    "sha256": "f38be9aebe28674d84304e1a4ae2826762b7f772a3155b8e0522de8fc8af2aa8"
+  },
+  {
+    "path": "artifacts/phase3/regression_selection.csv",
+    "size": 2921,
+    "sha256": "f6989d1a07789178dc632120b892d692f91d4a4204da4a447bcee930a7849a2b"
+  },
+  {
+    "path": "artifacts/phase3/strategy_comparison.csv",
+    "size": 1210,
+    "sha256": "af374c8146f543c566189146cdd8880d7fcb0cf658bef61bf6273e583ff16047"
+  },
+  {
+    "path": "artifacts/phase3/summary.json",
+    "size": 6240,
+    "sha256": "a80ebaf776be8246c89d46e21b40921aa3bcfd05b667bf58083fb2dd44c76aa6"
+  },
+  {
+    "path": "artifacts/phase3/test_direct_predictions.csv.gz",
+    "size": 483575,
+    "sha256": "eff44a8cc642b8f3f2fcf542c42d28b81ed3540b7a03ca71e7327669f87afd5c"
+  },
+  {
+    "path": "artifacts/reproduction/figures/phase2_cluster_selection.png",
+    "size": 67049,
+    "sha256": "66836ebcaaca28cb49c1cc574228ba451ca51c9273809ed85ba38ffdd76e24ce"
+  },
+  {
+    "path": "artifacts/reproduction/figures/phase2_forecast_rmse.png",
+    "size": 48359,
+    "sha256": "72a93ed0069c4078d0f2540cb45cc67697136210450968b79fccd1bc8d333592"
+  },
+  {
+    "path": "artifacts/reproduction/figures/phase2_regularized_coefficients.png",
+    "size": 106489,
+    "sha256": "a2c6691fdbd2d54f288a503a10cc2acfe2e34de7f2d4402230b711a6970d1237"
+  },
+  {
+    "path": "artifacts/reproduction/figures/phase2_revenue_regret.png",
+    "size": 49673,
+    "sha256": "8f6c2c56bd41b6d1bb63eb0f11b4ed6a5170c6aa38fbcda7c9a0402f7e8cd7a1"
+  },
+  {
+    "path": "artifacts/reproduction/figures/phase3_confusion_matrix.png",
+    "size": 81454,
+    "sha256": "80c9307196a04e02465d09edc211d2283508e56779c1c9cfa8e7b937d503d103"
+  },
+  {
+    "path": "artifacts/reproduction/figures/phase3_cumulative_revenue_delta.png",
+    "size": 95614,
+    "sha256": "fa92e20659b9b4a90421448012cf70ab99c0c756749807b8ce320252746f07b6"
+  },
+  {
+    "path": "artifacts/reproduction/figures/phase3_offer_timeseries.png",
+    "size": 212429,
+    "sha256": "fd30507ad3f706cda5f3e75404f25351fc0cf6e2862aa426fb6ecbc8045d076e"
+  },
+  {
+    "path": "artifacts/reproduction/figures/phase3_strategy_revenue_regret.png",
+    "size": 40421,
+    "sha256": "e29b98484bdf263a7abf65a869d28afc47e8b91e43008d9a68f9d5578a7aab04"
+  },
+  {
+    "path": "artifacts/reproduction/processed/features_unscaled.csv.gz",
+    "size": 3557391,
+    "sha256": "a08115c739bc65225c308027fbc7ab32195223b710d73981055845fe57b12a5f"
+  },
+  {
+    "path": "artifacts/reproduction/processed/feature_schema.json",
+    "size": 4235,
+    "sha256": "ab7fd1cf67f1577e6f1fdd2628f7fcb018a761cc5c274e604f312a5d0b49e4aa"
+  },
+  {
+    "path": "artifacts/reproduction/processed/standard_scaler.joblib",
+    "size": 1471,
+    "sha256": "8ff8ea9271cca5001fb6992485b0a4bfac31c2212b0ad6dc6258fcbb685072f2"
+  },
+  {
+    "path": "artifacts/reproduction/processed/test_scaled.csv.gz",
+    "size": 560308,
+    "sha256": "b764098ee40ef09f7945b4d349ee75ca5ab74b0b9857635c5f586fd2a392d5db"
+  },
+  {
+    "path": "artifacts/reproduction/processed/train_scaled.csv.gz",
+    "size": 2614787,
+    "sha256": "3eeb35e8342181cbc32163f34e576c2eb6254dcaa48e392f0122bbcb4048e253"
+  },
+  {
+    "path": "artifacts/reproduction/processed/validation_scaled.csv.gz",
+    "size": 561332,
+    "sha256": "c59238179e15af9ecad135a0165fe298d15397c56acbba9b698408a5ca38659f"
+  },
+  {
+    "path": "artifacts/reproduction/raw/climate.csv.gz",
+    "size": 6153574,
+    "sha256": "f7ee24f458a6ffc11143f4c048a9a52f3981c67feeecb94aa102726f598ee8a8"
+  },
+  {
+    "path": "artifacts/reproduction/raw/farm_metadata.csv",
+    "size": 367,
+    "sha256": "140470ed860d2ceef503e4123959873c90a999a8ca5c8bda3471f7646375dd00"
+  },
+  {
+    "path": "artifacts/reproduction/raw/market_prices.csv.gz",
+    "size": 813298,
+    "sha256": "ace6ad28cb7a75b6ae1ab2587ae41c377d84d4a946dff52be5512150e129ffa6"
+  },
+  {
+    "path": "artifacts/reproduction/raw/provenance.json",
+    "size": 1297,
+    "sha256": "0b5a4e86681e83905d0de18fffe56d70b8f85fb930b17d10165d4d484f385b8b"
+  },
+  {
+    "path": "artifacts/reproduction/raw/wind_power.csv.gz",
+    "size": 1378987,
+    "sha256": "51e76755e6af9141a60026e854f5795a08a6c97d69542b69f01b5054514ce9ec"
+  },
+  {
+    "path": "artifacts/reproduction/results/run_manifest.json",
+    "size": 4258,
+    "sha256": "45fb649bdf53b13571bdfce0136754325757df69a1dcfca306ec26fd5413c01f"
+  },
+  {
+    "path": "artifacts/reproduction/results/phase2/cluster_selection.csv",
+    "size": 234,
+    "sha256": "92ca2f7e46e1e3eaa3e11b8aa3547b7e8f94823088201bb98b4a60837669edf5"
+  },
+  {
+    "path": "artifacts/reproduction/results/phase2/coefficient_analysis.csv",
+    "size": 21836,
+    "sha256": "97c39f10608b043bac66ca9ba4bb054ff8a0e3f04c9edcc054fa154d408a6bb9"
+  },
+  {
+    "path": "artifacts/reproduction/results/phase2/prediction_metrics.csv",
+    "size": 688,
+    "sha256": "bf57c47b07f92c253df0ff26a2794e986b1317bf91856c7c7240f2bfbc47ff6f"
+  },
+  {
+    "path": "artifacts/reproduction/results/phase2/regularization_path.csv",
+    "size": 2132,
+    "sha256": "8f0647fb7487af212ef77837573b948c11890af26fa713678ad97bfd55552f33"
+  },
+  {
+    "path": "artifacts/reproduction/results/phase2/revenue_metrics.csv",
+    "size": 1497,
+    "sha256": "652bea19a2998b8ec9553cfc4884862bd453a9b7435d9ee1b872455dd412452d"
+  },
+  {
+    "path": "artifacts/reproduction/results/phase2/summary.json",
+    "size": 10355,
+    "sha256": "2bcc36c2db46087e84c8a09540d12889a069d8e14e5ea24d7796f557b45e4821"
+  },
+  {
+    "path": "artifacts/reproduction/results/phase2/test_predictions.csv.gz",
+    "size": 865157,
+    "sha256": "f074a621cd1f0082db733c3c89846a2681c339a42e9ecbe4e00336fd25fd9830"
+  },
+  {
+    "path": "artifacts/reproduction/results/phase3/classification_selection.csv",
+    "size": 7901,
+    "sha256": "f38be9aebe28674d84304e1a4ae2826762b7f772a3155b8e0522de8fc8af2aa8"
+  },
+  {
+    "path": "artifacts/reproduction/results/phase3/regression_selection.csv",
+    "size": 2921,
+    "sha256": "f6989d1a07789178dc632120b892d692f91d4a4204da4a447bcee930a7849a2b"
+  },
+  {
+    "path": "artifacts/reproduction/results/phase3/strategy_comparison.csv",
+    "size": 1210,
+    "sha256": "af374c8146f543c566189146cdd8880d7fcb0cf658bef61bf6273e583ff16047"
+  },
+  {
+    "path": "artifacts/reproduction/results/phase3/summary.json",
+    "size": 6400,
+    "sha256": "704aa050db594e705ab0c2d28f8b4a364a89182170ff8031d0cc43a374a9416c"
+  },
+  {
+    "path": "artifacts/reproduction/results/phase3/test_direct_predictions.csv.gz",
+    "size": 483575,
+    "sha256": "2e0f1bec05a5fd5c0e805157500d6c2832e5a6d9d59298c681ee76e7a06a0a2d"
+  },
+  {
+    "path": "data/processed/.gitkeep",
+    "size": 1,
+    "sha256": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b"
+  },
+  {
+    "path": "data/processed/features_unscaled.csv.gz",
+    "size": 3557391,
+    "sha256": "4169376a954ff6aa2c52f97890c3c1b75b24c92c5dd7b72e61949b53712cb129"
+  },
+  {
+    "path": "data/processed/feature_schema.json",
+    "size": 4235,
+    "sha256": "ab7fd1cf67f1577e6f1fdd2628f7fcb018a761cc5c274e604f312a5d0b49e4aa"
+  },
+  {
+    "path": "data/processed/standard_scaler.joblib",
+    "size": 1471,
+    "sha256": "8ff8ea9271cca5001fb6992485b0a4bfac31c2212b0ad6dc6258fcbb685072f2"
+  },
+  {
+    "path": "data/processed/test_scaled.csv.gz",
+    "size": 560308,
+    "sha256": "3f8f9631c7539fa0464cd607a608952319cabb1731486b381827bc86ca81cf90"
+  },
+  {
+    "path": "data/processed/train_scaled.csv.gz",
+    "size": 2614787,
+    "sha256": "44edf6e754649a366b359916f1671106f93251f86dfe0ea2a716f4d54ce04d87"
+  },
+  {
+    "path": "data/processed/validation_scaled.csv.gz",
+    "size": 561332,
+    "sha256": "529d58ffc06229e0b77317cb96e205d94410808a18d5bc02646924594fa9bd30"
+  },
+  {
+    "path": "data/raw/.gitkeep",
+    "size": 1,
+    "sha256": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b"
+  },
+  {
+    "path": "data/raw/climate.csv.gz",
+    "size": 6153574,
+    "sha256": "a18a46a834cd1879b820ddb764da01efbe40df6241639998419646c34342d215"
+  },
+  {
+    "path": "data/raw/farm_metadata.csv",
+    "size": 367,
+    "sha256": "140470ed860d2ceef503e4123959873c90a999a8ca5c8bda3471f7646375dd00"
+  },
+  {
+    "path": "data/raw/market_prices.csv.gz",
+    "size": 813298,
+    "sha256": "63de6b530933752bd4bccb86e73177dea367c571b0ba255a8d5d0f1a95ffb772"
+  },
+  {
+    "path": "data/raw/provenance.json",
+    "size": 1278,
+    "sha256": "a14e49835ee502ccbaf7ea4a4d91493a65787c33a2a6ba5b73772a598f4e72d7"
+  },
+  {
+    "path": "data/raw/wind_power.csv.gz",
+    "size": 1378987,
+    "sha256": "468535a14e173b1b46f0234335deb1083c16ea46465ce14bbbc76a5f71ace920"
+  },
+  {
+    "path": "docs/report.md",
+    "size": 53284,
+    "sha256": "f269f7797838f18a84999b7c0fbf1cc2518969318bf8b67fc360bc8c1b894d25"
+  },
+  {
+    "path": "docs/figures/phase2_cluster_selection.png",
+    "size": 67049,
+    "sha256": "66836ebcaaca28cb49c1cc574228ba451ca51c9273809ed85ba38ffdd76e24ce"
+  },
+  {
+    "path": "docs/figures/phase2_forecast_rmse.png",
+    "size": 48359,
+    "sha256": "72a93ed0069c4078d0f2540cb45cc67697136210450968b79fccd1bc8d333592"
+  },
+  {
+    "path": "docs/figures/phase2_regularized_coefficients.png",
+    "size": 106489,
+    "sha256": "a2c6691fdbd2d54f288a503a10cc2acfe2e34de7f2d4402230b711a6970d1237"
+  },
+  {
+    "path": "docs/figures/phase2_revenue_regret.png",
+    "size": 49673,
+    "sha256": "8f6c2c56bd41b6d1bb63eb0f11b4ed6a5170c6aa38fbcda7c9a0402f7e8cd7a1"
+  },
+  {
+    "path": "docs/figures/phase3_confusion_matrix.png",
+    "size": 81454,
+    "sha256": "80c9307196a04e02465d09edc211d2283508e56779c1c9cfa8e7b937d503d103"
+  },
+  {
+    "path": "docs/figures/phase3_cumulative_revenue_delta.png",
+    "size": 95614,
+    "sha256": "fa92e20659b9b4a90421448012cf70ab99c0c756749807b8ce320252746f07b6"
+  },
+  {
+    "path": "docs/figures/phase3_offer_timeseries.png",
+    "size": 212429,
+    "sha256": "fd30507ad3f706cda5f3e75404f25351fc0cf6e2862aa426fb6ecbc8045d076e"
+  },
+  {
+    "path": "docs/figures/phase3_strategy_revenue_regret.png",
+    "size": 40421,
+    "sha256": "e29b98484bdf263a7abf65a869d28afc47e8b91e43008d9a68f9d5578a7aab04"
+  },
+  {
+    "path": "src/zephyrtrade/data_loader.py",
+    "size": 18138,
+    "sha256": "a27f47536c276190d5fa9838a1f6886871aee622a295571da1a081a2f4604728"
+  },
+  {
+    "path": "src/zephyrtrade/direct.py",
+    "size": 5202,
+    "sha256": "b8fdc3da220330b8ddc7f36dc24019da7fac95cade2500d4932a8842fc7ffa00"
+  },
+  {
+    "path": "src/zephyrtrade/evaluate.py",
+    "size": 4279,
+    "sha256": "ac4dbfae03d4cfe42a8b8edf4dfb38360f68457cabbfb6a1792cc15da7d2ed1f"
+  },
+  {
+    "path": "src/zephyrtrade/models.py",
+    "size": 11810,
+    "sha256": "8a2892b9d012508ac0ad1ee45cc8d0358a1843d1019cb2ce59e42b919b3a857f"
+  },
+  {
+    "path": "src/zephyrtrade/optimize.py",
+    "size": 9571,
+    "sha256": "d4bf0ac7ccf80aa7a3ce9bd3c4239e2086da16d28a28063bf9621708dc8c67f3"
+  },
+  {
+    "path": "src/zephyrtrade/phase2.py",
+    "size": 27081,
+    "sha256": "3ee759aae477b73b7989ce188ee1c0d8db066e95cedc5b19a75f05b37b995e64"
+  },
+  {
+    "path": "src/zephyrtrade/phase3.py",
+    "size": 26865,
+    "sha256": "fa15864b665c4b14b5c6328b6fcf681857a5308ec4ea0dfaeb9c891f447bf62e"
+  },
+  {
+    "path": "src/zephyrtrade/pipeline.py",
+    "size": 7062,
+    "sha256": "ab79942d841e7240c095af9852e153909e3d84720498812f2b86da9d146ee827"
+  },
+  {
+    "path": "src/zephyrtrade/preprocessing.py",
+    "size": 14067,
+    "sha256": "00d5c63d57b244ada2399be49ab214e6530067af229365eca7c97ba9af0544b7"
+  },
+  {
+    "path": "src/zephyrtrade/__init__.py",
+    "size": 95,
+    "sha256": "e842e60e46638027fb46f21ad78d0291d849c3db1a7a415a250f8c4ad939143b"
+  },
+  {
+    "path": "src/zephyrtrade.egg-info/dependency_links.txt",
+    "size": 1,
+    "sha256": "01ba4719c80b6fe911b091a7c05124b64eeece964e09c058ef8f9805daca546b"
+  },
+  {
+    "path": "src/zephyrtrade.egg-info/entry_points.txt",
+    "size": 231,
+    "sha256": "b666b1100fba2704cffb079312c7bd697b33b1987af4511740867fafda5ca51b"
+  },
+  {
+    "path": "src/zephyrtrade.egg-info/PKG-INFO",
+    "size": 11366,
+    "sha256": "196c20915782fc30901f8cce67b96563d47ff2a035e02ac5f352eae8c69b1aa1"
+  },
+  {
+    "path": "src/zephyrtrade.egg-info/requires.txt",
+    "size": 210,
+    "sha256": "f156779b22187011868d52ae0895dd5c47519e1f3d3aa57e6569c03e55148657"
+  },
+  {
+    "path": "src/zephyrtrade.egg-info/SOURCES.txt",
+    "size": 1129,
+    "sha256": "c1535afe0d13650b7c9d9b75722be3dd86724f0c8e80451713b8ba4e703d145b"
+  },
+  {
+    "path": "src/zephyrtrade.egg-info/top_level.txt",
+    "size": 12,
+    "sha256": "da0c4885f8264eeac4ddb3b6fc3ea3b3d1f631abbdf2a2a343a9a7dff5a67317"
+  },
+  {
+    "path": "tests/test_data_loader.py",
+    "size": 1884,
+    "sha256": "5ae3b38cb8ab0c926659165c79091ef2244794ee45677377e6faa286a7d5cbf7"
+  },
+  {
+    "path": "tests/test_direct.py",
+    "size": 2369,
+    "sha256": "370c76bb1886af20cc174a2fa576b539fdedebc9e10635c39fc900c84ff2a44f"
+  },
+  {
+    "path": "tests/test_evaluate.py",
+    "size": 1804,
+    "sha256": "7278eeb950ce1461a3862cbcd7fe64603aa528b605c4502c67d3d99c5895e846"
+  },
+  {
+    "path": "tests/test_models.py",
+    "size": 2267,
+    "sha256": "90d62f780896395d98490d09785f27d40066d7744ca8fefbac8a42b53917df80"
+  },
+  {
+    "path": "tests/test_optimize.py",
+    "size": 3527,
+    "sha256": "0f9cc544a3a5e10f6bec3d07a655418ffd166a3cd3bb4808fc55eb85835e3f0e"
+  },
+  {
+    "path": "tests/test_pipeline.py",
+    "size": 958,
+    "sha256": "f0fe9115f1c1356eb29ceba9eb7006e784a2a955493d3d7db0ddd61e96c55762"
+  },
+  {
+    "path": "tests/test_preprocessing.py",
+    "size": 3575,
+    "sha256": "e6776c2f2df8027126ceb151d3066130039a9904c85eba12b832e61eb365e542"
+  }
+]

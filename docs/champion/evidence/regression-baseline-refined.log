@@ -1,0 +1,75 @@
+FFF..FFFFFFFFFFFFFF.                                                     [100%]
+=================================== FAILURES ===================================
+E   ZeroDivisionError: float division by zero
+/mnt/data/work/ZephyrTrade-original/src/zephyrtrade/evaluate.py:105: ZeroDivisionError: float division by zero
+E   Failed: DID NOT RAISE <class 'ValueError'>
+/mnt/data/work/test_repair_regressions.py:24: Failed: DID NOT RAISE <class 'ValueError'>
+E   RuntimeWarning: invalid value encountered in multiply
+/mnt/data/work/ZephyrTrade-original/src/zephyrtrade/evaluate.py:64: RuntimeWarning: invalid value encountered in multiply
+E   sklearn.exceptions.UndefinedMetricWarning: R^2 score is not well-defined with less than two samples.
+/opt/pyvenv/lib/python3.13/site-packages/sklearn/metrics/_regression.py:1288: sklearn.exceptions.UndefinedMetricWarning: R^2 score is not well-defined with less than two samples.
+E   Failed: DID NOT RAISE <class 'ValueError'>
+/mnt/data/work/test_repair_regressions.py:36: Failed: DID NOT RAISE <class 'ValueError'>
+E   Failed: DID NOT RAISE <class 'ValueError'>
+/mnt/data/work/test_repair_regressions.py:36: Failed: DID NOT RAISE <class 'ValueError'>
+E   Failed: DID NOT RAISE <class 'ValueError'>
+/mnt/data/work/test_repair_regressions.py:42: Failed: DID NOT RAISE <class 'ValueError'>
+E   RuntimeWarning: invalid value encountered in subtract
+/mnt/data/work/ZephyrTrade-original/src/zephyrtrade/optimize.py:238: RuntimeWarning: invalid value encountered in subtract
+E   Failed: DID NOT RAISE <class 'ValueError'>
+/mnt/data/work/test_repair_regressions.py:42: Failed: DID NOT RAISE <class 'ValueError'>
+E   Failed: DID NOT RAISE <class 'ValueError'>
+/mnt/data/work/test_repair_regressions.py:47: Failed: DID NOT RAISE <class 'ValueError'>
+E   Failed: DID NOT RAISE <class 'ValueError'>
+/mnt/data/work/test_repair_regressions.py:53: Failed: DID NOT RAISE <class 'ValueError'>
+E   Failed: DID NOT RAISE <class 'ValueError'>
+/mnt/data/work/test_repair_regressions.py:53: Failed: DID NOT RAISE <class 'ValueError'>
+E   assert [0] == [2]
+      
+      At index 0 diff: 0 != 2
+      
+      Full diff:
+        [
+      -     2,
+      ?     ^
+      +     0,
+      ?     ^
+        ]
+/mnt/data/work/test_repair_regressions.py:59: assert [0] == [2]
+E   Failed: DID NOT RAISE <class 'ValueError'>
+/mnt/data/work/test_repair_regressions.py:64: Failed: DID NOT RAISE <class 'ValueError'>
+E   Failed: DID NOT RAISE <class 'ValueError'>
+/mnt/data/work/test_repair_regressions.py:64: Failed: DID NOT RAISE <class 'ValueError'>
+E   Failed: DID NOT RAISE <class 'ValueError'>
+/mnt/data/work/test_repair_regressions.py:70: Failed: DID NOT RAISE <class 'ValueError'>
+E   Failed: DID NOT RAISE <class 'ValueError'>
+/mnt/data/work/test_repair_regressions.py:70: Failed: DID NOT RAISE <class 'ValueError'>
+=========================== short test summary info ============================
+FAILED ../test_repair_regressions.py::test_zero_generation_has_undefined_capture_not_crash - ZeroDivisionError: float division by zero
+FAILED ../test_repair_regressions.py::test_duration_must_be_finite_positive[nan] - Failed: DID NOT RAISE <class 'ValueError'>
+FAILED ../test_repair_regressions.py::test_duration_must_be_finite_positive[inf] - RuntimeWarning: invalid value encountered in multiply
+FAILED ../test_repair_regressions.py::test_single_interval_r2_is_explicitly_undefined - sklearn.exceptions.UndefinedMetricWarning: R^2 score is not well-defined with less than two samples.
+FAILED ../test_repair_regressions.py::test_expected_revenue_rejects_negative_probability[probabilities0] - Failed: DID NOT RAISE <class 'ValueError'>
+FAILED ../test_repair_regressions.py::test_expected_revenue_rejects_negative_probability[probabilities1] - Failed: DID NOT RAISE <class 'ValueError'>
+FAILED ../test_repair_regressions.py::test_expected_revenue_rejects_invalid_offer[nan] - Failed: DID NOT RAISE <class 'ValueError'>
+FAILED ../test_repair_regressions.py::test_expected_revenue_rejects_invalid_offer[inf] - RuntimeWarning: invalid value encountered in subtract
+FAILED ../test_repair_regressions.py::test_expected_revenue_rejects_invalid_offer[-1] - Failed: DID NOT RAISE <class 'ValueError'>
+FAILED ../test_repair_regressions.py::test_expected_revenue_rejects_invalid_price_order - Failed: DID NOT RAISE <class 'ValueError'>
+FAILED ../test_repair_regressions.py::test_lp_rejects_nonfinite_capacity_at_boundary[nan] - Failed: DID NOT RAISE <class 'ValueError'>
+FAILED ../test_repair_regressions.py::test_lp_rejects_nonfinite_capacity_at_boundary[inf] - Failed: DID NOT RAISE <class 'ValueError'>
+FAILED ../test_repair_regressions.py::test_quantile_one_cannot_wrap_to_lowest_class - assert [0] == [2]
+  
+  At index 0 diff: 0 != 2
+  
+  Full diff:
+    [
+  -     2,
+  ?     ^
+  +     0,
+  ?     ^
+    ]
+FAILED ../test_repair_regressions.py::test_probability_classes_are_unique_nonnegative[classes0] - Failed: DID NOT RAISE <class 'ValueError'>
+FAILED ../test_repair_regressions.py::test_probability_classes_are_unique_nonnegative[classes1] - Failed: DID NOT RAISE <class 'ValueError'>
+FAILED ../test_repair_regressions.py::test_encoder_transform_validates_capacity_before_fit[nan] - Failed: DID NOT RAISE <class 'ValueError'>
+FAILED ../test_repair_regressions.py::test_encoder_transform_validates_capacity_before_fit[0] - Failed: DID NOT RAISE <class 'ValueError'>
+17 failed, 3 passed in 0.67s

@@ -1,0 +1,11 @@
+{
+  "status": "PASS",
+  "output": "ZephyrTrade-Champion.html",
+  "rows": 3888,
+  "models": 9,
+  "expected_hours_between_endpoints": 3941,
+  "excluded_hours_between_endpoints": 53,
+  "source_negative_price_rows_removed": 319,
+  "revenue_values_checked": 34992,
+  "maximum_revenue_error_dkk": 3.637978807091713e-12
+}

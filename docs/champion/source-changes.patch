@@ -1,0 +1,2185 @@
+--- a/.github/workflows/ci.yml
++++ b/.github/workflows/ci.yml
+@@ -38,5 +38,15 @@
+       - name: Test with warnings as errors
+         run: python -m pytest -W error
+ 
++      - name: Set up Node for browser numerical tests
++        uses: actions/setup-node@v4
++        with:
++          node-version: "22"
++
++      - name: Browser numerical and Python parity checks
++        run: |
++          node --test tests/browser/engine.test.cjs
++          python scripts/verify_engines.py
++
+       - name: Build source and wheel distributions
+         run: python -m build
+--- a/CHANGELOG.md
++++ b/CHANGELOG.md
+@@ -1,3 +1,7 @@
++# Champion 1.1.0 — local research candidate
++
++Adds the offline research interface, optional loopback SciPy API, focused numerical boundary repairs, validation and export workflows. See docs/champion/AUDIT_AND_RELEASE.md for evidence and limits. No production release occurred.
++
+ # Changelog
+ 
+ All notable changes to ZephyrTrade are documented in this file.
+--- a/CITATION.cff
++++ b/CITATION.cff
+@@ -1,9 +1,9 @@
+ cff-version: 1.2.0
+ message: "If you use ZephyrTrade, please cite this software."
+-title: "ZephyrTrade: ML-Driven Wind Energy Market Optimizer"
++title: "ZephyrTrade Champion: local research candidate"
+ type: software
+-version: 1.0.0
+-date-released: 2026-07-13
++version: 1.1.0
++date-released: 2026-09-28
+ license: MIT
+ authors:
+   - name: "ZephyrTrade contributors"
+--- a/MANIFEST.in
++++ b/MANIFEST.in
+@@ -2,3 +2,16 @@
+ include CITATION.cff
+ include CONTRIBUTING.md
+ recursive-include docs *.md *.png
++
++include README_RESEARCH.md
++include ZephyrTrade-Champion.html
++include requirements-tested.txt
++include *.bat
++include start-python.sh
++recursive-include src/zephyrtrade/web *.html *.css *.js
++recursive-include scripts *.py
++recursive-include tests/browser *.cjs
++recursive-include docs/champion *.json *.csv *.log *.txt
++
++include START_HERE.txt
++recursive-include examples *.json
+--- /dev/null
++++ b/OPEN_CHAMPION_WINDOWS.bat
+@@ -0,0 +1,8 @@
++@echo off
++setlocal
++if not exist "%~dp0ZephyrTrade-Champion.html" (
++  echo Extract the complete ZIP before running this launcher.
++  pause
++  exit /b 1
++)
++start "" "%~dp0ZephyrTrade-Champion.html"
+--- a/README.md
++++ b/README.md
+@@ -1,237 +1,149 @@
+-# ZephyrTrade: ML-Driven Wind Energy Market Optimizer
++# ZephyrTrade Champion
++### A local wind-market research desk • candidate 1.1.0
+ 
+-ZephyrTrade is a reproducible research repository for optimizing the hourly
+-offering strategy of a wind farm in Bornholm, Denmark (the DK2 bidding zone).
+-It compares an indirect workflow that predicts wind production before solving
+-a trading optimization problem with a direct workflow that predicts the bid
+-itself.
++Explore the supplied synthetic backtest, compare nine strategies and calculate
++scenario-based offers. There are **no live prices, real orders, broker connections,
++accounts, external analytics, remote fonts or CDNs** in this app.
+ 
+-The four-phase repository is complete. It includes a deterministic four-farm
+-data pipeline, leakage-safe features, a stochastic trading linear program, six
+-wind-power models plus a persistence baseline, revenue backtesting,
+-regularization and clustering analysis, direct continuous and discrete offer
+-learning, automated tests, continuous integration, and a final academic report.
++![Implemented desktop interface](docs/champion/evidence/screenshots/overview-desktop.png)
+ 
+-## Research questions
++## Start with the portable app — no installation
+ 
+-1. Which regression family produces the most useful wind forecast when value
+-   is measured by realized market revenue rather than forecast error alone?
+-2. Can local models discovered with clustering outperform a single global
+-   regression model?
+-3. Does direct strategy learning outperform the conventional
+-   predict-then-optimize pipeline?
+-4. How do forecast accuracy, bid feasibility, and realized revenue trade off?
++Extract the ZIP, then open **`ZephyrTrade-Champion.html`** in a current desktop
++browser. Windows also has `OPEN_CHAMPION_WINDOWS.bat`. The single HTML contains the
++interface, calculations and validated observation snapshot; keep it in a stable
++folder. JavaScript must be enabled. Do not open the separate source `web/index.html`
++in isolation: use the complete portable HTML or the Python launcher.
+ 
+-## Model architecture
++Use **Overview** for strategy/date filters and output, cumulative-revenue and price
++charts. **Strategy lab** calculates an offer from editable assumptions, saves named
++scenarios and exports/imports JSON. **Model arena** compares all nine strategies.
++**Data explorer** exposes retained hourly observations and CSV exports. **Method &
++evidence** explains the data provenance, exclusions, units and limits.
+ 
+-- **Model 1 - indirect trading:** climate and lagged production features feed
+-  linear, nonlinear, locally weighted, Ridge, Lasso, and clustered regressors.
+-  Their wind forecasts feed a day-ahead/balancing-market linear program.
+-- **Model 2 - direct trading:** the same information set, augmented only by
+-  variables available at bid time, predicts either a continuous offer or a
+-  discrete bid bracket learned from perfect-foresight optimal decisions.
+-- **Evaluation:** models are compared on RMSE, MAE, R-squared, realized revenue,
+-  revenue regret, and operational feasibility.
++Saved scenarios use browser-local storage, not a cloud account. Private mode,
++enterprise policy, file relocation or clearing browser data can affect persistence.
++Export scenario JSON backups. An unavailable save is reported as an error. Draft
++inputs are retained while moving between app pages, but are not automatically
++written to disk and can be lost on closing/reloading the page. Recalculate edited
++inputs before saving or exporting a result.
+ 
+-## Repository layout
++## Optional: use the real Python / SciPy cross-check
+ 
+-```text
+-ZephyrTrade/
+-|-- data/
+-|   |-- raw/                  # Generated source tables (gitignored)
+-|   `-- processed/            # Features, splits, scaler, schema (gitignored)
+-|-- docs/
+-|   |-- figures/              # Versioned publication figures
+-|   `-- report.md             # Final academic report
+-|-- src/zephyrtrade/
+-|   |-- data_loader.py        # Phase 1 data synthesis and validation
+-|   |-- preprocessing.py      # Phase 1 features, split, and scaling
+-|   |-- models.py             # OLS, gradient descent, LOESS, clustering
+-|   |-- optimize.py           # Trading LP and exact quantile solution
+-|   |-- evaluate.py           # Forecast and realized-revenue metrics
+-|   |-- direct.py             # Direct target/bracket decision utilities
+-|   |-- phase2.py             # Reproducible indirect-model experiment
+-|   |-- phase3.py             # Direct-model selection and comparison
+-|   `-- pipeline.py           # One-command workflow and run manifest
+-|-- tests/                    # Deterministic pipeline tests
+-|-- CONTRIBUTING.md
+-|-- CHANGELOG.md
+-|-- pyproject.toml
+-`-- requirements.txt
++The portable app already calculates an optimal weighted-quantile offer in JavaScript.
++The Python service adds a separate SciPy linear-program cross-check on your machine.
++It does **not** train a new model when filters change.
++
++On Windows, run `START_PYTHON_WINDOWS.bat`. It requires Python 3.11+ and creates a
++new `.venv-champion` environment; first setup needs internet package access. The
++launcher does not modify or reuse the uploaded `.venv`. Windows launcher execution
++was not available in the Linux verification environment.
++
++On macOS/Linux, run `sh start-python.sh`, or install manually:
++
++```sh
++python3 -m venv .venv-champion
++. .venv-champion/bin/activate
++python -m pip install -e .
++python -m zephyrtrade.app
+ ```
+ 
+-## Data strategy and provenance
++Manual Windows activation uses `.venv-champion\Scripts\activate.bat` in Command
++Prompt. After startup, open `http://127.0.0.1:8765`. The app opens a browser where the
++operating system supports that operation. Keep the terminal open; use Ctrl+C to stop.
++A busy port can be avoided with `python -m zephyrtrade.app --port 8766`.
++`--no-browser` starts the server without requesting a browser window.
+ 
+-The default path is fully synthetic so that every experiment is deterministic,
+-offline-capable, and free of API credentials. It creates four **synthetic site
+-proxies** around Bornholm; their names and capacities do not describe real
+-commercial assets. Weather is generated with correlated seasonal and
+-autoregressive processes, production follows a turbine power curve with
+-availability effects, and prices reproduce diurnal, seasonal, wind-cannibalized,
+-spike, and negative-price regimes.
++**Do not expose this server to the internet or put it behind a public tunnel.** It
++is a local, single-user research server, not a production hosting architecture.
++No authentication system is provided because no shared or public service is in scope.
+ 
+-The schema is intentionally aligned with public data that can replace the
+-synthetic tables in a sensitivity study:
++## What is preserved, and what is new?
+ 
+-- [Energinet Energi Data Service API](https://api.energidataservice.dk/index.html)
+-  for Danish market datasets;
+-- [Energinet Elspot Prices](https://www.energidataservice.dk/tso-electricity/Elspotprices)
+-  for the historical hourly DK2 series (the dataset is discontinued for new
+-  observations, so its metadata must be checked before use);
+-- [Energinet Imbalance Price](https://www.energidataservice.dk/tso-electricity/ImbalancePrice)
+-  for imbalance-price data, subject to retrieval-time schema checks;
+-- [ENTSO-E Transparency Platform](https://transparency.entsoe.eu/) for European
+-  day-ahead prices, balancing information, and aggregated generation; and
+-- [Open-Meteo Historical Weather API](https://open-meteo.com/en/docs/historical-weather-api)
+-  for hourly reanalysis fields including 100 m wind speed, temperature,
+-  humidity, and pressure.
++The original NumPy/pandas/scikit-learn/SciPy research pipeline, synthetic data,
++chronological splits and supplied model outputs remain. The original README is
++retained, unchanged, as [README_RESEARCH.md](README_RESEARCH.md). Historical reports
++under `docs/` describe the uploaded research run, not the new verification run.
+ 
+-The generated tables use UTC timestamps. Calendar features are derived in
+-`Europe/Copenhagen`, which handles daylight-saving time without ambiguous local
+-timestamps. All rows containing a negative day-ahead, upward-regulation, or
+-downward-regulation price are removed from the market table and recorded in the
+-provenance manifest.
++New: the browser app, loopback API, scenario validation, recoverable UI states,
++source-backed snapshot compiler, launchers and tests. Focused Python repairs address
++undefined revenue capture, single-row R², nonfinite inputs, invalid probabilities,
++class IDs and a quantile-rounding boundary error. See
++[the audit and verification report](docs/champion/AUDIT_AND_RELEASE.md).
+ 
+-## Phase 1 data contract
++One explicit API contract change: `revenue_capture_pct` is `None` when the benchmark
++is not positive, and single-observation `r2` is `None`. Callers must handle undefined
++metrics rather than treating them as zero. Ordinary positive-benchmark calculations
++and valid multi-row metrics are preserved.
+ 
+-Running the data command produces:
++## Data boundary
+ 
+-- `farm_metadata.csv`: farm identifier, site-proxy coordinates, and capacity;
+-- `wind_power.csv.gz`: hourly power, capacity, and availability for four farms;
+-- `climate.csv.gz`: farm-level weather and climate variables;
+-- `market_prices.csv.gz`: DK2 price series after negative-price filtering; and
+-- `provenance.json`: configuration, source references, row counts, and filter
+-  statistics.
++The interface contains **3,888 retained hourly test observations**, **nine strategies**,
++one **30 MW synthetic Ronne Coastal Proxy** site and two source-file SHA-256 hashes.
++The test snapshot spans 20 July–31 December 2024 UTC; it is **not current market data**.
++There are 53 absent hours between endpoints. The original pipeline removed 319
++negative-price hours across its full generated source period. It is not an
++unfiltered calendar backtest. The sandbox allows negative prices under the stated
++price-order assumptions, but that does not restore omitted backtest observations.
+ 
+-Preprocessing selects `bornholm_ronne_coastal` by default. It creates an exact
+-24-hour power lag, trailing 168-hour production quantiles at 0.05, 0.50, and
+-0.95, forecast-time climate variables, and cyclic calendar/direction features.
+-It retains prices for later revenue evaluation but does not use realized prices
+-to predict wind power.
++Perfect foresight knows actual production and is an analytical benchmark, not an
++operational forecast. Forecast issuance, gate-closure availability, current market
++rules, transaction costs and real settlement data are not validated. Synthetic
++capture percentages do not establish investable or live trading performance.
+ 
+-## Quick start
++## Verification and known limits
+ 
+-Python 3.11 or newer is recommended.
++- 86 Python tests pass with warnings treated as errors, including real local HTTP requests.
++- 13 JavaScript numerical test cases pass; 120 seeded scenarios agree with SciPy to less than 0.000001 DKK in objective value.
++- 23 Chromium UI-harness checks pass across 320–1440 CSS-pixel layouts. Screenshots are of the implemented app.
++- All 34,992 saved strategy revenue values reconcile with recomputation; largest difference is approximately 3.64e-12 DKK.
+ 
+-```bash
+-python -m venv .venv
+-python -m pip install --upgrade pip
+-python -m pip install -e ".[dev]"
++**The test browser's administrator policy blocked direct file and localhost navigation.**
++UI checks therefore render the shipped HTML with Playwright `set_content` and use an
++explicit in-memory Storage double. Native durable browser storage, direct file opening
++and browser-to-Python integration still need a normal-browser check. Python HTTP and
++browser calculations were tested separately; this is not a claim of full hosted E2E.
++
++A new bounded training smoke completed using the normal Phase 2 and a reduced Phase 3
++grid. Four Lasso convergence warnings are retained in its log. The default full-grid
++pipeline exceeded the 120-second test limit and is not verified end to end here.
++The supplied multi-year models were **not retrained or replaced**.
++
++Ruff and the `build` frontend could not be installed in this environment. Do not read
++this delivery as a passing hosted CI, complete WCAG conformance, security certification,
++human UAT sign-off or production release. Detailed status and evidence are in
++`docs/champion/`. This is a **local research release candidate**, not a deployed product.
++
++## Reproduce the checks
++
++Install `.[dev]` in a development environment with package access. Node is only needed
++for JavaScript tests and parity verification, not to use the app.
++
++```sh
++python -m pytest -W error
++node --test tests/browser/engine.test.cjs
++python scripts/verify_engines.py
++python scripts/build_app.py
++python -m ruff check src tests
++python -m ruff format --check src tests
++python -m build
+ ```
+ 
+-Run the full default experiment with one command. It may take several minutes
+-because locally weighted regression and the direct-model search are fitted from
+-scratch.
++The optional browser harness requires Playwright and Chromium:
++`python scripts/check_browser.py --chromium /path/to/chromium`.
++It documents its Storage test double and navigation limitations in its output.
++For a bounded fresh training check, choose a new directory:
++`python scripts/smoke_research.py --output /tmp/zephyr-new-smoke`.
+ 
+-```bash
+-python -m zephyrtrade.pipeline \
+-  --start 2022-01-01 \
+-  --end 2025-01-01 \
+-  --seed 42
+-```
++To reproduce the original full research workflow, follow `README_RESEARCH.md`; it is
++computationally heavier than browsing the packaged snapshot. Use new output directories
++rather than overwriting the supplied evidence. `requirements-tested.txt` records observed
++scientific-package versions; it is not a cross-platform resolved lockfile.
+ 
+-The command writes a run manifest containing configuration, runtime versions,
+-principal output paths, and SHA-256 hashes to `artifacts/run_manifest.json`.
+-The following commands expose the same stages for partial reruns.
++## Licence and distribution
+ 
+-Generate three years of hourly source data. The end timestamp is exclusive.
+-
+-```bash
+-python -m zephyrtrade.data_loader \
+-  --start 2022-01-01 \
+-  --end 2025-01-01 \
+-  --output-dir data/raw \
+-  --seed 42
+-```
+-
+-Build the selected-farm feature matrix and chronological splits.
+-
+-```bash
+-python -m zephyrtrade.preprocessing \
+-  --raw-data-dir data/raw \
+-  --output-dir data/processed \
+-  --farm-id bornholm_ronne_coastal
+-```
+-
+-The default allocation is 70% training, 15% validation, and 15% testing,
+-ordered strictly by timestamp. `StandardScaler` is fit on the training split
+-only, then applied unchanged to validation and test data.
+-
+-Run the quality checks:
+-
+-```bash
+-python -m pytest -W error
+-python -m ruff check src tests
+-python -m ruff format --check src tests
+-```
+-
+-## Phase 2 indirect-model experiment
+-
+-Run the complete forecast-then-optimize backtest:
+-
+-```bash
+-python -m zephyrtrade.phase2 \
+-  --processed-data-dir data/processed \
+-  --output-dir artifacts/phase2 \
+-  --figure-dir docs/figures
+-```
+-
+-On the seeded three-year synthetic dataset, locally weighted linear regression
+-is the leading indirect model: test RMSE is 1.876 MW and realized test revenue
+-is DKK 18.497 million, equal to 97.98% of the perfect-foresight benchmark.
+-Polynomial OLS ranks second. Three k-means regimes improve on global linear OLS
+-but do not outperform the nonlinear models. Full assumptions, equations, tuning
+-paths, coefficient analysis, and rankings are in the academic report.
+-
+-## Phase 3 direct-strategy experiment
+-
+-Run target engineering, direct model selection, and the shared-test comparison:
+-
+-```bash
+-python -m zephyrtrade.phase3 \
+-  --processed-data-dir data/processed \
+-  --phase2-prediction-path artifacts/phase2/test_predictions.csv.gz \
+-  --output-dir artifacts/phase3 \
+-  --figure-dir docs/figures
+-```
+-
+-Under the maintained no-arbitrage price order, the deterministic
+-perfect-foresight LP label equals realized production. The implementation
+-verifies this analytical result against explicit LP solves. On the seeded test
+-period, continuous direct regression earns DKK 18.761 million and captures
+-99.38% of perfect-foresight revenue. Fifteen-bracket classification earns DKK
+-18.672 million, while the best indirect model earns DKK 18.497 million. The
+-report explains why these gains are conditional on the synthetic experiment,
+-the degenerate perfect-foresight target, and unequal learner families.
+-
+-## Final comparison
+-
+-All strategies use the same 3,888-hour chronological test period.
+-
+-| Strategy | Offer RMSE (MW) | Revenue (million DKK) | Capture (%) | Regret (million DKK) |
+-|---|---:|---:|---:|---:|
+-| Perfect foresight | 0.000 | 18.879 | 100.000 | 0.000 |
+-| Direct continuous regression | 0.781 | 18.761 | 99.375 | 0.118 |
+-| Direct bid-bracket classification | 0.975 | 18.672 | 98.902 | 0.207 |
+-| Indirect locally weighted plus LP | 1.965 | 18.497 | 97.976 | 0.382 |
+-
+-The complete methodology, equations, coefficient analysis, figures, validity
+-threats, and deployment design are in the [academic report](docs/report.md).
+-
+-## Reproducibility and research limits
+-
+-- A fixed seed makes every generated numeric table reproducible.
+-- The end-to-end manifest records runtime metadata and hashes core summaries.
+-- Source tables remain unscaled; processed files preserve both the original
+-  feature table and scaled model matrices.
+-- Synthetic results demonstrate the method, not the profitability of a real
+-  Bornholm asset. Production deployment requires licensed asset telemetry,
+-  point-in-time weather forecasts, current market settlement rules, transaction
+-  costs, and an independent risk review.
+-- Filtering negative prices follows the supplied project specification. It can
+-  bias the evaluated regime and must be reported as a scope choice rather than
+-  interpreted as normal market practice.
+-
+-## License
+-
+-MIT. Public datasets remain subject to their providers' terms and licenses.
++The supplied project has an MIT licence, retained in `LICENSE`. New app icons, CSS,
++SVG diagrams and interface code are original and use that project licence. No font
++files, model-environment executables or third-party frontend bundles are included.
++The root ZIP includes the original datasets and reports. The wheel is a Python app
++package with its precompiled web snapshot, not a standalone Windows executable.
+--- /dev/null
++++ b/START_HERE.txt
+@@ -0,0 +1,24 @@
++ZEPHYRTRADE CHAMPION 1.1.0 - LOCAL RESEARCH CANDIDATE
++
++FASTEST START
++Extract this ZIP. Open ZephyrTrade-Champion.html in your browser.
++There is no installation for the portable HTML.
++On Windows, OPEN_CHAMPION_WINDOWS.bat opens the same file.
++
++OPTIONAL PYTHON CROSS-CHECK
++Run START_PYTHON_WINDOWS.bat (Python 3.11+ required).
++The first setup downloads Python packages into a separate environment.
++Keep its window open. Browse to http://127.0.0.1:8765.
++Never expose this service to the public internet.
++
++WHAT YOU GET
++Overview, Strategy lab, Model arena, Data explorer, Method & evidence.
++CSV and JSON exports. Named local scenarios. Light and dark themes.
++Source code, existing research data, a Python wheel, tests and audit evidence.
++
++IMPORTANT
++The data is synthetic. This is not a live trading app and cannot submit orders.
++Save scenario JSON backups. Browser storage is not a cloud backup.
++Normal-browser file opening and native persistence need your acceptance check.
++Read README.md and docs/champion/AUDIT_AND_RELEASE.md for verified results,
++blocked checks, training warnings and the release checklist.
+--- /dev/null
++++ b/START_PYTHON_WINDOWS.bat
+@@ -0,0 +1,37 @@
++@echo off
++setlocal
++pushd "%~dp0" || exit /b 1
++echo ZephyrTrade Champion - optional local Python research server
++echo The first setup downloads Python packages. No trades are submitted.
++if exist ".venv-champion\Scripts\python.exe" goto check_package
++where py >nul 2>nul
++if not errorlevel 1 (
++  set "BASE_PY=py -3"
++) else (
++  set "BASE_PY=python"
++)
++%BASE_PY% -c "import sys;sys.exit(0 if sys.version_info >= (3,11) else 1)"
++if errorlevel 1 (
++  echo Install Python 3.11 or newer, then run this file again.
++  echo The portable ZephyrTrade-Champion.html does not need Python.
++  goto failed
++)
++%BASE_PY% -m venv .venv-champion
++if errorlevel 1 goto failed
++:check_package
++".venv-champion\Scripts\python.exe" -c "import zephyrtrade.app" >nul 2>nul
++if not errorlevel 1 goto launch
++".venv-champion\Scripts\python.exe" -m pip install -e .
++if errorlevel 1 goto failed
++:launch
++echo Starting on http://127.0.0.1:8765 . Keep this window open.
++".venv-champion\Scripts\python.exe" -m zephyrtrade.app
++if errorlevel 1 goto failed
++popd
++exit /b 0
++:failed
++echo Setup or startup did not complete. The error above has not been suppressed.
++echo Read README.md for manual setup and alternate port instructions.
++pause
++popd
++exit /b 1
+--- a/pyproject.toml
++++ b/pyproject.toml
+@@ -4,7 +4,7 @@
+ 
+ [project]
+ name = "zephyrtrade"
+-version = "1.0.0"
++version = "1.1.0"
+ description = "ML-driven day-ahead and balancing-market optimization for wind energy"
+ readme = "README.md"
+ requires-python = ">=3.11"
+@@ -37,6 +37,7 @@
+ ]
+ 
+ [project.scripts]
++zephyr-app = "zephyrtrade.app:main"
+ zephyr-data = "zephyrtrade.data_loader:main"
+ zephyr-phase2 = "zephyrtrade.phase2:main"
+ zephyr-phase3 = "zephyrtrade.phase3:main"
+@@ -45,6 +46,9 @@
+ 
+ [tool.setuptools.packages.find]
+ where = ["src"]
++
++[tool.setuptools.package-data]
++zephyrtrade = ["web/*.html", "web/*.css", "web/*.js"]
+ 
+ [tool.pytest.ini_options]
+ addopts = "-q"
+--- /dev/null
++++ b/requirements-tested.txt
+@@ -0,0 +1,8 @@
++# Observed Linux / Python 3.13.5 runtime. Not a cross-platform lockfile.
++numpy==2.3.5
++pandas==2.2.3
++scipy==1.17.0
++scikit-learn==1.8.0
++joblib==1.5.3
++matplotlib==3.10.8
++threadpoolctl==3.6.0
+--- /dev/null
++++ b/scripts/build_app.py
+@@ -0,0 +1,122 @@
++"""Build a self-contained research app from the supplied, validated CSV artifacts.
++
++No untrusted joblib or pickle files are loaded. No model is retrained by this
++script. It verifies saved revenue values against the preserved Python engine.
++"""
++from __future__ import annotations
++import argparse
++import hashlib
++import json
++import sys
++from pathlib import Path
++import numpy as np
++import pandas as pd
++
++ROOT = Path(__file__).resolve().parents[1]
++sys.path.insert(0, str(ROOT / 'src'))
++from zephyrtrade.evaluate import realized_market_revenue  # noqa: E402
++from zephyrtrade.optimize import validate_price_order  # noqa: E402
++
++WEB = ROOT / 'src' / 'zephyrtrade' / 'web'
++MODEL_NAMES = {
++    'direct_regression': ('Direct continuous', 'Direct learning'),
++    'direct_classification': ('Direct bid brackets', 'Direct learning'),
++    'locally_weighted': ('Locally weighted linear', 'Forecast → optimise'),
++    'polynomial_ols': ('Polynomial OLS', 'Forecast → optimise'),
++    'ridge_polynomial': ('Polynomial Ridge', 'Forecast → optimise'),
++    'clustered_ridge': ('Clustered Ridge', 'Forecast → optimise'),
++    'linear_ols': ('Linear OLS', 'Forecast → optimise'),
++    'lasso_polynomial': ('Polynomial Lasso', 'Forecast → optimise'),
++    'persistence_24h': ('24-hour persistence', 'Baseline'),
++}
++
++def make_snapshot(root: Path = ROOT) -> dict:
++    """Align both experiments and validate every observation and saved revenue."""
++    paths = [root / 'artifacts/phase2/test_predictions.csv.gz',
++             root / 'artifacts/phase3/test_direct_predictions.csv.gz']
++    frames = [pd.read_csv(p) for p in paths]
++    a, b = frames
++    common = ['timestamp_utc', 'farm_id', 'actual_power_mw', 'capacity_mw',
++              'day_ahead_price_dkk_mwh', 'up_reg_price_dkk_mwh', 'down_reg_price_dkk_mwh']
++    if len(a) != len(b) or not a[common].equals(b[common]):
++        raise ValueError('Phase 2 and 3 rows do not align exactly.')
++    times = pd.to_datetime(a.timestamp_utc, utc=True, errors='raise')
++    if times.duplicated().any() or not times.is_monotonic_increasing:
++        raise ValueError('Timestamps must be unique and strictly increasing.')
++    if a.farm_id.nunique() != 1:
++        raise ValueError('This snapshot supports one evaluated farm, not an aggregated fleet.')
++    for frame in frames:
++        numeric = frame.select_dtypes(include='number')
++        if not np.isfinite(numeric.to_numpy()).all():
++            raise ValueError('Non-finite source values.')
++    if a.capacity_mw.nunique() != 1 or a.capacity_mw.iloc[0] <= 0:
++        raise ValueError('The snapshot requires one positive constant site capacity.')
++    if (times.dt.minute != 0).any() or (times.dt.second != 0).any():
++        raise ValueError('The snapshot requires hourly observations.')
++    validate_price_order(a.day_ahead_price_dkk_mwh.to_numpy(), a.up_reg_price_dkk_mwh.to_numpy(), a.down_reg_price_dkk_mwh.to_numpy())
++    if ((a.actual_power_mw < 0) | (a.actual_power_mw > a.capacity_mw)).any():
++        raise ValueError('Actual output exceeds physical bounds.')
++    models = []
++    maximum_error = 0.
++    for key, (name, family) in MODEL_NAMES.items():
++        frame = b if key.startswith('direct_') else a
++        offer = frame[f'{key}_offer_mw'].to_numpy()
++        if not np.isfinite(offer).all() or (offer < 0).any() or (offer > a.capacity_mw).any():
++            raise ValueError(f'Invalid offers for {key}.')
++        revenue = realized_market_revenue(offer, a.actual_power_mw.to_numpy(),
++                 a.day_ahead_price_dkk_mwh.to_numpy(), a.up_reg_price_dkk_mwh.to_numpy(),
++                 a.down_reg_price_dkk_mwh.to_numpy())
++        error = float(np.max(np.abs(revenue - frame[f'{key}_revenue_dkk'].to_numpy())))
++        if error > 1e-7:
++            raise ValueError(f'Saved revenue mismatch for {key}: {error}')
++        maximum_error = max(maximum_error, error)
++        model = {'id': key, 'name': name, 'family': family, 'offers': offer.tolist()}
++        if f'{key}_prediction_mw' in frame:
++            model['forecasts'] = frame[f'{key}_prediction_mw'].tolist()
++        models.append(model)
++    provenance = json.loads((root / 'data/raw/provenance.json').read_text())
++    metadata = pd.read_csv(root / 'data/raw/farm_metadata.csv').to_dict(orient='records')
++    site = next((x for x in metadata if x['farm_id'] == a.farm_id.iloc[0]), None)
++    if site is None or site['capacity_mw'] != a.capacity_mw.iloc[0]:
++        raise ValueError('Site metadata does not match the evaluated observations.')
++    expected_hours = int((times.iloc[-1] - times.iloc[0]).total_seconds() / 3600) + 1
++    snap = {'schema_version': 1, 'app_version': '1.1.0',
++            'data_kind': 'Supplied synthetic research backtest',
++            'farm_id': str(a.farm_id.iloc[0]), 'farm_name': site['display_name'],
++            'capacity_mw': float(a.capacity_mw.iloc[0]), 'market_area': 'DK2',
++            'currency': 'DKK', 'timezone': 'UTC', 'interval_hours': 1,
++            'source_generated_at': provenance['generated_at_utc'],
++            'timestamps': a.timestamp_utc.tolist(), 'actual': a.actual_power_mw.tolist(),
++            'day_ahead': a.day_ahead_price_dkk_mwh.tolist(),
++            'up': a.up_reg_price_dkk_mwh.tolist(), 'down': a.down_reg_price_dkk_mwh.tolist(),
++            'models': models, 'farms': metadata,
++            'quality': {'rows': len(a), 'expected_hours_between_endpoints': expected_hours,
++                        'excluded_hours_between_endpoints': expected_hours-len(a),
++                        'source_negative_price_rows_removed': provenance['price_filter']['negative_price_rows_removed'],
++                        'revenue_values_checked': len(a)*len(models),
++                        'maximum_revenue_error_dkk': maximum_error},
++            'sources': [{'path': str(p.relative_to(root)), 'sha256': hashlib.sha256(p.read_bytes()).hexdigest()} for p in paths]}
++    return snap
++
++
++def build() -> None:
++    """Write snapshot, provenance verification and the portable HTML artifact."""
++    snap = make_snapshot()
++    data = 'window.ZEPHYR_DATA = ' + json.dumps(snap, ensure_ascii=False, allow_nan=False, separators=(',', ':')).replace('</', '<\\/') + ';\n'
++    (WEB / 'snapshot.js').write_text(data, encoding='utf-8')
++    index = (WEB / 'index.html').read_text(encoding='utf-8')
++    index = index.replace('<link rel="stylesheet" href="styles.css">', '<style>\n' + (WEB/'styles.css').read_text() + '\n</style>')
++    for name in ['snapshot.js', 'engine.js', 'app.js']:
++        content = (WEB/name).read_text(encoding='utf-8').replace('</script', '<\\/script')
++        index = index.replace(f'<script src="{name}" defer></script>', '<script>\n' + content + '\n</script>')
++    (ROOT / 'ZephyrTrade-Champion.html').write_text(index, encoding='utf-8')
++    out = ROOT / 'docs/champion/evidence/snapshot-verification.json'
++    out.parent.mkdir(parents=True, exist_ok=True)
++    out.write_text(json.dumps({'status': 'PASS', 'quality': snap['quality'], 'sources': snap['sources']}, indent=2))
++    print(json.dumps({'status': 'PASS', 'output': 'ZephyrTrade-Champion.html', 'rows':len(snap['timestamps']),
++                      'models':len(snap['models']), **snap['quality']}, indent=2))
++
++if __name__ == '__main__':
++    parser = argparse.ArgumentParser(description=__doc__)
++    parser.parse_args()
++    build()
+--- /dev/null
++++ b/scripts/check_browser.py
+@@ -0,0 +1,237 @@
++"""Exercise the shipped HTML in Chromium without real network navigation.
++
++This harness uses set_content because this environment's administrator blocks
++file:// and localhost navigation. Scenario persistence uses an explicit in-memory
++Storage test double. It verifies UI logic, not native durable browser storage or
++end-to-end browser-to-server integration. Real local HTTP is tested in pytest.
++"""
++from __future__ import annotations
++import argparse
++import json
++from pathlib import Path
++import time
++from playwright.sync_api import sync_playwright, expect
++
++root=Path(__file__).resolve().parents[1]
++parser=argparse.ArgumentParser(description=__doc__)
++parser.add_argument('--chromium',default='/usr/bin/chromium')
++parser.add_argument('--output',type=Path,default=root/'docs/champion/evidence')
++args=parser.parse_args()
++args.output.mkdir(parents=True,exist_ok=True)
++shots=args.output/'screenshots';shots.mkdir(exist_ok=True)
++html=(root/'ZephyrTrade-Champion.html').read_text()
++checks=[]
++errors=[]
++
++def record(name,details=''):
++    checks.append({'check':name,'status':'PASS','details':details})
++
++def instrument(store=None):
++    # A transparent storage double and an observation hook for actual Blob payloads.
++    encoded=json.dumps(store or {}).replace('</', '<\\/')
++    fixture=f'''<script>
++    (()=>{{
++    window.__store={encoded};window.__denyStorage=false;window.__exports=[];
++    Object.defineProperty(window,'localStorage',{{configurable:true,value:{{
++      getItem:k=>Object.prototype.hasOwnProperty.call(window.__store,k)?window.__store[k]:null,
++      setItem:(k,v)=>{{if(window.__denyStorage)throw new DOMException('Test quota','QuotaExceededError');window.__store[k]=String(v);}},
++      removeItem:k=>{{delete window.__store[k];}},clear:()=>{{window.__store={{}};}}
++    }}}});
++    const originalCreateURL=URL.createObjectURL.bind(URL);
++    URL.createObjectURL=blob=>{{window.__exports.push(blob);return originalCreateURL(blob);}};
++    }})();
++    </script>'''
++    return html.replace('</head>',fixture+'</head>')
++
++with sync_playwright() as p:
++    browser=p.chromium.launch(executable_path=args.chromium,headless=True,args=['--no-sandbox'])
++    context=browser.new_context(viewport={'width':1440,'height':1000},device_scale_factor=1)
++    page=context.new_page();page.set_default_timeout(5000)
++    page.on('pageerror',lambda e:errors.append(str(e)))
++    downloads=[];page.on('download',lambda d:downloads.append(d.suggested_filename))
++    def capture(name):
++        # Capture settled real app state at the top, not a scrolled full-page composite.
++        page.locator('#page-title').click()
++        page.evaluate('window.scrollTo(0,0)')
++        page.wait_for_timeout(120)
++        expect(page.locator('#toast')).to_be_hidden(timeout=7000)
++        page.screenshot(path=str(shots/name),full_page=True)
++
++    begin=time.perf_counter();page.set_content(instrument(),wait_until='load')
++    expect(page.locator('#page-title')).to_have_text('From wind to value.')
++    elapsed=time.perf_counter()-begin
++    metrics=page.evaluate('ZephyrApp.getVisibleMetrics()')
++    assert metrics['rows']==3888
++    assert abs(metrics['total']-18761431.424600992)<1e-6
++    assert page.locator('#model-select option').count()==9
++    record('Initial snapshot and nine strategies',f"3888 hours, full-precision revenue agrees; one set_content load {elapsed:.3f}s (not network performance).")
++    capture('overview-desktop.png')
++    page.get_by_role('button',name='Prices',exact=True).click()
++    assert page.locator('svg[role="img"]').count()>0
++    page.get_by_role('button',name='Revenue',exact=True).click()
++    expect(page.locator('#page-content')).to_contain_text('Perfect foresight')
++    page.get_by_role('button',name='Output',exact=True).click()
++    record('Three chart modes and benchmark disclosure')
++    page.get_by_role('button',name='7 days',exact=True).click()
++    ids=page.evaluate('ZephyrApp.getVisibleMetrics().rows')
++    assert 0<ids<=168
++    page.locator('#model-select').select_option('persistence_24h')
++    assert page.evaluate('ZephyrApp.getState().model')=='persistence_24h'
++    record('Period and strategy changes recompute metrics',str(ids)+' retained hours in 7-day window')
++    page.get_by_role('button',name='Custom',exact=True).click()
++    page.locator('#from-date').fill('2024-12-31');page.locator('#to-date').fill('2024-12-01')
++    page.get_by_role('button',name='Apply',exact=True).click()
++    expect(page.locator('#filter-error')).to_be_visible()
++    page.locator('#from-date').fill('2024-07-21');page.locator('#to-date').fill('2024-07-21')
++    page.get_by_role('button',name='Apply',exact=True).click()
++    assert 0<page.evaluate('ZephyrApp.getVisibleMetrics().rows')<=24
++    record('Invalid date ordering rejected; one-day window recovers')
++    # Synthetic out-of-range custom dates exercise the empty state, not fabricated rows.
++    page.locator('#from-date').fill('2025-01-01');page.locator('#to-date').fill('2025-01-02')
++    page.get_by_role('button',name='Apply',exact=True).click()
++    expect(page.locator('#page-content')).to_contain_text('No records in this period.')
++    page.get_by_role('button',name='All data',exact=True).click()
++    record('Empty date range has explicit recovery')
++    page.get_by_role('link',name='Model arena').click()
++    expect(page.locator('#page-title')).to_have_text('Let the evidence lead.')
++    assert page.locator('tbody tr').count()==9
++    capture('model-arena-desktop.png')
++    page.locator('#export-models').click()
++    text=page.evaluate('window.__exports.at(-1).text()')
++    assert len(text.strip().splitlines())==10 and 'capture_pct' in text
++    record('Nine-row model ranking and comparison CSV payload')
++    page.get_by_role('link',name='Data explorer').click()
++    expect(page.locator('#page-title')).to_have_text('Every number, traceable.')
++    assert page.locator('tbody tr').count()==25
++    first=page.locator('tbody tr').first.inner_text()
++    page.get_by_role('button',name='Next',exact=True).click()
++    assert page.locator('tbody tr').first.inner_text()!=first
++    page.locator('#data-search').fill('2024-12-15')
++    assert 0<page.locator('tbody tr').count()<=24
++    page.locator('#export-filtered').click()
++    text=page.evaluate('window.__exports.at(-1).text()')
++    assert 'synthetic_research' in text and '2024-12-15' in text
++    assert len(text.strip().splitlines())<=25
++    page.locator('#data-search').fill('not-a-date')
++    expect(page.locator('tbody')).to_contain_text('No matching records.')
++    page.locator('#data-search').fill('')
++    record('Ledger pagination, search, empty state and filtered CSV payload')
++    page.get_by_role('link',name='Strategy lab').click()
++    expect(page.locator('#optimal-offer')).to_contain_text('9.00')
++    page.locator('#da').fill('999')
++    expect(page.locator('#lab-stale')).to_be_visible()
++    expect(page.locator('#save-scenario')).to_be_disabled()
++    page.get_by_role('link',name='Overview').click()
++    page.get_by_role('link',name='Strategy lab').click()
++    expect(page.locator('#da')).to_have_value('999')
++    expect(page.locator('#save-scenario')).to_be_disabled()
++    page.get_by_role('button',name='Calculate optimal offer').click()
++    expect(page.locator('#lab-error')).to_be_visible()
++    page.locator('#da').fill('400');page.locator('#up').fill('600');page.locator('#down').fill('200')
++    page.locator('#scenarios').fill('2,8,20');page.locator('#probabilities').fill('.2,.5,.3')
++    page.get_by_role('button',name='Calculate optimal offer').click()
++    expect(page.locator('#optimal-offer')).to_contain_text('8.00')
++    expect(page.locator('#expected-revenue')).to_contain_text('3,200.00')
++    expect(page.locator('#lab-stale')).to_be_hidden()
++    record('Dirty assumptions, draft navigation retention, invalid prices and recovery')
++    capture('strategy-lab-desktop.png')
++    page.locator('#hours').fill('0.25');page.get_by_role('button',name='Calculate optimal offer').click()
++    expect(page.locator('#expected-revenue')).to_contain_text('800.00')
++    record('Quarter-hour settlement scaling in UI')
++    page.locator('#save-scenario').click()
++    expect(page.locator('#save-dialog')).to_be_visible()
++    page.locator('#scenario-name').fill('<script>not executable</script>')
++    page.locator('#save-form button[type=submit]').click()
++    expect(page.locator('#saved-list')).to_contain_text('<script>not executable</script>')
++    assert page.locator('#saved-list script').count()==0
++    store=page.evaluate('window.__store')
++    assert 'zephyr-scenarios-v1' in store
++    record('Scenario save and escaped names through Storage test double','Native durable storage NOT verified in this harness.')
++    page.locator('#export-scenario').click()
++    scenario=json.loads(page.evaluate('window.__exports.at(-1).text()'))
++    assert scenario['calculated']['expected_revenue_dkk']==800
++    page.locator('#export-curve').click()
++    assert 'user_assumptions' in page.evaluate('window.__exports.at(-1).text()')
++    record('Scenario JSON and revenue-curve CSV payloads')
++    page.locator('#scenario-file').set_input_files({'name':'bad.json','mimeType':'application/json','buffer':b'{invalid'})
++    expect(page.locator('#toast')).to_contain_text('Import failed:')
++    scenario['input']['hours']=1
++    page.locator('#scenario-file').set_input_files({'name':'scenario.json','mimeType':'application/json','buffer':json.dumps(scenario).encode()})
++    expect(page.locator('#hours')).to_have_value('1')
++    expect(page.locator('#expected-revenue')).to_contain_text('3,200.00')
++    record('Invalid import rejected; valid JSON imports and recalculates')
++    page.evaluate('window.__denyStorage=true')
++    page.locator('#save-scenario').click();page.locator('#scenario-name').fill('Quota test')
++    page.locator('#save-form button[type=submit]').click()
++    expect(page.locator('#toast')).to_contain_text('Could not save')
++    expect(page.locator('#save-dialog')).to_be_visible()
++    page.get_by_role('button',name='Cancel',exact=True).click()
++    page.evaluate('window.__denyStorage=false')
++    record('Storage failure is not reported as a successful save','Fault injection into explicit Storage double.')
++    page.on('dialog',lambda dialog:dialog.accept())
++    page.locator('[data-delete-saved]').click()
++    expect(page.locator('#saved-list')).to_contain_text('Your experiments belong here.')
++    record('Delete confirmation and in-memory storage update')
++    # Hydrate an actual saved app record via an explicit storage fixture on a fresh DOM.
++    page.close()
++    page=context.new_page();page.set_default_timeout(5000)
++    page.on('pageerror',lambda e:errors.append(str(e)))
++    page.on('download',lambda d:downloads.append(d.suggested_filename))
++    page.set_content(instrument(store),wait_until='load')
++    page.get_by_role('link',name='Strategy lab').click()
++    expect(page.locator('#saved-list')).to_contain_text('not executable')
++    page.locator('[data-load-saved]').click()
++    expect(page.locator('#hours')).to_have_value('0.25')
++    record('Saved-record hydration and loading','Fixture rehydration, not an OS/browser persistence claim.')
++    page.locator('#verify-python').click()
++    expect(page.locator('#page-title')).to_have_text('Know what you are seeing.')
++    record('Unavailable optional solver leads to setup, not fabricated success')
++    page.locator('#export-provenance').click()
++    provenance=json.loads(page.evaluate('window.__exports.at(-1).text()'))
++    assert provenance['quality']['rows']==3888 and len(provenance['sources'])==2
++    record('Provenance JSON exposes source hashes and exclusions')
++    page.get_by_role('button',name='Open quick guide').click()
++    expect(page.locator('#guide-dialog')).to_be_visible()
++    assert page.evaluate("document.querySelector('#guide-dialog').contains(document.activeElement)")
++    page.keyboard.press('Escape');expect(page.locator('#guide-dialog')).to_be_hidden()
++    expect(page.locator('#help-button')).to_be_focused()
++    record('Dialog focus entry, Escape and focus return')
++    page.get_by_role('link',name='Overview').click();page.locator('#model-select').select_option('direct_regression')
++    for width,height in [(1440,1000),(1024,900),(768,1024),(390,844),(320,740)]:
++        page.set_viewport_size({'width':width,'height':height})
++        for name in ['Overview','Strategy lab','Model arena','Data explorer','Method & evidence']:
++            page.get_by_role('link',name=name,exact=False).click()
++            assert page.evaluate('document.documentElement.scrollWidth<=innerWidth+1'),(width,name,'overflow')
++        if width==390:
++            page.get_by_role('link',name='Overview').click()
++            capture('overview-mobile.png')
++            page.get_by_role('link',name='Strategy lab').click()
++            capture('strategy-lab-mobile.png')
++    record('Responsive overflow check across five pages and five viewports','1440, 1024, 768, 390, 320 CSS px; emulation only.')
++    page.locator('#theme-top').click()
++    assert page.locator('html').get_attribute('data-theme')=='light'
++    page.set_viewport_size({'width':1440,'height':1000})
++    page.get_by_role('link',name='Overview').click()
++    capture('overview-light.png')
++    record('Light theme and mobile-accessible theme toggle')
++    page.emulate_media(reduced_motion='reduce')
++    assert page.evaluate("matchMedia('(prefers-reduced-motion: reduce)').matches")
++    transition=page.locator('.button').first.evaluate('el=>getComputedStyle(el).transitionDuration')
++    assert transition in ['0s','1e-05s','0.00001s','0.01ms'],transition
++    record('Reduced-motion preference respected',transition)
++    # DOM checks are not a comprehensive accessibility audit.
++    missing=page.evaluate("""() => [...document.querySelectorAll('button,input:not([type=file]),select,textarea')].filter(el=>el.getClientRects().length && !el.disabled && !(el.innerText?.trim()||el.getAttribute('aria-label')||el.labels?.length||el.getAttribute('title'))).map(el=>el.outerHTML)""")
++    assert not missing,missing
++    record('Visible controls have DOM labels or accessible-name sources','No screen-reader or full WCAG conformance claim.')
++    assert not errors,errors
++    record('No uncaught JavaScript exceptions across exercised journeys')
++    result={'status':'PASS','harness':'Chromium set_content; in-memory Storage double; no file or localhost browser navigation',
++            'browser':browser.version,'checks':checks,'javascript_errors':errors,
++            'browser_download_events':downloads,
++            'limitations':['Native persistent storage and real file opening blocked by administrator policy',
++                           'Actual browser-to-Python navigation blocked; Python HTTP API tested separately',
++                           'Screenshots are actual rendered app, not a concept mockup',
++                           'Human UAT, real devices and assistive-technology testing not performed']}
++    (args.output/'browser-checks.json').write_text(json.dumps(result,indent=2))
++    print(json.dumps(result,indent=2))
++    browser.close()
+--- /dev/null
++++ b/scripts/smoke_research.py
+@@ -0,0 +1,33 @@
++"""Run an isolated, bounded training smoke; this is not the archived backtest.
++
++Use a new output directory. The Phase 3 grid is deliberately small for a smoke
++check; defaults in the library and command-line research pipeline are unchanged.
++"""
++from __future__ import annotations
++import argparse
++import json
++from pathlib import Path
++from zephyrtrade.data_loader import SyntheticDataConfig, generate_synthetic_data, write_data_bundle
++from zephyrtrade.preprocessing import PreprocessingConfig, prepare_dataset
++from zephyrtrade.phase2 import Phase2Config, run_phase2
++from zephyrtrade.phase3 import Phase3Config, run_phase3
++
++parser=argparse.ArgumentParser(description=__doc__)
++parser.add_argument('--output', type=Path, required=True)
++args=parser.parse_args()
++root=args.output
++if root.exists():
++    parser.error('Choose a new directory; this smoke never overwrites saved research.')
++root.mkdir(parents=True)
++config=SyntheticDataConfig(start='2023-01-01',end='2023-03-01',output_dir=root/'raw')
++write_data_bundle(generate_synthetic_data(config),config)
++prepare_dataset(PreprocessingConfig(raw_data_dir=root/'raw',output_dir=root/'processed'))
++p2=run_phase2(Phase2Config(processed_data_dir=root/'processed',output_dir=root/'phase2',figure_dir=root/'figures'))
++p3=run_phase3(Phase3Config(processed_data_dir=root/'processed',phase2_prediction_path=p2['test_predictions'],
++                         output_dir=root/'phase3',figure_dir=root/'figures',max_iter=10,
++                         regression_quantiles=(.5,),decision_quantiles=(.2,.5,.8),
++                         leaf_candidates=(7,),bracket_candidates=(3,),min_samples_leaf=10))
++print(json.dumps({'status':'PASS','scope':'New synthetic Jan-Feb 2023; default Phase 2; reduced-grid 10-iteration Phase 3',
++                  'original_backtest_retrained':False,
++                  'phase2_outputs':{k:str(v) for k,v in p2.items()},
++                  'phase3_outputs':{k:str(v) for k,v in p3.items()}},indent=2))
+--- /dev/null
++++ b/scripts/verify_engines.py
+@@ -0,0 +1,36 @@
++"""Compare the real browser calculation module with SciPy on seeded assumptions."""
++from __future__ import annotations
++import json
++from pathlib import Path
++import subprocess
++import numpy as np
++from zephyrtrade.app import optimize_payload
++
++root = Path(__file__).resolve().parents[1]
++rng = np.random.default_rng(42)
++cases = []
++for i in range(120):
++    n = int(rng.integers(1, 30))
++    capacity = float(rng.uniform(5, 100))
++    down = float(rng.uniform(-300, 500))
++    up = down + float(rng.uniform(1, 900))
++    q = 0.0 if i % 10 == 0 else 1.0 if i % 10 == 1 else float(rng.random())
++    probabilities = rng.dirichlet(np.ones(n))
++    cases.append(dict(capacity=capacity, da=down+q*(up-down), up=up, down=down,
++                      hours=float(rng.choice([.25, .5, 1, 2, 24])),
++                      scenarios=rng.uniform(0, capacity, n).tolist(),
++                      probabilities=probabilities.tolist()))
++code = "const E=require('./src/zephyrtrade/web/engine.js');let x='';process.stdin.on('data',d=>x+=d);process.stdin.on('end',()=>console.log(JSON.stringify(JSON.parse(x).map(E.optimize))));"
++run = subprocess.run(["node", "-e", code], input=json.dumps(cases), text=True,
++                     capture_output=True, check=True, cwd=root, timeout=20)
++browser = json.loads(run.stdout)
++errors = []
++for i, (case, actual) in enumerate(zip(cases, browser, strict=True)):
++    expected = optimize_payload(case)
++    error = abs(actual['expected'] - expected['expected_revenue_dkk'])
++    assert error < 1e-6, (i, error)
++    assert 0 <= actual['offer'] <= case['capacity']
++    errors.append(error)
++print(json.dumps({'status':'PASS','seed':42,'cases':len(cases),
++                  'maximum_objective_difference_dkk':max(errors),
++                  'comparison':'Browser module in Node vs actual SciPy LP; equal-objective offer ties permitted'},indent=2))
+--- a/src/zephyrtrade/__init__.py
++++ b/src/zephyrtrade/__init__.py
+@@ -1,3 +1,3 @@
+ """ZephyrTrade renewable-energy forecasting and market optimization."""
+ 
+-__version__ = "1.0.0"
++__version__ = "1.1.0"
+--- /dev/null
++++ b/src/zephyrtrade/app.py
+@@ -0,0 +1,282 @@
++"""Local-only research UI and bounded SciPy cross-check service.
++
++This is a single-user development service, not an internet-facing deployment.
++It never loads saved estimator pickles or submits market orders.
++"""
++
++from __future__ import annotations
++
++import argparse
++import json
++import math
++import threading
++import webbrowser
++from http import HTTPStatus
++from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
++from pathlib import Path
++from typing import Any
++from urllib.parse import urlsplit
++
++import numpy as np
++
++from zephyrtrade import __version__
++from zephyrtrade.optimize import solve_single_period_offer_lp
++
++MAX_BODY = 32_768
++WEB_ROOT = Path(__file__).with_name("web")
++ASSETS = {
++    "/": ("index.html", "text/html; charset=utf-8"),
++    "/index.html": ("index.html", "text/html; charset=utf-8"),
++    "/styles.css": ("styles.css", "text/css; charset=utf-8"),
++    "/engine.js": ("engine.js", "text/javascript; charset=utf-8"),
++    "/app.js": ("app.js", "text/javascript; charset=utf-8"),
++    "/snapshot.js": ("snapshot.js", "text/javascript; charset=utf-8"),
++}
++
++
++def _number(value: Any, label: str, minimum: float, maximum: float) -> float:
++    """Validate a finite JSON number, excluding booleans and numeric strings."""
++    if isinstance(value, bool) or not isinstance(value, (int, float)):
++        raise ValueError(f"{label} must be a JSON number.")
++    if not math.isfinite(value) or not minimum <= value <= maximum:
++        raise ValueError(f"{label} must be between {minimum:g} and {maximum:g}.")
++    return float(value)
++
++
++def optimize_payload(payload: Any) -> dict[str, Any]:
++    """Validate lab assumptions and solve the repository's unchanged LP objective."""
++    required = {"capacity", "da", "up", "down", "scenarios"}
++    allowed = required | {"hours", "probabilities"}
++    if not isinstance(payload, dict) or not required <= payload.keys():
++        raise ValueError("Supply capacity, da, up, down and scenarios.")
++    if payload.keys() - allowed:
++        raise ValueError("The request contains unsupported fields.")
++    capacity = _number(payload["capacity"], "Capacity", 0.1, 10000)
++    hours = _number(payload.get("hours", 1), "Duration", 0.25, 24)
++    prices = {k: _number(payload[k], k, -10000, 100000) for k in ("da", "up", "down")}
++    scenarios = payload["scenarios"]
++    if not isinstance(scenarios, list) or not 1 <= len(scenarios) <= 100:
++        raise ValueError("Supply 1 to 100 production scenarios.")
++    scenarios = np.array([_number(x, "Scenario", 0, capacity) for x in scenarios])
++    probabilities = payload.get("probabilities")
++    if probabilities is None or probabilities == []:
++        probabilities = np.full(len(scenarios), 1.0 / len(scenarios))
++    else:
++        if not isinstance(probabilities, list) or len(probabilities) != len(scenarios):
++            raise ValueError("Probabilities must align with the scenarios.")
++        probabilities = np.array([_number(x, "Probability", 0, 1.0000001) for x in probabilities])
++        total = float(probabilities.sum())
++        if abs(total - 1) > 1e-7:
++            raise ValueError("Probabilities must sum to 1 within 0.0000001.")
++        probabilities = probabilities / total
++    result = solve_single_period_offer_lp(
++        scenarios, probabilities, prices["da"], prices["up"], prices["down"], capacity
++    )
++    return {
++        "offer_mw": float(result["offer_mw"]),
++        "expected_revenue_dkk": float(result["expected_revenue_dkk"]) * hours,
++        "interval_hours": hours,
++        "solver": "scipy.optimize.linprog / HiGHS",
++        "data_kind": "user_assumptions_not_live",
++    }
++
++
++def _reject_constant(value: str) -> None:
++    """Reject non-standard JSON NaN and Infinity values."""
++    raise ValueError(f"{value} is not a valid JSON number.")
++
++
++def _unique_keys(pairs: list[tuple[str, Any]]) -> dict[str, Any]:
++    """Reject duplicate JSON keys instead of silently taking the last value."""
++    output: dict[str, Any] = {}
++    for key, value in pairs:
++        if key in output:
++            raise ValueError("Duplicate JSON field.")
++        output[key] = value
++    return output
++
++
++class LocalServer(ThreadingHTTPServer):
++    """Serve only loopback, with bounded concurrent requests and one solver."""
++
++    daemon_threads = True
++    request_queue_size = 8
++
++    def __init__(self, port: int = 8765) -> None:
++        """Bind an isolated single-user service to the IPv4 loopback interface."""
++        super().__init__(("127.0.0.1", port), Handler)
++        self.workers = threading.BoundedSemaphore(8)
++        self.solver = threading.Lock()
++
++    def process_request(self, request: Any, client_address: Any) -> None:
++        """Reject excess work rather than creating an unbounded thread pool."""
++        if not self.workers.acquire(blocking=False):
++            try:
++                request.sendall(b"HTTP/1.0 503 Service Unavailable\r\nContent-Length: 0\r\nConnection: close\r\n\r\n")
++            finally:
++                self.shutdown_request(request)
++            return
++        try:
++            super().process_request(request, client_address)
++        except BaseException:
++            self.workers.release()
++            raise
++
++    def process_request_thread(self, request: Any, client_address: Any) -> None:
++        """Release the worker slot for both successful and disconnected requests."""
++        try:
++            super().process_request_thread(request, client_address)
++        finally:
++            self.workers.release()
++
++
++class Handler(BaseHTTPRequestHandler):
++    """Expose a fixed asset allowlist and a same-origin, JSON-only solver route."""
++
++    server: LocalServer
++    server_version = "ZephyrTradeLocal/1.1"
++    sys_version = ""
++    timeout = 10
++
++    def log_message(self, format: str, *args: Any) -> None:
++        """Avoid logging user scenario values, raw URLs or request headers."""
++
++    def _reply(self, code: int, data: bytes, content_type: str) -> None:
++        """Send bounded response content with local-use security headers."""
++        self.send_response(code)
++        self.send_header("Content-Type", content_type)
++        self.send_header("Content-Length", str(len(data)))
++        self.send_header("Cache-Control", "no-store")
++        self.send_header("X-Content-Type-Options", "nosniff")
++        self.send_header("Referrer-Policy", "no-referrer")
++        self.send_header("X-Frame-Options", "DENY")
++        self.send_header("Content-Security-Policy", "default-src 'none'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self'; base-uri 'none'; frame-ancestors 'none'; form-action 'self'")
++        self.send_header("Connection", "close")
++        self.end_headers()
++        if self.command != "HEAD":
++            self.wfile.write(data)
++        self.close_connection = True
++
++    def _json(self, code: int, value: dict[str, Any]) -> None:
++        """Serialize responses without nonfinite numbers."""
++        self._reply(code, json.dumps(value, allow_nan=False).encode(), "application/json; charset=utf-8")
++
++    def _trusted_host(self) -> bool:
++        """Reject non-loopback Host headers, including DNS-rebinding hosts."""
++        hosts = self.headers.get_all("Host", [])
++        expected = {f"127.0.0.1:{self.server.server_port}", f"localhost:{self.server.server_port}"}
++        if len(hosts) != 1 or hosts[0].lower() not in expected:
++            self._json(HTTPStatus.FORBIDDEN, {"error": "Use the local loopback application address."})
++            return False
++        return True
++
++    def do_GET(self) -> None:
++        """Serve health or an explicit asset, never arbitrary filesystem paths."""
++        if not self._trusted_host():
++            return
++        path = urlsplit(self.path).path
++        if path == "/api/health":
++            self._json(200, {"service": "zephyrtrade-local", "version": __version__, "scope": "local_research_only"})
++            return
++        if path == "/favicon.ico":
++            self._reply(204, b"", "image/x-icon")
++            return
++        asset = ASSETS.get(path)
++        if asset is None:
++            self._json(404, {"error": "Resource not found."})
++            return
++        filename, content_type = asset
++        try:
++            data = (WEB_ROOT / filename).read_bytes()
++        except OSError:
++            self._json(503, {"error": "A packaged UI asset is missing. Reinstall the application."})
++            return
++        self._reply(200, data, content_type)
++
++    def do_HEAD(self) -> None:
++        """Return asset metadata without a response body."""
++        self.do_GET()
++
++    def do_POST(self) -> None:
++        """Validate the browser boundary before entering the local solver."""
++        if not self._trusted_host():
++            return
++        if self.path != "/api/optimize":
++            self._json(404, {"error": "Resource not found."})
++            return
++        origins = self.headers.get_all("Origin", [])
++        allowed = {f"http://127.0.0.1:{self.server.server_port}", f"http://localhost:{self.server.server_port}"}
++        # Non-browser CLI requests may omit Origin. Cross-origin browser posts may not.
++        if len(origins) > 1 or (origins and origins[0] not in allowed):
++            self._json(403, {"error": "Cross-origin requests are not permitted."})
++            return
++        if self.headers.get("Sec-Fetch-Site") == "cross-site":
++            self._json(403, {"error": "Cross-site requests are not permitted."})
++            return
++        if self.headers.get_content_type() != "application/json":
++            self._json(415, {"error": "Use application/json."})
++            return
++        lengths = self.headers.get_all("Content-Length", [])
++        if self.headers.get("Transfer-Encoding") or len(lengths) != 1:
++            self._json(411, {"error": "A single Content-Length is required."})
++            return
++        try:
++            length = int(lengths[0])
++        except ValueError:
++            self._json(400, {"error": "Invalid Content-Length."})
++            return
++        if not 1 <= length <= MAX_BODY:
++            self._json(413, {"error": "Request must contain 1 to 32768 bytes."})
++            return
++        try:
++            body = self.rfile.read(length)
++            if len(body) != length:
++                raise ValueError("Incomplete request body.")
++            payload = json.loads(body, parse_constant=_reject_constant, object_pairs_hook=_unique_keys)
++        except (ValueError, UnicodeDecodeError, RecursionError):
++            self._json(400, {"error": "Send complete, valid JSON without duplicate fields or nonfinite values."})
++            return
++        if not self.server.solver.acquire(blocking=False):
++            self._json(503, {"error": "The local solver is busy. Your inputs are retained; retry shortly."})
++            return
++        try:
++            result = optimize_payload(payload)
++            self._json(200, result)
++        except (ValueError, TypeError, OverflowError) as exc:
++            self._json(400, {"error": str(exc)})
++        except RuntimeError:
++            self._json(503, {"error": "The optimisation could not be completed. Review the assumptions and retry."})
++        finally:
++            self.server.solver.release()
++
++    def do_OPTIONS(self) -> None:
++        """Refuse cross-origin preflight; no CORS access is granted."""
++        self._json(405, {"error": "Cross-origin access is not supported."})
++
++
++def main() -> None:
++    """Start the optional loopback UI without contacting any external service."""
++    parser = argparse.ArgumentParser(description=__doc__)
++    parser.add_argument("--port", type=int, default=8765)
++    parser.add_argument("--no-browser", action="store_true")
++    args = parser.parse_args()
++    if not 1024 <= args.port <= 65535:
++        parser.error("Choose a local port between 1024 and 65535.")
++    try:
++        server = LocalServer(args.port)
++    except OSError as exc:
++        parser.exit(1, f"Could not start the local server: {exc}. Try --port 8766.\n")
++    url = f"http://127.0.0.1:{server.server_port}"
++    print(f"ZephyrTrade Champion {__version__}\n{url}\nSynthetic research only. Press Ctrl+C to stop.", flush=True)
++    if not args.no_browser:
++        threading.Timer(0.5, webbrowser.open, args=(url,)).start()
++    try:
++        server.serve_forever()
++    except KeyboardInterrupt:
++        pass
++    finally:
++        server.server_close()
++
++
++if __name__ == "__main__":
++    main()
+--- a/src/zephyrtrade/direct.py
++++ b/src/zephyrtrade/direct.py
+@@ -71,6 +71,10 @@
+ 
+     def _validate_target(self, target_mw: np.ndarray) -> np.ndarray:
+         """Validate targets against the physical offer interval."""
++        if not isinstance(self.n_brackets, (int, np.integer)) or self.n_brackets < 2:
++            raise ValueError("n_brackets must be an integer of at least two.")
++        if not np.isfinite(self.capacity_mw) or self.capacity_mw <= 0.0:
++            raise ValueError("capacity_mw must be finite and positive.")
+         target = _finite_vector(target_mw, "target_mw")
+         if (target < 0.0).any() or (target > self.capacity_mw).any():
+             raise ValueError("Targets must lie between zero and capacity_mw.")
+@@ -91,6 +95,8 @@
+         raise ValueError("classes must align with probability columns.")
+     if not np.issubdtype(class_ids.dtype, np.integer):
+         raise ValueError("classes must be integer identifiers.")
++    if (class_ids < 0).any() or np.unique(class_ids).size != class_ids.size:
++        raise ValueError("classes must be unique and nonnegative.")
+     if not 0.0 < decision_quantile <= 1.0:
+         raise ValueError("decision_quantile must lie in (0, 1].")
+     if not np.isfinite(matrix).all() or (matrix < 0.0).any():
+@@ -101,7 +107,10 @@
+ 
+     order = np.argsort(class_ids)
+     sorted_classes = class_ids[order]
+-    cumulative = np.cumsum(matrix[:, order], axis=1)
++    # Accepted floating-point roundoff must not make q=1 wrap to class zero.
++    normalized = matrix / row_sums[:, None]
++    cumulative = np.cumsum(normalized[:, order], axis=1)
++    cumulative[:, -1] = 1.0
+     selected_indices = np.argmax(cumulative + 1e-12 >= decision_quantile, axis=1)
+     return sorted_classes[selected_indices].astype(int)
+ 
+--- a/src/zephyrtrade/evaluate.py
++++ b/src/zephyrtrade/evaluate.py
+@@ -27,15 +27,15 @@
+ def regression_metrics(
+     actual_mw: np.ndarray,
+     predicted_mw: np.ndarray,
+-) -> dict[str, float]:
+-    """Return RMSE, MAE, and R-squared on the physical MW scale."""
++) -> dict[str, float | None]:
++    """Return physical-scale errors; R-squared is None for a single interval."""
+     values = _aligned_vectors(actual_mw=actual_mw, predicted_mw=predicted_mw)
+     actual = values["actual_mw"]
+     predicted = values["predicted_mw"]
+     return {
+         "rmse_mw": float(np.sqrt(mean_squared_error(actual, predicted))),
+         "mae_mw": float(mean_absolute_error(actual, predicted)),
+-        "r2": float(r2_score(actual, predicted)),
++        "r2": float(r2_score(actual, predicted)) if actual.size >= 2 else None,
+     }
+ 
+ 
+@@ -48,8 +48,8 @@
+     interval_hours: float = 1.0,
+ ) -> np.ndarray:
+     """Calculate realized day-ahead plus two-price imbalance revenue by interval."""
+-    if interval_hours <= 0.0:
+-        raise ValueError("interval_hours must be positive.")
++    if not np.isfinite(interval_hours) or interval_hours <= 0.0:
++        raise ValueError("interval_hours must be finite and positive.")
+     values = _aligned_vectors(
+         offer_mw=offer_mw,
+         actual_power_mw=actual_power_mw,
+@@ -102,7 +102,9 @@
+         "total_revenue_dkk": total_revenue,
+         "mean_revenue_dkk_per_interval": float(interval_revenue.mean()),
+         "perfect_foresight_revenue_dkk": total_oracle,
+-        "revenue_capture_pct": 100.0 * total_revenue / total_oracle,
++        "revenue_capture_pct": (
++            100.0 * total_revenue / total_oracle if total_oracle > 0.0 else None
++        ),
+         "revenue_regret_dkk": total_oracle - total_revenue,
+         "mean_offer_mw": float(values["offer_mw"].mean()),
+         "mean_signed_imbalance_mw": float(imbalance.mean()),
+--- a/src/zephyrtrade/optimize.py
++++ b/src/zephyrtrade/optimize.py
+@@ -119,8 +119,8 @@
+         raise ValueError("Scenarios and probabilities must have the same length.")
+     if (probabilities < 0.0).any() or not np.isclose(probabilities.sum(), 1.0):
+         raise ValueError("Scenario probabilities must be nonnegative and sum to one.")
+-    if capacity_mw <= 0.0:
+-        raise ValueError("capacity_mw must be positive.")
++    if not np.isfinite(capacity_mw) or capacity_mw <= 0.0:
++        raise ValueError("capacity_mw must be finite and positive.")
+     if (scenarios < 0.0).any() or (scenarios > capacity_mw).any():
+         raise ValueError("Production scenarios must lie within physical capacity.")
+ 
+@@ -227,11 +227,23 @@
+         scenario_probabilities,
+         "scenario_probabilities",
+     )
+-    if scenarios.size != probabilities.size or not np.isclose(
+-        probabilities.sum(),
+-        1.0,
+-    ):
+-        raise ValueError("Scenario probabilities must align and sum to one.")
++    if (
++        scenarios.size != probabilities.size
++        or (probabilities < 0.0).any()
++        or not np.isclose(probabilities.sum(), 1.0)
++    ):
++        raise ValueError(
++            "Scenario probabilities must be nonnegative, align and sum to one."
++        )
++    if not np.isfinite(offer_mw) or offer_mw < 0.0:
++        raise ValueError("offer_mw must be finite and nonnegative.")
++    if (scenarios < 0.0).any():
++        raise ValueError("Production scenarios must be nonnegative.")
++    validate_price_order(
++        np.array([day_ahead_price_dkk_mwh]),
++        np.array([up_regulation_price_dkk_mwh]),
++        np.array([down_regulation_price_dkk_mwh]),
++    )
+     surplus = np.maximum(scenarios - offer_mw, 0.0)
+     shortfall = np.maximum(offer_mw - scenarios, 0.0)
+     scenario_revenue = (
+--- /dev/null
++++ b/src/zephyrtrade/web/app.js
+@@ -0,0 +1,271 @@
++/* ZephyrTrade Champion UI. All observations originate in the packaged snapshot. */
++(function () {
++  'use strict';
++  const D = window.ZEPHYR_DATA, E = window.ZephyrEngine;
++  const $ = id => document.getElementById(id);
++  const esc = value => String(value).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
++  const icons = {
++    overview:'<rect x="3" y="3" width="7" height="7" rx="1"/><rect x="14" y="3" width="7" height="7" rx="1"/><rect x="3" y="14" width="7" height="7" rx="1"/><rect x="14" y="14" width="7" height="7" rx="1"/>',
++    lab:'<path d="M9 3h6M10 3v6l-6 10a1.3 1.3 0 0 0 1 2h14a1.3 1.3 0 0 0 1-2L14 9V3M7 15h10"/>',
++    models:'<path d="M5 20V11M12 20V4M19 20V8M3 20h18"/>',
++    data:'<ellipse cx="12" cy="5" rx="8" ry="3"/><path d="M4 5v7c0 4 16 4 16 0V5M4 12v7c0 4 16 4 16 0v-7"/>',
++    method:'<path d="M5 3h10l4 4v14H5zM14 3v5h5M8 12h8M8 16h6"/>',
++    wind:'<path d="M3 8h11c5 0 5-6 1-6M3 12h16c4 0 4 6 0 6M3 16h8c4 0 4 5 0 5"/>',
++    download:'<path d="M12 3v12m-5-5 5 5 5-5M4 16v5h16v-5"/>',
++    help:'<circle cx="12" cy="12" r="9"/><path d="M9 9a3 3 0 0 1 6 0c0 2-3 2-3 5M12 17h.01"/>',
++    theme:'<path d="M20 14A8 8 0 0 1 10 4 8 8 0 1 0 20 14Z"/>',
++    arrow:'<path d="M4 12h16m-6-6 6 6-6 6"/>',
++    value:'<path d="M3 17 9 11l4 3 7-9M15 5h5v5"/>',
++    target:'<circle cx="12" cy="12" r="9"/><circle cx="12" cy="12" r="5"/><circle cx="12" cy="12" r="1"/>',
++    clock:'<circle cx="12" cy="12" r="9"/><path d="M12 6v6l4 3"/>',
++    check:'<path d="m5 12 4 4L19 6"/>',
++  };
++  const icon = name => `<svg viewBox="0 0 24 24" aria-hidden="true">${icons[name] || icons.overview}</svg>`;
++  const num = (x,d=1) => x == null || !Number.isFinite(x) ? '—' : x.toLocaleString('en-GB',{minimumFractionDigits:d,maximumFractionDigits:d});
++  const compact = x => Math.abs(x)>=1e6 ? num(x/1e6,2)+'m' : Math.abs(x)>=1e3 ? num(x/1e3,1)+'k' : num(x,1);
++  const dateLabel = s => new Date(s).toLocaleDateString('en-GB',{day:'2-digit',month:'short',year:'numeric',timeZone:'UTC'});
++  const shortDate = s => new Date(s).toLocaleDateString('en-GB',{day:'2-digit',month:'short',timeZone:'UTC'});
++  let toastTimer, pythonAvailable = false, labVersion = 0, currentLab = null;
++  let labDraft = null;
++  let saved = [], dataPage = 0, dataSearch = '', chartMode = 'power';
++  let labInput = {capacity:30,da:420,up:610,down:310,hours:1,scenarios:[2,5,9,13,18,24,28],probabilities:[]};
++  const pageInfo = {
++    overview:['Overview','WIND INTELLIGENCE / DK2','From wind to value.','Explore the forecast. Understand the offer. See the trade-off.'],
++    lab:['Strategy lab','SCENARIOS / STOCHASTIC OFFERING','Test the trade-off.','Change your assumptions. Find the optimal offer. No real trades.'],
++    models:['Model arena','BENCHMARK / NINE STRATEGIES','Let the evidence lead.','Compare realised value and offer error on the same retained hours.'],
++    data:['Data explorer','OBSERVATIONS / HOURLY RECORDS','Every number, traceable.','Inspect the source observations behind the selected backtest.'],
++    method:['Method & evidence','TRANSPARENCY / RESEARCH CONTRACT','Know what you are seeing.','The assumptions, provenance and limits behind every result.'],
++  };
++  const state = {page:'overview',model:'direct_regression',period:'all',from:'',to:''};
++  function notify(message) { $('toast').textContent=message; $('toast').hidden=false; clearTimeout(toastTimer); toastTimer=setTimeout(()=>$('toast').hidden=true,5500); }
++  function renderIcons(root=document) { root.querySelectorAll('[data-icon]').forEach(el=>{el.innerHTML=icon(el.dataset.icon);}); }
++  function persistView() { try { localStorage.setItem('zephyr-view-v1',JSON.stringify({model:state.model,period:state.period,from:state.from,to:state.to})); } catch (_) { /* Preferences are optional, unlike scenario saves. */ } }
++  function indices() {
++    let from=-Infinity,to=Infinity;
++    if (state.period==='custom') { from=Date.parse(state.from+'T00:00:00Z');to=Date.parse(state.to+'T23:59:59Z'); }
++    else if (state.period!=='all') {to=Date.parse(D.timestamps.at(-1));from=to-Number(state.period)*86400000+3600000;}
++    return D.timestamps.flatMap((t,i)=>Date.parse(t)>=from&&Date.parse(t)<=to?[i]:[]);
++  }
++  const selectedModel = () => D.models.find(m=>m.id===state.model) || D.models[0];
++  const subset = (arr,ids) => ids.map(i=>arr[i]);
++  function metrics(model,ids) { return E.statistics(subset(D.actual,ids),subset(model.offers,ids),subset(D.day_ahead,ids),subset(D.up,ids),subset(D.down,ids)); }
++  function rankings(ids) { return D.models.map(model=>({model,score:metrics(model,ids)})).sort((a,b)=>b.score.total-a.score.total); }
++  function kpi(label,value,unit,sub,name='value',primary=false) {return `<article class="kpi${primary?' primary':''}"><div class="kpi-label">${label}<span data-icon="${name}"></span></div><div class="kpi-value">${value}${unit?`<small>${unit}</small>`:''}</div><div class="kpi-sub">${sub}</div></article>`;}
++  function lineChart(lines,labels,{ylabel='',height=238,min=null,max=null,title='Chart',gaps=[]}={}) {
++    const w=800,h=height,p={l:50,r:15,t:19,b:35},pw=w-p.l-p.r,ph=h-p.t-p.b;
++    const flat=lines.flatMap(s=>s.values).filter(Number.isFinite);
++    let lo=min ?? Math.min(0,...flat), hi=max ?? Math.max(...flat);
++    if (!Number.isFinite(hi)||hi<=lo) hi=lo+1;
++    const x=i=>p.l+(labels.length<2?pw/2:i/(labels.length-1)*pw), y=v=>p.t+ph-(v-lo)/(hi-lo)*ph;
++    let svg=`<svg class="chart" viewBox="0 0 ${w} ${h}" role="img" aria-label="${esc(title)}"><title>${esc(title)}</title>`;
++    for(let i=0;i<=4;i++){const v=lo+(hi-lo)*i/4,py=y(v);svg+=`<line class="grid-line" x1="${p.l}" x2="${w-p.r}" y1="${py}" y2="${py}"/><text x="${p.l-10}" y="${py+3}" text-anchor="end">${esc(Math.abs(v)>=1000?compact(v):num(v,Number.isInteger(hi)?0:1))}</text>`;}
++    const ticks = [...new Set([0,Math.floor((labels.length-1)/3),Math.floor((labels.length-1)*2/3),labels.length-1])];
++    ticks.forEach(i=>{if(i>=0)svg+=`<text x="${x(i)}" y="${h-10}" text-anchor="${i===0?'start':i===labels.length-1?'end':'middle'}">${esc(labels[i])}</text>`;});
++    svg+=`<text x="${p.l}" y="10">${esc(ylabel)}</text>`;
++    const classes=['line-a','line-b','line-c'];
++    lines.forEach((s,j)=>{let path='',last=false;s.values.forEach((v,i)=>{if(!Number.isFinite(v)){last=false;return;}path+=(last&&!gaps[i]?'L':'M')+x(i).toFixed(2)+','+y(v).toFixed(2)+' ';last=true;});svg+=`<path class="${classes[j%3]}" d="${path}"/>`;if(s.values.length===1)svg+=`<circle cx="${x(0)}" cy="${y(s.values[0])}" r="3" fill="var(--accent)"/>`;});
++    return svg+'</svg>';
++  }
++  function groupTime(ids,arrays,cumulative=false) {
++    const daily=ids.length>180;
++    const groups=[];let lastKey='';
++    ids.forEach((id,i)=>{const key=daily?D.timestamps[id].slice(0,10):D.timestamps[id];if(key!==lastKey){groups.push({key,ids:[],points:arrays.map(()=>[])});lastKey=key;}const g=groups.at(-1);g.ids.push(id);arrays.forEach((a,j)=>g.points[j].push(a[i]));});
++    return {daily,labels:groups.map(g=>daily?shortDate(g.key):D.timestamps[g.ids[0]].slice(5,16).replace('T',' ')),
++      values:arrays.map((_,j)=>groups.map(g=>cumulative?g.points[j].at(-1):g.points[j].reduce((a,b)=>a+b,0)/g.points[j].length)),
++      gaps:groups.map((g,i)=>i>0 && Date.parse(g.key)-Date.parse(groups[i-1].key)>(daily?86400000:3600000))};
++  }
++  function powerPlot(model,ids) {
++    const actual=subset(D.actual,ids),offers=subset(model.offers,ids);
++    let series, labels, opts, note;
++    if(chartMode==='revenue') {
++      let running=0,oracle=0;
++      const values=ids.map(i=>running+=E.revenue(model.offers[i],D.actual[i],D.day_ahead[i],D.up[i],D.down[i]));
++      const ideal=ids.map(i=>oracle+=D.actual[i]*D.day_ahead[i]);
++      const g=groupTime(ids,[ideal,values],true);series=[{values:g.values[0]},{values:g.values[1]}];labels=g.labels;
++      opts={ylabel:'DKK · cumulative',title:'Cumulative synthetic revenue, selected offer and perfect-foresight benchmark',gaps:g.gaps};
++      note=g.daily?'End-of-day cumulative values; only retained hourly records contribute.':'Cumulative value of retained hourly records; gaps are not zero-filled.';
++    } else if(chartMode==='prices') {
++      const g=groupTime(ids,[subset(D.day_ahead,ids),subset(D.down,ids),subset(D.up,ids)]);series=g.values.map(values=>({values}));labels=g.labels;
++      opts={ylabel:'DKK / MWh',title:'Synthetic day-ahead and balancing settlement prices',gaps:g.gaps};note=g.daily?'Daily means of retained prices. Excluded hours are not zero-filled.':'Hourly prices. Excluded hours are left as gaps.';
++    } else {
++      const g=groupTime(ids,[actual,offers]);series=g.values.map(values=>({values}));labels=g.labels;
++      opts={ylabel:'MW',max:D.capacity_mw,title:'Actual synthetic wind output and selected strategy offer',gaps:g.gaps};note=g.daily?'Daily means of retained hours. Metrics use every hourly record.':'Hourly output and offers. Excluded hours are left as gaps.';
++    }
++    const legend=chartMode==='revenue'?'<span><i class="actual"></i>Perfect foresight</span><span><i class="offer"></i>Selected strategy</span>':chartMode==='prices'?'<span><i class="actual"></i>Day-ahead</span><span><i class="offer"></i>Down-regulation</span><span><i class="gold"></i>Up-regulation</span>':'<span><i class="actual"></i>Actual output</span><span><i class="offer"></i>Selected offer</span>';
++    return `<div class="legend">${legend}</div>${lineChart(series,labels,opts)}<div class="chart-note"><span>${note}</span><span>UTC · ${num(ids.length,0)} records</span></div>`;
++  }
++  function turbineGlyph() {return `<svg class="wind-glyph" viewBox="0 0 240 105" role="img" aria-label="Wind turbine diagram"><defs><linearGradient id="tg" x2="0" y2="1"><stop stop-color="currentColor" stop-opacity=".2"/><stop offset="1" stop-color="currentColor" stop-opacity="0"/></linearGradient></defs><path d="M7 94H235M20 98h195" stroke="currentColor" stroke-opacity=".2"/><g fill="none" stroke="currentColor" stroke-width="1.2"><path d="M107 38 103 92h11l-4-54M174 47l-3 45h7l-3-45M57 58l-2 34h5l-2-34"/><path d="M109 38 105 3c8 3 9 17 4 35ZM109 38l31 16c-1 6-22-2-31-16ZM109 38 87 62c-6-3 7-20 22-24Z"/><circle cx="109" cy="38" r="3"/><path d="m174 47 0-25c5 2 5 15 0 25ZM174 47l22 13c-2 4-16-2-22-13ZM174 47l-16 18c-5-4 7-16 16-18Z"/><circle cx="174" cy="47" r="2"/><path d="M57 58V39c4 1 4 12 0 19Zm0 0 17 10c-2 3-12-1-17-10Zm0 0L45 72c-4-3 5-12 12-14Z"/><circle cx="57" cy="58" r="1.5"/></g><path d="M30 20h36M15 30h53M186 10h36M198 19h25" stroke="currentColor" stroke-opacity=".25" stroke-linecap="round"/></svg>`;}
++  function overview(ids) {
++    const model=selectedModel(),s=metrics(model,ids),ranked=rankings(ids);
++    const baseline=ranked.find(x=>x.model.id==='persistence_24h').score;
++    const delta=s.total-baseline.total;
++    const gapHours=Math.round((Date.parse(D.timestamps[ids.at(-1)])-Date.parse(D.timestamps[ids[0]]))/3600000)+1-ids.length;
++    return `<div class="kpi-grid">${kpi('Realised revenue',compact(s.total),'DKK',`<span class="accent">${delta>=0?'+':''}${compact(delta)}</span> vs persistence`,'value',true)}${kpi('Perfect-foresight capture',num(s.capture,2),'%', 'Revenue ÷ benchmark revenue','target')}${kpi('Absolute imbalance',compact(s.imbalance),'MWh',num(s.mae,2)+' MW mean absolute offer error','wind')}${kpi('Retained test intervals',num(ids.length,0),'hours',num(gapHours,0)+' excluded hours between endpoints','clock')}</div>
++    <div class="dashboard-grid"><section class="panel"><div class="panel-header"><div><h2>Production meets strategy</h2><p>${esc(model.name)} · held-out synthetic observations</p></div><div class="chart-toolbar" role="group" aria-label="Chart measure">${['power','revenue','prices'].map(x=>`<button data-chart="${x}" type="button" aria-pressed="${chartMode===x}">${{power:'Output',revenue:'Revenue',prices:'Prices'}[x]}</button>`).join('')}</div></div><div id="overview-plot">${powerPlot(model,ids)}</div><p class="chart-summary">${num(s.meanActual,2)} MW mean output · ${num(s.meanOffer,2)} MW mean offer · ${compact(s.regret)} DKK regret to perfect foresight</p></section>
++    <aside class="panel insight-panel"><div class="eyebrow">EXPLORE THE DECISION</div><h2 class="insight-title">The best forecast<br>is not the whole story.</h2><p>A shortfall costs the up-regulation price. A surplus earns the down-regulation price. Explore how that changes your offer.</p>${turbineGlyph()}<button class="button secondary small" data-go="lab" type="button">Open strategy lab <span data-icon="arrow"></span></button></aside></div>
++    <div class="split-grid"><section class="panel"><div class="panel-header"><div><h2>Leading strategies</h2><p>Ranked by revenue within the selected window</p></div><button class="text-link" data-go="models" type="button">Compare all <span data-icon="arrow"></span></button></div>${ranked.slice(0,3).map((x,i)=>`<div class="mini-row"><span class="rank">0${i+1}</span><div><strong>${esc(x.model.name)}</strong><small>${esc(x.model.family)}</small></div><div class="number">${compact(x.score.total)}<small>DKK · ${num(x.score.capture,2)}% capture</small></div></div>`).join('')}</section>
++    <section class="panel"><div class="panel-header"><div><h2>The research context</h2><p>Keep the assumptions in view</p></div><span class="badge">OFFLINE</span></div><div class="context-row"><span>Evaluated farm</span><strong>Ronne Coastal Proxy</strong></div><div class="context-row"><span>Price regime</span><strong>Down ≤ day-ahead ≤ up</strong></div><div class="context-row"><span>Interval / settlement</span><strong>1 hour / DKK</strong></div><div class="context-note">Not a complete calendar backtest: negative-price hours were removed upstream. These results are not evidence of live profitability.</div></section></div>`;
++  }
++  function modelsPage(ids) {
++    const rows=rankings(ids), max=Math.max(...rows.map(x=>x.score.total)), benchmark=rows[0].score.oracle;
++    return `<div class="notice"><strong>Same hours. Different decisions.</strong> This table compares offer error, not forecast-only error. Rankings change with your date filter. Perfect foresight is shown as a non-deployable reference, not as a competing learned model.</div>
++    <section class="panel"><div class="panel-header"><div><h2>Value leaderboard</h2><p>${num(ids.length,0)} retained hourly records · ${compact(benchmark)} DKK perfect-foresight reference</p></div><button class="button secondary small" id="export-models" type="button"><span data-icon="download"></span>Export comparison</button></div><div class="model-bars">${rows.map(x=>`<div class="model-bar-row"><span>${esc(x.model.name)}</span><div class="bar-track"><div class="bar-fill" style="--width:${Math.max(0,x.score.total/max*100)}%;background:var(--${x.model.family==='Direct learning'?'accent':x.model.family==='Baseline'?'gold':'cyan'})"></div></div><strong>${compact(x.score.total)} DKK</strong></div>`).join('')}</div><p class="readout-caption">Bars start at zero. Colours distinguish direct learning, forecast-then-optimise and persistence.</p><div class="table-wrap"><table><caption class="sr-only">Strategy performance in the selected time window</caption><thead><tr><th>Rank</th><th>Strategy</th><th class="number">Revenue (DKK)</th><th class="number">Capture (%)</th><th class="number">Regret (DKK)</th><th class="number">Offer RMSE (MW)</th><th class="number">Offer MAE (MW)</th><th>Explore</th></tr></thead><tbody>${rows.map((x,i)=>`<tr class="${state.model===x.model.id?'selected-row':''}"><td><span class="pill-number">${i+1}</span></td><td><strong>${esc(x.model.name)}</strong><small>${esc(x.model.family)}</small></td><td class="number">${num(x.score.total,0)}</td><td class="number">${num(x.score.capture,2)}</td><td class="number">${num(x.score.regret,0)}</td><td class="number">${num(x.score.rmse,3)}</td><td class="number">${num(x.score.mae,3)}</td><td><button class="text-link" data-select-model="${x.model.id}" type="button">Inspect <span data-icon="arrow"></span></button></td></tr>`).join('')}</tbody></table></div></section>
++    <div class="split-grid section-space"><section class="panel prose"><h2>Forecast → optimise</h2><div class="flow"><div>Weather + lagged output</div><span>→</span><div>Power forecast</div><span>→</span><div>Residual scenarios</div><span>→</span><div>Optimal offer</div></div><p>The seven indirect strategies include the 24-hour persistence baseline. Saved offer vectors come from the supplied research run; changing the dashboard date window does not retrain them.</p></section><section class="panel prose"><h2>Direct learning</h2><div class="flow"><div>Same information set</div><span>→</span><div>Continuous / bracket learning</div><span>→</span><div>Offer</div></div><p>The two direct strategies learn offers from synthetic perfect-foresight targets. They are research outputs, not an independently validated production forecasting service.</p></section></div>`;
++  }
++  function dataPageHtml(ids) {
++    const filtered=ids.filter(i=>!dataSearch||D.timestamps[i].toLowerCase().includes(dataSearch.toLowerCase()));
++    const pageCount=Math.max(1,Math.ceil(filtered.length/25));dataPage=Math.min(dataPage,pageCount-1);
++    const visible=filtered.slice(dataPage*25,dataPage*25+25),m=selectedModel();
++    return `<div class="data-quality-grid">${kpi('Records in selected period',num(ids.length,0),'',dateLabel(D.timestamps[ids[0]])+' → '+dateLabel(D.timestamps[ids.at(-1)]),'data')}${kpi('Source rows checked',num(D.quality.revenue_values_checked,0),'', 'Saved revenue values reconciled with Python','check')}${kpi('Dataset coverage',num(D.quality.rows,0),'hours', 'One evaluated synthetic site · UTC','clock')}</div><section class="panel"><div class="panel-header"><div><h2>Hourly research ledger</h2><p>${esc(m.name)} · use the global filters to select a period</p></div><span class="badge good">SOURCE-BACKED</span></div><div class="table-controls"><label class="sr-only" for="data-search">Find a UTC date or hour</label><input id="data-search" type="search" placeholder="Find a UTC date or hour, e.g. 2024-12-15" value="${esc(dataSearch)}"><button class="button secondary small" id="export-filtered" type="button"><span data-icon="download"></span>Export ${num(filtered.length,0)} matching rows</button></div><div class="table-wrap"><table><caption class="sr-only">Hourly actual output, strategy offer, settlement prices and calculated revenue</caption><thead><tr><th>Time (UTC)</th><th class="number">Actual (MW)</th><th class="number">Offer (MW)</th><th class="number">Day-ahead<br>(DKK/MWh)</th><th class="number">Up price<br>(DKK/MWh)</th><th class="number">Down price<br>(DKK/MWh)</th><th class="number">Revenue (DKK)</th></tr></thead><tbody>${visible.length?visible.map(i=>`<tr><td class="mono">${D.timestamps[i].slice(0,16).replace('T',' ')}</td><td class="number">${num(D.actual[i],3)}</td><td class="number">${num(m.offers[i],3)}</td><td class="number">${num(D.day_ahead[i],2)}</td><td class="number">${num(D.up[i],2)}</td><td class="number">${num(D.down[i],2)}</td><td class="number">${num(E.revenue(m.offers[i],D.actual[i],D.day_ahead[i],D.up[i],D.down[i]),2)}</td></tr>`).join(''):'<tr><td colspan="7"><div class="empty"><strong>No matching records.</strong>Clear your date search or choose a different period. Missing hours are not fabricated.</div></td></tr>'}</tbody></table></div><div class="pagination"><span>${filtered.length?num(dataPage*25+1,0):0}–${num(Math.min((dataPage+1)*25,filtered.length),0)} of ${num(filtered.length,0)} rows · Page ${dataPage+1} / ${pageCount}</span><div><button class="button secondary small" data-paginate="-1" type="button" ${dataPage===0?'disabled':''}>Previous</button><button class="button secondary small" data-paginate="1" type="button" ${dataPage>=pageCount-1?'disabled':''}>Next</button></div></div></section><div class="notice section-space">CSV exports contain unrounded numerical values, the strategy ID and a synthetic-data label. The on-screen table rounds values for readability. ${D.quality.excluded_hours_between_endpoints} hours are absent between the full test-set endpoints; the original source removed ${D.quality.source_negative_price_rows_removed} negative-price hours across its complete generation period.</div>`;
++  }
++  function numericField(id,label,value,unit,min,max,step='1') {return `<div class="form-field"><label for="${id}">${label}</label><div class="input-unit"><input id="${id}" name="${id}" type="number" value="${value}" min="${min}" max="${max}" step="any" required><span>${unit}</span></div></div>`;}
++  function labPage() {
++    return `<div class="notice"><strong>Independent scenario sandbox.</strong> These are editable assumptions, not a forecast or live bid. The dashboard strategy and date filters do not affect this calculation. Negative prices are allowed here only when the required price ordering holds.</div><div class="lab-grid"><div><section class="panel"><div class="panel-header"><div><h2>Build your scenario</h2><p>Empirical production distribution + settlement prices</p></div><span class="badge blue">WHAT-IF</span></div><div class="preset-row" role="group" aria-label="Scenario presets"><button data-preset="balanced" type="button">Balanced spread</button><button data-preset="shortfall" type="button">Costly shortfall</button><button data-preset="surplus" type="button">Low surplus value</button></div><form id="lab-form" novalidate><div class="form-grid">${numericField('capacity','Physical capacity',labInput.capacity,'MW',.1,10000,.1)}${numericField('hours','Settlement interval',labInput.hours,'hours',.25,24,.25)}${numericField('da','Day-ahead price',labInput.da,'DKK/MWh',-10000,100000,.1)}${numericField('up','Up-regulation price',labInput.up,'DKK/MWh',-10000,100000,.1)}${numericField('down','Down-regulation price',labInput.down,'DKK/MWh',-10000,100000,.1)}<div class="form-field"><span>Decision rule</span><div class="formula">q = (DA − down)<br> / (up − down)</div></div><div class="form-field full"><label for="scenarios">Production scenarios (MW)</label><textarea id="scenarios" rows="3" aria-describedby="scenarios-hint" required>${labInput.scenarios.join(', ')}</textarea><small id="scenarios-hint">1–100 values, separated by commas. Every value must be within capacity.</small></div><div class="form-field full"><label for="probabilities">Probabilities (optional)</label><input id="probabilities" value="${labInput.probabilities.join(', ')}" placeholder="Leave blank for equal probabilities" aria-describedby="probabilities-hint"><small id="probabilities-hint">One nonnegative probability per scenario; sum must equal 1.</small></div></div><div id="lab-error" class="notice error" role="alert" hidden></div><button class="button wide" type="submit">Calculate optimal offer <span data-icon="arrow"></span></button></form></section><section class="panel section-space"><div class="panel-header"><div><h2>Saved scenarios</h2><p>Stored in this browser only</p></div><button class="text-link" id="import-scenario" type="button">Import JSON</button></div><input type="file" id="scenario-file" accept="application/json,.json" hidden><div id="saved-list">${savedHtml()}</div></section></div><div class="lab-results"><section class="panel" id="lab-output" aria-live="polite">${labOutput()}</section><section class="panel prose"><h2>Why this is the optimal offer</h2><p>For a given offer, a surplus earns the down-regulation price and a shortfall pays the up-regulation price. Under the stated ordering, expected revenue is concave and piecewise linear.</p><div class="formula">R(b, p) = Δt × [DA × b + down × max(p − b, 0)<br>                        − up × max(b − p, 0)]</div><p>The weighted empirical quantile at <strong>q = (DA − down) / (up − down)</strong> gives an optimum. Ties can produce more than one equally good offer. The line chart evaluates every scenario breakpoint and both capacity bounds.</p><button class="text-link" id="verify-python" type="button">${pythonAvailable?'Cross-check with Python / SciPy':'How to enable the Python cross-check'} <span data-icon="arrow"></span></button><div id="python-result" class="api-result" role="status" hidden></div></section></div></div>`;
++  }
++  function labOutput() {
++    if(!currentLab) currentLab=E.optimize(labInput);
++    const r=currentLab,n=labInput.scenarios.length, uplift=r.expected-r.meanOfferRevenue;
++    const curve=r.curve;
++    return `<div class="panel-header"><div><h2>Calculated offer</h2><p>Browser engine · weighted empirical quantile</p></div><span id="lab-result-state" class="badge good">CALCULATED LOCALLY</span></div><div id="lab-stale" class="notice" role="status" hidden>Inputs changed. The figures below are the last calculated result; recalculate before saving or exporting. Your draft is retained while navigating this workspace.</div><div class="result-hero"><div><div class="eyebrow">OPTIMAL DAY-AHEAD OFFER</div><div class="result-value" id="optimal-offer">${num(r.offer,2)} <small>MW</small></div></div><div class="result-side"><span>Expected scenario revenue</span><strong id="expected-revenue">${num(r.expected,2)} DKK</strong><span>per ${num(labInput.hours,2)}-hour interval</span></div></div><div class="metric-triple"><div><small>Decision quantile</small><strong>${num(r.quantile*100,1)}%</strong></div><div><small>Expected production</small><strong>${num(r.mean,2)} MW</strong></div><div><small>Value vs mean offer</small><strong>+${num(Math.max(0,uplift),2)} DKK</strong></div></div><div class="legend"><span><i class="offer"></i>Expected revenue by offer</span></div>${offerCurve(curve,r.offer)}<p class="chart-summary">${n} scenarios · ${num(labInput.capacity,1)} MW physical limit · prices in DKK/MWh. This is not a trade instruction.</p><div class="button-row"><button class="button secondary small" id="save-scenario" type="button">Save scenario</button><button class="button secondary small" id="export-scenario" type="button"><span data-icon="download"></span>Export JSON</button><button class="button secondary small" id="export-curve" type="button">Export curve CSV</button></div>`;
++  }
++  function offerCurve(curve,offer) {
++    const w=720,h=210,p={l:62,r:18,t:15,b:38},xs=labInput.capacity;
++    const ys=curve.map(p=>p.revenue),lo=Math.min(...ys,0),hi=Math.max(...ys,0)+1;
++    const x=v=>p.l+v/xs*(w-p.l-p.r),y=v=>p.t+(hi-v)/(hi-lo)*(h-p.t-p.b);
++    let svg=`<svg class="chart" viewBox="0 0 ${w} ${h}" role="img" aria-label="Expected scenario revenue in DKK versus offer in MW; optimal offer ${num(offer,2)} MW"><title>Expected revenue versus offer; optimal offer ${num(offer,2)} MW</title>`;
++    for(let i=0;i<=4;i++){const v=lo+(hi-lo)*i/4;svg+=`<line class="grid-line" x1="${p.l}" x2="${w-p.r}" y1="${y(v)}" y2="${y(v)}"/><text x="${p.l-8}" y="${y(v)+3}" text-anchor="end">${esc(compact(v))}</text><text x="${x(xs*i/4)}" y="${h-14}" text-anchor="middle">${num(xs*i/4,1)}</text>`;}
++    const d=curve.map((p,i)=>(i?'L':'M')+x(p.offer).toFixed(2)+','+y(p.revenue).toFixed(2)).join(' ');
++    svg+=`<path class="line-b" d="${d}"/><line x1="${x(offer)}" x2="${x(offer)}" y1="${p.t}" y2="${h-p.b}" stroke="var(--gold)" stroke-dasharray="4 5"/><text x="${p.l}" y="10">DKK</text><text x="${w-p.r}" y="${h-1}" text-anchor="end">Offer (MW)</text></svg>`;return svg;
++  }
++  function savedHtml() {return saved.length?saved.map((s,i)=>`<div class="saved-item"><div><strong>${esc(s.name)}</strong><small>${num(s.input.capacity,1)} MW capacity · ${s.input.scenarios.length} scenarios</small></div><div><button class="text-link" data-load-saved="${i}" type="button">Load</button> <button class="text-link" data-delete-saved="${i}" type="button" aria-label="Delete ${esc(s.name)}">×</button></div></div>`).join(''):'<div class="empty"><strong>Your experiments belong here.</strong>Calculate an offer, then save the assumptions for another comparison.</div>';}
++  function methodPage() {
++    return `<div class="notice"><strong>Research, not a live trading system.</strong> This release presents the supplied synthetic experiments and a local optimisation sandbox. It does not fetch current prices, retrain on filter changes, authenticate traders or submit orders. Public deployment and real-market validation remain outside the verified scope.</div><div class="method-grid"><section class="panel prose"><h2>What is connected to what?</h2><div class="flow"><div>Supplied CSV observations</div><span>→</span><div>Validated snapshot</div><span>→</span><div>Browser calculations</div></div><p>The dashboard contains ${num(D.quality.rows,0)} retained test observations for <strong>${esc(D.farm_name)}</strong>, covering ${dateLabel(D.timestamps[0])} to ${dateLabel(D.timestamps.at(-1))}. All values use UTC, one-hour intervals and DKK. Four farms exist in the synthetic source metadata; only one has evaluated model outputs in this workspace.</p><h3>Metric definitions</h3><p><strong>Realised revenue</strong> is day-ahead offer revenue plus surplus receipts minus shortfall costs. <strong>Capture</strong> divides realised revenue by the perfect-foresight benchmark. Capture is undefined when that denominator is not positive; it is never shown as an invented percentage.</p><div class="formula">Revenue = DA × offer + down × surplus − up × shortfall<br>Capture = 100 × Σ revenue / Σ (DA × actual output)<br>Offer MAE = mean(|actual output − offer|)<br>Imbalance MWh = Σ |actual output − offer| × interval hours</div><p><strong>Perfect foresight</strong> assumes actual output is known before offering. It is an analytical reference under the repository's price ordering, not a forecast achievable in operation. Offer RMSE is not the same quantity as wind-forecast RMSE.</p><h3>Temporal scope and exclusions</h3><p>The original pipeline removed ${D.quality.source_negative_price_rows_removed} negative-price hours from its full generated market table. ${D.quality.excluded_hours_between_endpoints} hours are absent between the first and last test observations. The UI does not fill those missing observations with zero. Daily charts use means of available hours; revenue charts use cumulative sums of included hourly values.</p><h3>Model and information limitations</h3><p>Models were trained in the supplied research run, with chronological train/validation/test separation. The weather fields are synthetic forecast-time proxies. Operational forecast issuance, gate-closure availability of lagged features, current market rules, transaction costs and live settlement data have not been independently validated here. No live profitability claim is warranted.</p><h3>Scenario lab</h3><p>The lab is independent of the saved backtest. Its production distribution and prices are your assumptions. The browser evaluates the weighted empirical quantile. When started through the optional Python launcher, a local SciPy linear program can cross-check the same objective. Local checks are not an external integration test.</p></section><div class="provenance-grid"><section class="panel"><div class="panel-header"><div><h2>Source provenance</h2><p>Artifacts from your uploaded repository</p></div><span class="badge good">TRACEABLE</span></div>${D.sources.map(s=>`<div class="context-row"><div><div class="source-path">${esc(s.path)}</div><small class="muted">SHA-256</small><div class="source-path">${s.sha256}</div></div></div>`).join('')}<p class="readout-caption">Source manifest says generated ${esc(D.source_generated_at)}. These are historical synthetic observations, not a current market feed.</p><button class="button secondary small" id="export-provenance" type="button">Export provenance JSON</button></section><section class="panel"><h2>Verified snapshot integrity</h2><div class="context-row"><span>Unique, ordered timestamps</span><strong>Validated</strong></div><div class="context-row"><span>Phase 2 / 3 row alignment</span><strong>Exact</strong></div><div class="context-row"><span>Revenue values recalculated</span><strong>${num(D.quality.revenue_values_checked,0)}</strong></div><div class="context-row"><span>Largest saved-value difference</span><strong>${D.quality.maximum_revenue_error_dkk.toExponential(2)} DKK</strong></div><div class="context-note">These are artifact checks, not a rerun of the original three-year model training. Test logs and limitations are included in <span class="mono">docs/champion/</span>.</div></section><section class="panel prose" id="python-setup"><h2>Run the Python cross-check</h2><p>The portable HTML runs without installation. For the optional local solver, extract the complete ZIP, install Python 3.11 or newer, then run:</p><div class="formula">python -m venv .venv-champion<br># Activate your environment, then:<br>python -m pip install -e .<br>python -m zephyrtrade.app</div><p>Windows users can run <strong>START_PYTHON_WINDOWS.bat</strong>. It creates a separate environment and installs the project. The service binds only to 127.0.0.1 and is intended for local research, not internet hosting.</p><h3>Privacy and persistence</h3><p>The offline app uses no remote fonts, analytics or CDNs. Saved scenario settings stay in this browser's local storage. Export JSON backups; clearing browser data removes local saves. No credentials or live customer data are required.</p></section></div></div>`;
++  }
++  function render() {
++    const info=pageInfo[state.page];$('breadcrumb-title').textContent=info[0];$('page-eyebrow').textContent=info[1];$('page-title').textContent=info[2];$('page-subtitle').textContent=info[3];
++    document.title=`${info[0]} · ZephyrTrade Champion`;
++    document.querySelectorAll('nav a').forEach(a=>{if(a.dataset.page===state.page)a.setAttribute('aria-current','page');else a.removeAttribute('aria-current');});
++    $('filterbar').hidden=['lab','method'].includes(state.page);$('heading-tag').hidden=state.page!=='overview';
++    $('model-select').value=state.model;
++    document.querySelectorAll('[data-period]').forEach(b=>b.setAttribute('aria-pressed',String(b.dataset.period===state.period)));
++    $('date-fields').hidden=state.period!=='custom';
++    const ids=indices();
++    $('period-label').textContent=ids.length?`${dateLabel(D.timestamps[ids[0]])} — ${dateLabel(D.timestamps[ids.at(-1)])} · UTC`:'No records in this period';
++    if(!ids.length && !['lab','method'].includes(state.page)) $('page-content').innerHTML='<div class="empty"><strong>No records in this period.</strong>Choose All data or a date within the supplied test set.</div>';
++    else $('page-content').innerHTML=state.page==='overview'?overview(ids):state.page==='models'?modelsPage(ids):state.page==='data'?dataPageHtml(ids):state.page==='lab'?labPage():methodPage();
++    if(state.page==='lab'&&labDraft){for(const [key,value] of Object.entries(labDraft))$(key).value=value;markLabDirty();}
++    renderIcons(); persistView();
++  }
++  function go(page,focus=true) {if(!pageInfo[page])page='overview';state.page=page;dataPage=0;render();if(focus){$('workspace').focus();window.scrollTo({top:0,behavior:'instant'});}}
++  function download(name,content,type='text/plain;charset=utf-8') {
++    const url=URL.createObjectURL(new Blob([content],{type}));const a=document.createElement('a');a.href=url;a.download=name;document.body.append(a);a.click();a.remove();setTimeout(()=>URL.revokeObjectURL(url),1500);notify('Export prepared. Check your browser downloads.');
++  }
++  function csvDownload(name,header,rows){download(name,'\uFEFF'+[header,...rows].map(row=>row.map(E.csvCell).join(',')).join('\r\n'),'text/csv;charset=utf-8');}
++  function exportData(filtered=false) {
++    let ids=indices();if(filtered&&dataSearch)ids=ids.filter(i=>D.timestamps[i].includes(dataSearch));
++    if(!ids.length){notify('No rows match this selection.');return;}
++    const m=selectedModel();
++    csvDownload(`ZephyrTrade-${m.id}-${D.timestamps[ids[0]].slice(0,10)}.csv`,['data_kind','strategy','farm_id','timestamp_utc','interval_hours','capacity_mw','actual_mw','offer_mw','day_ahead_dkk_mwh','up_dkk_mwh','down_dkk_mwh','revenue_dkk'],ids.map(i=>['synthetic_research',m.id,D.farm_id,D.timestamps[i],1,D.capacity_mw,D.actual[i],m.offers[i],D.day_ahead[i],D.up[i],D.down[i],E.revenue(m.offers[i],D.actual[i],D.day_ahead[i],D.up[i],D.down[i])]));
++  }
++  function exportModels(){const ids=indices();if(!ids.length){notify('No rows in this period.');return;}csvDownload('ZephyrTrade-model-comparison.csv',['data_kind','start_utc','end_utc','hours','strategy','revenue_dkk','capture_pct','regret_dkk','offer_rmse_mw','offer_mae_mw','absolute_imbalance_mwh'],rankings(ids).map(x=>['synthetic_research',D.timestamps[ids[0]],D.timestamps[ids.at(-1)],ids.length,x.model.id,x.score.total,x.score.capture,x.score.regret,x.score.rmse,x.score.mae,x.score.imbalance]));}
++  function readLabForm() {
++    const obj={};for(const key of ['capacity','da','up','down','hours']){const el=$(key);el.classList.remove('input-error');if(!el.checkValidity()){el.classList.add('input-error');el.focus();throw new Error(`Check ${el.previousElementSibling?.textContent||key}: enter a valid value within the shown limits.`);}obj[key]=Number(el.value);}
++    obj.scenarios=E.parseNumbers($('scenarios').value);obj.probabilities=E.parseNumbers($('probabilities').value);return validateInput(obj);
++  }
++  function validateInput(obj) {
++    if(!obj||typeof obj!=='object'||Array.isArray(obj))throw new Error('Scenario input must be an object.');
++    const input={};for(const key of ['capacity','da','up','down','hours'])input[key]=E.finite(obj[key],key);
++    if(input.capacity<.1||input.capacity>10000||input.hours<.25||input.hours>24)throw new Error('Capacity must be 0.1–10,000 MW and duration 0.25–24 hours.');
++    for(const key of ['da','up','down'])if(input[key]<-10000||input[key]>100000)throw new Error('Prices must be between −10,000 and 100,000 DKK/MWh.');
++    if(!Array.isArray(obj.scenarios)||!Array.isArray(obj.probabilities))throw new Error('Scenarios and probabilities must be arrays.');
++    input.scenarios=obj.scenarios.slice();input.probabilities=obj.probabilities.slice();E.optimize(input);return input;
++  }
++  function calculateLab() {
++    try {const input=readLabForm(),result=E.optimize(input);labInput=input;currentLab=result;labDraft=null;labVersion++;$('lab-error').hidden=true;$('lab-output').innerHTML=labOutput();renderIcons($('lab-output'));$('verify-python').disabled=false;if($('python-result'))$('python-result').hidden=true;notify('Optimal offer recalculated from your assumptions.');}
++    catch(error){$('lab-error').textContent=error.message;$('lab-error').hidden=false;}
++  }
++  function markLabDirty() {
++    if(!$('lab-stale'))return;
++    $('lab-stale').hidden=false;$('lab-result-state').textContent='INPUTS CHANGED';
++    for(const id of ['save-scenario','export-scenario','export-curve','verify-python'])$(id).disabled=true;
++    if($('python-result'))$('python-result').hidden=true;
++  }
++  function scenarioDocument(name='Exported scenario') {return {schema_version:1,application:'ZephyrTrade Champion',data_kind:'user_assumptions_not_live',name,input:labInput,calculated:{offer_mw:currentLab.offer,expected_revenue_dkk:currentLab.expected,critical_quantile:currentLab.quantile}};}
++  function requireFreshLab() {
++    try {const input=readLabForm();if(JSON.stringify(input)!==JSON.stringify(labInput)){notify('Recalculate your edited inputs before saving or exporting.');return false;}return true;}catch(error){$('lab-error').textContent=error.message;$('lab-error').hidden=false;return false;}
++  }
++  function loadScenario(input) {labDraft=null;labInput=validateInput(input);currentLab=E.optimize(labInput);labVersion++;render();notify('Scenario loaded and recalculated.');}
++  async function pythonCheck() {
++    if(!pythonAvailable){location.hash='method';setTimeout(()=>$('python-setup')?.scrollIntoView({block:'start'}),50);return;}
++    if(!requireFreshLab())return;
++    const epoch=labVersion,input=JSON.parse(JSON.stringify(labInput)),expected=currentLab.expected;
++    const output=$('python-result');output.hidden=false;output.textContent='Running the local SciPy linear program…';
++    const button=$('verify-python');button.disabled=true;const controller=new AbortController(),timeout=setTimeout(()=>controller.abort(),5000);
++    try {const response=await fetch('/api/optimize',{method:'POST',headers:{'Content-Type':'application/json'},body:JSON.stringify(input),signal:controller.signal});const result=await response.json();if(!response.ok)throw new Error(result.error||'Local solver request failed.');if(epoch!==labVersion||state.page!=='lab')return;
++      E.verifyLPResult(result,expected,input.capacity);
++      output.textContent=`Cross-check passed: Python LP offer ${num(result.offer_mw,4)} MW; expected revenue ${num(result.expected_revenue_dkk,4)} DKK. Objective agrees within 0.000001 DKK. Equal-value ties can give different offers.`;
++    }catch(error){if(epoch===labVersion&&state.page==='lab')output.textContent=error.name==='AbortError'?'The local solver timed out. Your inputs are retained; retry when it is available.':error.message;}finally{clearTimeout(timeout);if(button.isConnected)button.disabled=false;}
++  }
++  function toggleTheme(){const theme=document.documentElement.dataset.theme==='dark'?'light':'dark';document.documentElement.dataset.theme=theme;$('theme-label').textContent=`Switch to ${theme==='dark'?'light':'dark'} theme`;try{localStorage.setItem('zephyr-theme',theme);}catch(_){} }
++  function init() {
++    if(!D||!E||D.schema_version!==1||!D.timestamps.length)throw new Error('The bundled dataset or calculation engine is missing. Re-extract the complete app or use the standalone HTML.');
++    try {const view=JSON.parse(localStorage.getItem('zephyr-view-v1')||'null');if(view){if(D.models.some(m=>m.id===view.model))state.model=view.model;if(['all','7','30'].includes(view.period))state.period=view.period;}}
++    catch(_){/* An unreadable view preference does not affect observations. */}
++    try {const t=localStorage.getItem('zephyr-theme');if(['light','dark'].includes(t))document.documentElement.dataset.theme=t;}
++    catch(_){}
++    $('theme-label').textContent=`Switch to ${document.documentElement.dataset.theme==='dark'?'light':'dark'} theme`;
++    try {const raw=JSON.parse(localStorage.getItem('zephyr-scenarios-v1')||'[]');if(!Array.isArray(raw)||raw.length>20)throw new Error('Invalid saved data');saved=raw.map(x=>({name:String(x.name).slice(0,80),input:validateInput(x.input)}));}
++    catch(_){saved=[];notify('Browser scenario storage is unavailable or unreadable. Use JSON export; no stored data has been changed.');}
++    document.querySelector('.site-card strong').textContent=D.farm_name;
++    document.querySelector('.site-card p').textContent=`${num(D.capacity_mw,0)} MW · synthetic ${D.market_area} case`;
++    document.querySelector('#heading-tag strong').innerHTML=esc(num(D.capacity_mw,0))+' <small>MW</small>';
++    $('model-select').innerHTML=D.models.map(m=>`<option value="${m.id}">${esc(m.name)}</option>`).join('');
++    $('from-date').value=D.timestamps[0].slice(0,10);$('to-date').value=D.timestamps.at(-1).slice(0,10);
++    ['from-date','to-date'].forEach(id=>{$(id).min=D.timestamps[0].slice(0,10);$(id).max=D.timestamps.at(-1).slice(0,10);});
++    currentLab=E.optimize(labInput);go(location.hash.slice(1)||'overview',false);
++    window.addEventListener('hashchange',()=>go(location.hash.slice(1)));
++    $('model-select').addEventListener('change',event=>{state.model=event.target.value;dataPage=0;render();});
++    $('theme-toggle').addEventListener('click',toggleTheme);
++    $('theme-top').addEventListener('click',toggleTheme);
++    $('help-button').addEventListener('click',()=>$('guide-dialog').showModal());
++    $('export-top').addEventListener('click',()=>exportData());
++    document.addEventListener('click',event=>{
++      const btn=event.target.closest('button');if(!btn)return;
++      if(btn.dataset.closeDialog){$(btn.dataset.closeDialog).close();return;}
++      if(btn.dataset.go){location.hash=btn.dataset.go;return;}
++      if(btn.dataset.period){if(btn.dataset.period==='custom'){state.period='custom';state.from=$('from-date').value;state.to=$('to-date').value;}else state.period=btn.dataset.period;dataPage=0;$('filter-error').hidden=true;render();return;}
++      if(btn.id==='apply-dates'){const from=$('from-date').value,to=$('to-date').value;if(!from||!to||from>to){$('filter-error').textContent='Choose a valid start date on or before the end date.';$('filter-error').hidden=false;return;}state.from=from;state.to=to;state.period='custom';dataPage=0;$('filter-error').hidden=true;render();return;}
++      if(btn.dataset.chart){chartMode=btn.dataset.chart;render();return;}
++      if(btn.dataset.selectModel){state.model=btn.dataset.selectModel;location.hash='overview';return;}
++      if(btn.dataset.paginate){dataPage+=Number(btn.dataset.paginate);render();return;}
++      if(btn.id==='export-models'){exportModels();return;}
++      if(btn.id==='export-filtered'){exportData(true);return;}
++      if(btn.dataset.preset){const presets={balanced:{da:450,up:600,down:300},shortfall:{da:450,up:900,down:300},surplus:{da:450,up:600,down:50}};loadScenario({...labInput,...presets[btn.dataset.preset]});return;}
++      if(btn.id==='save-scenario'){if(!requireFreshLab())return;if(saved.length>=20){notify('The local notebook holds 20 scenarios. Export and remove one before saving another.');return;}$('scenario-name').value='';$('save-dialog').showModal();return;}
++      if(btn.id==='export-scenario'){if(requireFreshLab())download('ZephyrTrade-scenario.json',JSON.stringify(scenarioDocument(),null,2),'application/json');return;}
++      if(btn.id==='export-curve'){if(requireFreshLab())csvDownload('ZephyrTrade-revenue-curve.csv',['data_kind','offer_mw','expected_revenue_dkk','interval_hours'],currentLab.curve.map(p=>['user_assumptions',p.offer,p.revenue,labInput.hours]));return;}
++      if(btn.id==='import-scenario'){$('scenario-file').click();return;}
++      if(btn.dataset.loadSaved!=null){loadScenario(saved[Number(btn.dataset.loadSaved)].input);return;}
++      if(btn.dataset.deleteSaved!=null){const i=Number(btn.dataset.deleteSaved);if(!window.confirm(`Delete “${saved[i].name}” from this browser? Export a JSON backup first if needed.`))return;const next=saved.filter((_,j)=>j!==i);try{localStorage.setItem('zephyr-scenarios-v1',JSON.stringify(next));saved=next;$('saved-list').innerHTML=savedHtml();notify('Scenario deleted from this browser.');}catch(_){notify('Deletion failed. Your saved scenario has been retained.');}return;}
++      if(btn.id==='verify-python'){pythonCheck();return;}
++      if(btn.id==='export-provenance'){download('ZephyrTrade-provenance.json',JSON.stringify({data_kind:D.data_kind,source_generated_at:D.source_generated_at,quality:D.quality,sources:D.sources},null,2),'application/json');}
++    });
++    document.addEventListener('submit',event=>{
++      if(event.target.id==='lab-form'){event.preventDefault();calculateLab();}
++      if(event.target.id==='save-form'){event.preventDefault();const name=$('scenario-name').value.trim();if(!name){$('scenario-name').setCustomValidity('Enter a scenario name.');$('scenario-name').reportValidity();return;}const next=[...saved,{name,input:JSON.parse(JSON.stringify(labInput))}];try{localStorage.setItem('zephyr-scenarios-v1',JSON.stringify(next));saved=next;$('save-dialog').close();$('saved-list').innerHTML=savedHtml();notify('Scenario saved in this browser. Export JSON for a backup.');}catch(_){notify('Could not save: browser storage is unavailable or full. Use Export JSON instead.');}}
++    });
++    document.addEventListener('input',event=>{if(event.target.closest('#lab-form')){labDraft={};for(const key of ['capacity','da','up','down','hours','scenarios','probabilities'])labDraft[key]=$(key).value;labVersion++;markLabDirty();}if(event.target.id==='scenario-name')event.target.setCustomValidity('');if(event.target.id==='data-search'){dataSearch=event.target.value;dataPage=0;const focus=event.target.selectionStart;render();const field=$('data-search');field.focus();if(focus!=null)field.setSelectionRange(focus,focus);}});
++    document.addEventListener('change',async event=>{
++      if(event.target.id!=='scenario-file')return;const file=event.target.files[0];if(!file)return;
++      try{if(file.size>32768)throw new Error('Scenario JSON must be smaller than 32 KB.');const parsed=JSON.parse(await file.text());if(parsed.schema_version!==1)throw new Error('Unsupported scenario schema; expected version 1.');loadScenario(parsed.input);}
++      catch(error){notify('Import failed: '+error.message);}finally{if($('scenario-file'))$('scenario-file').value='';}
++    });
++    if(location.protocol==='http:'&&['127.0.0.1','localhost'].includes(location.hostname)){
++      const controller=new AbortController(),timeout=setTimeout(()=>controller.abort(),2000);
++      fetch('/api/health',{signal:controller.signal}).then(r=>{if(!r.ok)throw new Error();return r.json();}).then(result=>{if(result.service==='zephyrtrade-local'){pythonAvailable=true;$('engine-status').textContent='Browser + Python / SciPy · loopback only';if(state.page==='lab'){$('verify-python').innerHTML='Cross-check with Python / SciPy '+icon('arrow');}}}).catch(()=>{}).finally(()=>clearTimeout(timeout));
++    }
++  }
++  try { init(); } catch(error) { $('fatal-error').textContent=error.message;$('fatal-error').hidden=false;console.error('ZephyrTrade startup failed:',error.message); }
++  // Read-only testing and diagnostic contract; no privileged capabilities.
++  window.ZephyrApp = {getState:()=>({...state}),getLab:()=>({input:JSON.parse(JSON.stringify(labInput)),result:currentLab}),getVisibleMetrics:()=>metrics(selectedModel(),indices())};
++})();
+--- /dev/null
++++ b/src/zephyrtrade/web/engine.js
+@@ -0,0 +1,83 @@
++/* ZephyrTrade numerical browser engine. Pure functions; no network or DOM. */
++(function (root) {
++  'use strict';
++  const finite = (x, name) => {
++    if (typeof x !== 'number' || !Number.isFinite(x)) throw new Error(`${name} must be finite.`);
++    return x;
++  };
++  function priceOrder(da, up, down) {
++    [da, up, down].forEach(x => finite(x, 'Price'));
++    if (!(down <= da && da <= up && down < up))
++      throw new Error('Use down-regulation ≤ day-ahead ≤ up-regulation, with a positive spread.');
++  }
++  function revenue(offer, actual, da, up, down, hours = 1) {
++    [offer, actual, da, up, down, hours].forEach(x => finite(x, 'Value'));
++    if (hours <= 0 || offer < 0 || actual < 0) throw new Error('Use nonnegative MW and a positive duration.');
++    return hours * (da * offer + down * Math.max(actual - offer, 0) - up * Math.max(offer - actual, 0));
++  }
++  function statistics(actual, offers, da, up, down, hours = 1) {
++    if (!actual.length || ![offers, da, up, down].every(a => a.length === actual.length))
++      throw new Error('Statistics require nonempty aligned vectors.');
++    const n = actual.length, mean = actual.reduce((a,b) => a+b,0) / n;
++    let total = 0, oracle = 0, sq = 0, absolute = 0, variance = 0, offerSum = 0, signed = 0;
++    const values = actual.map((a, i) => {
++      const r = revenue(offers[i], a, da[i], up[i], down[i], hours);
++      total += r; oracle += hours * a * da[i]; sq += (a - offers[i]) ** 2;
++      absolute += Math.abs(a - offers[i]); signed += a - offers[i];
++      variance += (a - mean) ** 2; offerSum += offers[i]; return r;
++    });
++    return {rows:n, total, oracle, capture: oracle > 0 ? total / oracle * 100 : null,
++      regret:oracle-total, rmse:Math.sqrt(sq/n), mae:absolute/n,
++      r2:n < 2 ? null : variance === 0 ? (sq === 0 ? 1 : 0) : 1-sq/variance,
++      imbalance:absolute*hours, meanOffer:offerSum/n, meanActual:mean, signed:signed/n, values};
++  }
++  function optimize(input) {
++    const {capacity, da, up, down, hours = 1} = input;
++    finite(capacity,'Capacity'); finite(hours,'Duration'); priceOrder(da, up, down);
++    if (capacity <= 0 || hours <= 0) throw new Error('Capacity and duration must be positive.');
++    const scenarios = input.scenarios;
++    if (!Array.isArray(scenarios) || !scenarios.length || scenarios.length > 100)
++      throw new Error('Enter between 1 and 100 production scenarios.');
++    let probs = input.probabilities;
++    if (probs == null || probs.length === 0) probs = scenarios.map(() => 1/scenarios.length);
++    if (!Array.isArray(probs) || probs.length !== scenarios.length) throw new Error('Probabilities must align with the scenarios.');
++    scenarios.forEach(x => { finite(x,'Scenario'); if (x < 0 || x > capacity) throw new Error('Every scenario must be between zero and capacity.'); });
++    probs.forEach(x => { finite(x,'Probability'); if (x < 0) throw new Error('Probabilities must be nonnegative.'); });
++    const sum = probs.reduce((a,b)=>a+b,0);
++    if (Math.abs(sum-1)>1e-7) throw new Error('Scenario probabilities must sum to 1 (within 0.0000001).');
++    probs = probs.map(p => p/sum);
++    const pairs = scenarios.map((x,i) => [x,probs[i]]).filter(p => p[1]>0).sort((a,b) => a[0]-b[0]);
++    const quantile = (da-down)/(up-down);
++    let cumulative = 0, offer = pairs[pairs.length-1][0];
++    for (const [x,p] of pairs) { cumulative += p; if (cumulative+1e-12 >= quantile) {offer=x; break;} }
++    const expected = q => scenarios.reduce((s,x,i) => s+probs[i]*revenue(q,x,da,up,down,hours),0);
++    const candidates = [...new Set([0, capacity, ...scenarios])].sort((a,b)=>a-b);
++    const curve = candidates.map(x=>({offer:x, revenue:expected(x)}));
++    return {offer, quantile, expected:expected(offer), probabilities:probs,
++      mean:scenarios.reduce((s,x,i)=>s+x*probs[i],0),
++      meanOfferRevenue:expected(scenarios.reduce((s,x,i)=>s+x*probs[i],0)), curve,
++      scenarioRevenues:scenarios.map(x=>revenue(offer,x,da,up,down,hours))};
++  }
++  function verifyLPResult(result, expected, capacity) {
++    if (!result || !Number.isFinite(result.offer_mw) || !Number.isFinite(result.expected_revenue_dkk))
++      throw new Error('The local solver returned an invalid result. Your inputs are retained.');
++    finite(expected, 'Expected objective'); finite(capacity, 'Capacity');
++    if (result.offer_mw < -1e-8 || result.offer_mw > capacity + 1e-8 || Math.abs(result.expected_revenue_dkk - expected) > 1e-6)
++      throw new Error('The Python and browser objectives disagree. Do not rely on this result.');
++    return true;
++  }
++  function parseNumbers(text) {
++    const parts = String(text).trim().split(/[\s,;]+/);
++    if (!parts[0]) return [];
++    return parts.map(x=>{const value=Number(x); finite(value,'Entry'); return value;});
++  }
++  function csvCell(value) {
++    let s = value == null ? '' : String(value);
++    // Formula neutralisation for user-provided text; numbers remain numerical.
++    if (typeof value === 'string' && /^[=+\-@\t\r]/.test(s)) s = "'" + s;
++    return /[",\n\r]/.test(s) ? '"'+s.replace(/"/g,'""')+'"' : s;
++  }
++  const api = {finite,priceOrder,revenue,statistics,optimize,verifyLPResult,parseNumbers,csvCell};
++  root.ZephyrEngine = api;
++  if (typeof module === 'object' && module.exports) module.exports = api;
++})(typeof globalThis !== 'undefined' ? globalThis : window);
+--- /dev/null
++++ b/src/zephyrtrade/web/index.html
+@@ -0,0 +1,63 @@
++<!doctype html>
++<html lang="en" data-theme="dark">
++<head>
++<meta charset="utf-8">
++<meta name="viewport" content="width=device-width, initial-scale=1">
++<meta name="color-scheme" content="dark light">
++<meta name="description" content="ZephyrTrade Champion: an offline wind-energy research desk, backed by transparent synthetic backtests and a scenario optimiser.">
++<link rel="icon" href="data:image/svg+xml,%3Csvg xmlns=%27http://www.w3.org/2000/svg%27 viewBox=%270 0 40 40%27%3E%3Crect width=%2740%27 height=%2740%27 rx=%278%27 fill=%27%23101825%27/%3E%3Cpath d=%27M8 10h25L18 22h14L7 35l11-16H6z%27 fill=%27%2368dfb6%27/%3E%3C/svg%3E">
++<title>ZephyrTrade Champion · Wind-market research desk</title>
++<link rel="stylesheet" href="styles.css">
++</head>
++<body>
++<a class="skip-link" href="#workspace">Skip to workspace</a>
++<div class="app-shell">
++  <aside class="sidebar" aria-label="Application navigation">
++    <a class="brand" href="#overview" aria-label="ZephyrTrade home">
++      <span class="brand-symbol" aria-hidden="true"><svg viewBox="0 0 40 40"><path d="M8 10h25L18 22h14L7 35l11-16H6z" fill="currentColor"/></svg></span>
++      <span>Zephyr<span class="brand-light">Trade</span><small>CHAMPION / RESEARCH DESK</small></span>
++    </a>
++    <div class="workspace-badge"><span class="tiny-orbit" aria-hidden="true"></span><div>Wind-market workspace<small>Local research · No real orders</small></div></div>
++    <div class="nav-label">WORKSPACE</div>
++    <nav id="navigation">
++      <a href="#overview" data-page="overview"><span data-icon="overview"></span>Overview <span class="nav-index">01</span></a>
++      <a href="#lab" data-page="lab"><span data-icon="lab"></span>Strategy lab <span class="nav-index">02</span></a>
++      <a href="#models" data-page="models"><span data-icon="models"></span>Model arena <span class="nav-index">03</span></a>
++      <a href="#data" data-page="data"><span data-icon="data"></span>Data explorer <span class="nav-index">04</span></a>
++      <a href="#method" data-page="method"><span data-icon="method"></span>Method & evidence <span class="nav-index">05</span></a>
++    </nav>
++    <div class="sidebar-bottom">
++      <div class="site-card"><div class="eyebrow">EVALUATED SITE</div><strong>Ronne Coastal Proxy</strong><p>30 MW · synthetic DK2 case</p><div class="site-line"><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span><span></span></div><small>Four source proxies. One evaluated site.</small></div>
++      <button id="theme-toggle" class="theme-control" type="button"><span data-icon="theme"></span><span id="theme-label">Switch to light theme</span></button>
++      <div class="version">v1.1.0 <span>Offline-first research</span></div>
++    </div>
++  </aside>
++  <div class="main-shell">
++    <header class="topbar">
++      <div class="breadcrumb">Workspace <span>/</span> <strong id="breadcrumb-title">Overview</strong></div>
++      <div class="top-actions"><span class="badge synthetic"><span aria-hidden="true"></span>Synthetic snapshot</span><button id="theme-top" class="icon-button" aria-label="Toggle colour theme" type="button"><span data-icon="theme"></span></button><button id="help-button" class="icon-button" aria-label="Open quick guide" type="button"><span data-icon="help"></span></button><button id="export-top" class="button secondary small" type="button"><span data-icon="download"></span>Export data</button></div>
++    </header>
++    <main id="workspace" tabindex="-1">
++      <noscript><div class="notice">This local app needs JavaScript enabled. No data is sent to a remote service.</div></noscript>
++      <div id="fatal-error" class="notice error" hidden></div>
++      <section class="page-heading"><div><div class="eyebrow" id="page-eyebrow">WIND INTELLIGENCE / DK2</div><h1 id="page-title">From wind to value.</h1><p id="page-subtitle">Explore the forecast. Understand the offer. See the trade-off.</p></div><div class="heading-tag" id="heading-tag"><span data-icon="wind"></span><div><strong>30 <small>MW</small></strong><span>Synthetic site capacity</span></div></div></section>
++      <section class="filterbar" id="filterbar" aria-label="Backtest filters">
++        <div class="field-inline"><label for="model-select">Strategy</label><select id="model-select"></select></div>
++        <div class="period-control" role="group" aria-label="Selected backtest period"><button data-period="7" type="button">7 days</button><button data-period="30" type="button">30 days</button><button data-period="all" type="button" aria-pressed="true">All data</button><button data-period="custom" type="button">Custom</button></div>
++        <div class="date-fields" id="date-fields" hidden><label>From <input type="date" id="from-date"></label><label>To <input type="date" id="to-date"></label><button class="button small" id="apply-dates" type="button">Apply</button></div>
++        <span id="period-label" class="period-label"></span>
++      </section>
++      <div id="filter-error" class="notice error" role="alert" hidden></div>
++      <div id="page-content"></div>
++      <footer class="workspace-footer"><span><span class="status-dot" aria-hidden="true"></span><span id="engine-status">Browser engine · local calculations</span></span><span>Synthetic research only · no live prices or order execution</span></footer>
++    </main>
++  </div>
++</div>
++<div id="toast" class="toast" role="status" aria-live="polite" hidden></div>
++<dialog id="guide-dialog" aria-labelledby="guide-title"><div class="dialog-head"><div><div class="eyebrow">YOUR RESEARCH WORKSPACE</div><h2 id="guide-title">Start with a question.</h2></div><button class="icon-button" data-close-dialog="guide-dialog" aria-label="Close guide" type="button">×</button></div><div class="guide-steps"><p><strong>01 / Explore a backtest.</strong> Use the strategy and date filters. Charts and metrics are recalculated from the supplied observations, not live market data.</p><p><strong>02 / Challenge an offer.</strong> In Strategy lab, edit production scenarios and settlement prices. The optimal offer is computed locally; no trade is placed.</p><p><strong>03 / Compare and inspect.</strong> Model arena ranks nine strategies within your chosen window. Data explorer exposes each retained hourly record and a CSV export.</p><p><strong>04 / Keep your work.</strong> Save scenario settings in this browser and export a JSON backup. Browser storage is not a cloud backup.</p></div><div class="notice">The saved research dataset excludes negative-price hours. The perfect-foresight benchmark knows actual output and is not a deployable strategy. Read Method & evidence before interpreting results.</div><button class="button" data-close-dialog="guide-dialog" type="button">Open the workspace</button></dialog>
++<dialog id="save-dialog" aria-labelledby="save-title"><form id="save-form"><div class="dialog-head"><h2 id="save-title">Save a scenario</h2><button class="icon-button" type="button" data-close-dialog="save-dialog" aria-label="Close save dialog">×</button></div><label for="scenario-name">Scenario name</label><input id="scenario-name" maxlength="80" required placeholder="e.g. Higher shortfall cost" autocomplete="off"><p class="muted">Stored only in this browser. Export your scenario JSON for a portable backup.</p><div class="dialog-actions"><button class="button secondary" type="button" data-close-dialog="save-dialog">Cancel</button><button class="button" type="submit">Save scenario</button></div></form></dialog>
++<script src="snapshot.js" defer></script>
++<script src="engine.js" defer></script>
++<script src="app.js" defer></script>
++</body>
++</html>
+--- /dev/null
++++ b/src/zephyrtrade/web/styles.css
+@@ -0,0 +1,18 @@
++:root{--bg:#0b141c;--sidebar:#0b131b;--surface:#111e28;--raised:#172731;--hover:#1c303a;--line:#293b46;--text:#f0f6f7;--muted:#a6b8c3;--soft:#7894a2;--accent:#66e6c4;--accent-ink:#06291e;--cyan:#6fc9f3;--gold:#f0ce87;--rose:#ffb1b0;--grid:#263844;--shadow:0 18px 55px #0003;--radius:16px;--font:Inter,ui-sans-serif,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif;color-scheme:dark}
++html[data-theme=light]{--bg:#f2f6f7;--sidebar:#fff;--surface:#fff;--raised:#edf3f4;--hover:#e3edef;--line:#c6d5da;--text:#112b35;--muted:#49636f;--soft:#4c6875;--accent:#087658;--accent-ink:#fff;--cyan:#086da2;--gold:#846014;--rose:#af3838;--grid:#dce6e9;--shadow:0 15px 42px #213d4710;color-scheme:light}
++*{box-sizing:border-box}body{margin:0;font:14px/1.55 var(--font);background:var(--bg);color:var(--text)}a{color:inherit;text-decoration:none}button,input,select,textarea{font:inherit;color:inherit}button{cursor:pointer}button:disabled{opacity:.48;cursor:not-allowed}button,a,input,select,textarea{outline-offset:4px}*:focus-visible{outline:3px solid var(--cyan)}[hidden]{display:none!important}h1,h2,h3,p{margin:0}h1{font-size:37px;letter-spacing:-1.3px;line-height:1.2;font-weight:650}h2{font-size:18px;letter-spacing:-.3px;font-weight:600}h3{font-size:14px;font-weight:600}small{font-size:12px}svg{display:block}button svg,.nav-icon svg,[data-icon] svg{width:18px;height:18px;stroke:currentColor;fill:none;stroke-width:1.7;stroke-linecap:round;stroke-linejoin:round}button{border:1px solid transparent}.app-shell{display:flex;min-height:100vh}.sidebar{width:244px;min-width:244px;background:var(--sidebar);border-right:1px solid var(--line);position:fixed;inset:0 auto 0 0;padding:31px 22px 20px;display:flex;flex-direction:column;z-index:5}.brand{display:flex;align-items:center;gap:8px;font-size:22px;font-weight:700;letter-spacing:-.7px}.brand-symbol{color:var(--accent);width:32px;height:40px;flex-shrink:0}.brand-light{font-weight:350}.brand small{display:block;letter-spacing:1.35px;font-size:7.7px;color:var(--muted);margin-top:2px}.workspace-badge{display:flex;align-items:center;gap:10px;margin:31px 0 30px;padding:12px 7px 12px 0;font-size:11.5px;font-weight:550}.workspace-badge small{display:block;font-size:10px;font-weight:400;color:var(--muted);margin-top:3px}.tiny-orbit{width:26px;height:26px;border:1px solid var(--line);border-radius:8px;position:relative}.tiny-orbit:after{content:"";position:absolute;border:1px solid var(--accent);border-radius:50%;inset:6px}.nav-label,.eyebrow{font-size:10px;letter-spacing:1.8px;font-weight:650;color:var(--muted)}.nav-label{padding-left:12px;margin-bottom:15px}nav{display:flex;flex-direction:column;gap:7px}nav a{display:flex;align-items:center;gap:12px;padding:11px 12px;min-height:44px;border:1px solid transparent;border-radius:9px;color:var(--muted);font-size:12px;font-weight:550}nav a:hover{background:var(--raised);color:var(--text)}nav a[aria-current=page]{background:color-mix(in srgb,var(--accent) 10%,var(--sidebar));color:var(--accent);border-color:color-mix(in srgb,var(--accent) 18%,var(--line))}.nav-index{margin-left:auto;font-size:9px;font-weight:400;opacity:.75}.sidebar-bottom{margin-top:auto;padding-top:40px}.site-card{border:1px solid var(--line);border-radius:12px;padding:15px 13px;background:var(--surface)}.site-card .eyebrow{font-size:8px;letter-spacing:1.4px;margin-bottom:9px}.site-card strong{font-size:12px}.site-card p{font-size:10px;color:var(--muted);margin-top:3px}.site-card small{font-size:9px;color:var(--muted);display:block;margin-top:9px}.site-line{display:flex;align-items:end;gap:4px;height:35px;opacity:.8}.site-line span{background:var(--accent);width:8px;border-radius:2px 2px 0 0;height:35%}.site-line span:nth-child(3n){height:80%}.site-line span:nth-child(3n+1){height:52%}.site-line span:nth-child(5n){height:100%}.theme-control{display:flex;align-items:center;gap:10px;width:100%;background:none;font-size:10px;color:var(--muted);padding:20px 3px 12px}.version{border-top:1px solid var(--line);padding-top:15px;color:var(--muted);font-size:10px;display:flex;justify-content:space-between}.main-shell{margin-left:244px;min-width:0;width:calc(100% - 244px)}.topbar{min-height:77px;border-bottom:1px solid var(--line);padding:0 34px;display:flex;align-items:center;justify-content:space-between;gap:12px}.breadcrumb{font-size:11px;color:var(--muted)}.breadcrumb span{margin:0 10px;color:var(--soft)}.breadcrumb strong{color:var(--text);font-weight:500}.top-actions{display:flex;align-items:center;gap:15px}.badge{display:inline-flex;align-items:center;gap:6px;border:1px solid var(--line);padding:4px 9px;border-radius:5px;font-size:9px;letter-spacing:.4px;white-space:nowrap;font-weight:600}.badge.synthetic{color:var(--gold);border-color:color-mix(in srgb,var(--gold) 25%,var(--line));background:color-mix(in srgb,var(--gold) 5%,var(--surface))}.badge.synthetic>span{width:4px;height:4px;border-radius:50%;background:var(--gold)}.badge.good{color:var(--accent)}.badge.blue{color:var(--cyan)}.button{display:inline-flex;align-items:center;justify-content:center;gap:8px;min-height:42px;padding:9px 16px;border:1px solid var(--accent);border-radius:8px;background:var(--accent);color:var(--accent-ink);font-weight:650;font-size:12px;transition:filter .15s,transform .15s}.button:hover{filter:brightness(1.08)}.button:active{transform:translateY(1px)}.button.secondary{background:var(--surface);color:var(--text);border-color:var(--line)}.button.secondary:hover{background:var(--hover)}.button.small{min-height:35px;font-size:11px;padding:7px 12px}.button.wide{width:100%}.button.danger{color:var(--rose);border-color:var(--rose);background:transparent}.icon-button{display:flex;align-items:center;justify-content:center;min-width:36px;min-height:36px;background:transparent;border:1px solid var(--line);border-radius:8px;color:var(--muted)}.icon-button:hover{background:var(--raised);color:var(--text)}main{padding:30px 34px 15px;max-width:1800px;margin:0 auto}main:focus{outline:none}.page-heading{display:flex;align-items:center;justify-content:space-between;margin-bottom:25px;gap:20px}.page-heading .eyebrow{color:var(--accent);font-size:9px;margin-bottom:9px}.page-heading p{font-size:12px;color:var(--muted);margin-top:10px}.heading-tag{display:flex;gap:12px;align-items:center}.heading-tag>span{width:43px;height:43px;border:1px solid var(--line);border-radius:13px;display:grid;place-items:center;color:var(--accent)}.heading-tag>span svg{height:23px;width:23px}.heading-tag strong{font-size:23px;font-weight:550;display:block;line-height:1.15}.heading-tag strong small{font-size:11px;color:var(--muted)}.heading-tag div>span{display:block;font-size:9px;color:var(--muted);margin-top:5px}.filterbar{display:flex;align-items:center;gap:15px;border-top:1px solid var(--line);border-bottom:1px solid var(--line);padding:13px 0;margin-bottom:22px;flex-wrap:wrap}.field-inline{display:flex;align-items:center;gap:9px}.field-inline label{font-size:10px;color:var(--muted)}select,input,textarea{border:1px solid var(--line);border-radius:7px;background:var(--bg);padding:9px 11px;min-height:40px;max-width:100%;font-size:12px}select{min-height:33px;padding:6px 27px 6px 9px}textarea{resize:vertical;width:100%;line-height:1.7}.period-control{display:flex;background:var(--surface);padding:3px;border:1px solid var(--line);border-radius:8px}.period-control button{background:transparent;border-radius:5px;color:var(--muted);font-size:10px;padding:5px 10px;min-height:29px}.period-control button[aria-pressed=true]{background:var(--raised);color:var(--text);box-shadow:0 0 0 1px var(--line)}.period-label{font-size:10px;color:var(--muted);margin-left:auto}.date-fields{width:100%;display:flex;align-items:center;gap:12px}.date-fields label{font-size:10px;color:var(--muted)}.date-fields input{margin-left:6px;padding:5px 8px;min-height:33px}.kpi-grid{display:grid;grid-template-columns:repeat(4,minmax(0,1fr));gap:15px;margin-bottom:20px}.kpi{padding:19px 19px 17px;border:1px solid var(--line);border-radius:12px;background:var(--surface);position:relative;overflow:hidden}.kpi.primary{border-color:color-mix(in srgb,var(--accent) 37%,var(--line));background:linear-gradient(130deg,color-mix(in srgb,var(--accent) 7%,var(--surface)),var(--surface))}.kpi-label{font-size:10px;font-weight:500;color:var(--muted);display:flex;align-items:center;justify-content:space-between;gap:10px}.kpi-label svg{width:15px;height:15px}.kpi-value{font-size:28px;font-weight:580;letter-spacing:-.8px;font-variant-numeric:tabular-nums;line-height:1.2;margin:12px 0 9px}.kpi-value small{font-size:11px;color:var(--muted);letter-spacing:0;margin-left:5px;font-weight:400}.kpi-sub{font-size:10px;color:var(--muted)}.kpi-sub .accent{color:var(--accent)}.dashboard-grid{display:grid;grid-template-columns:minmax(0,1fr) 285px;gap:20px;margin-bottom:20px}.panel{background:var(--surface);border:1px solid var(--line);border-radius:var(--radius);padding:22px;min-width:0}.panel-header{display:flex;align-items:flex-start;justify-content:space-between;gap:15px;margin-bottom:20px}.panel-header h2{font-size:15px}.panel-header p{font-size:10px;color:var(--muted);margin-top:5px}.chart-toolbar{display:flex;gap:4px}.chart-toolbar button{font-size:9px;min-height:28px;border:1px solid var(--line);border-radius:5px;background:transparent;color:var(--muted);padding:4px 8px}.chart-toolbar button[aria-pressed=true]{background:var(--raised);color:var(--text)}.legend{display:flex;align-items:center;gap:16px;font-size:10px;color:var(--muted);flex-wrap:wrap;margin:8px 0 15px}.legend i{display:inline-block;width:15px;height:2px;vertical-align:middle;margin-right:5px}.legend i.actual{background:var(--cyan)}.legend i.offer{background:var(--accent)}.legend i.gold{background:var(--gold)}.chart{width:100%;height:auto;min-height:180px;overflow:visible}.chart text{font-family:var(--font);fill:var(--muted);font-size:10px}.chart .grid-line{stroke:var(--grid);stroke-width:1}.chart .line-a{fill:none;stroke:var(--cyan);stroke-width:2}.chart .line-b{fill:none;stroke:var(--accent);stroke-width:2}.chart .line-c{fill:none;stroke:var(--gold);stroke-width:1.5}.chart-note{display:flex;justify-content:space-between;gap:10px;font-size:9px;color:var(--muted);padding-top:12px;border-top:1px solid var(--line);margin-top:10px}.chart-summary{font-size:10px;color:var(--muted);margin-top:8px}.insight-panel{display:flex;flex-direction:column;position:relative;background:radial-gradient(ellipse at 80% 0%,color-mix(in srgb,var(--accent) 9%,var(--surface)),var(--surface) 60%)}.insight-panel .eyebrow{font-size:8px;color:var(--accent)}.insight-title{font-size:21px;line-height:1.35;letter-spacing:-.5px;margin:13px 0 9px;font-weight:520}.insight-panel p{font-size:11px;color:var(--muted)}.wind-glyph{color:var(--accent);width:100%;height:115px;margin:6px 0;opacity:.9}.insight-panel .button{margin-top:auto}.split-grid{display:grid;grid-template-columns:minmax(0,1.15fr) minmax(0,1fr);gap:20px;margin-bottom:20px}.mini-row{display:grid;grid-template-columns:24px 1fr auto;gap:10px;align-items:center;padding:11px 0;border-bottom:1px solid var(--line)}.mini-row:last-child{border:0}.rank{font-size:10px;color:var(--muted);font-variant-numeric:tabular-nums}.mini-row strong{display:block;font-size:11px;font-weight:500}.mini-row small{color:var(--muted);font-size:9px}.mini-row .number{font-size:13px;font-weight:550;font-variant-numeric:tabular-nums}.mini-row .number small{display:block;font-size:9px;text-align:right;font-weight:400}.bar-track{height:5px;border-radius:3px;background:var(--raised);margin-top:7px;overflow:hidden}.bar-fill{height:100%;border-radius:3px;background:var(--accent);width:var(--width)}.text-link{display:inline-flex;align-items:center;gap:5px;color:var(--accent);background:none;font-size:10px;font-weight:550;padding:0;min-height:28px}.context-row{display:flex;justify-content:space-between;align-items:center;gap:10px;padding:12px 0;border-bottom:1px solid var(--line);font-size:11px}.context-row:last-child{border:0}.context-row>span{color:var(--muted)}.context-row strong{font-weight:500;font-variant-numeric:tabular-nums}.context-note{margin-top:15px;padding:11px 12px;border-left:2px solid var(--gold);background:var(--raised);color:var(--muted);font-size:10px;border-radius:0 6px 6px 0}.workspace-footer{display:flex;justify-content:space-between;gap:15px;border-top:1px solid var(--line);margin-top:27px;padding:18px 0 7px;font-size:9px;color:var(--muted)}.workspace-footer>span:first-child{display:flex;align-items:center;gap:6px}.status-dot{width:4px;height:4px;background:var(--accent);border-radius:50%}.notice{padding:14px 16px;border:1px solid var(--line);border-left:3px solid var(--gold);border-radius:8px;background:var(--raised);font-size:11px;color:var(--muted);line-height:1.7;margin:0 0 18px}.notice.error{border-left-color:var(--rose);color:var(--rose)}.notice strong{color:var(--text)}.muted{color:var(--muted)}.accent{color:var(--accent)}.lab-grid{display:grid;grid-template-columns:370px minmax(0,1fr);gap:20px}.form-grid{display:grid;grid-template-columns:1fr 1fr;gap:15px;margin-bottom:16px}.form-field{display:flex;flex-direction:column;gap:6px}.form-field label,.form-field>span{font-size:10px;color:var(--muted)}.form-field.full{grid-column:1/-1}.form-field small{font-size:9px;color:var(--muted)}.input-unit{position:relative}.input-unit input{width:100%;padding-right:64px}.input-unit span{position:absolute;right:10px;top:12px;font-size:9px;color:var(--muted);pointer-events:none}.lab-results{display:flex;flex-direction:column;gap:20px}.result-hero{display:flex;align-items:center;justify-content:space-between;gap:20px;border-bottom:1px solid var(--line);padding-bottom:18px;margin-bottom:18px}.result-hero .eyebrow{font-size:9px}.result-value{font-size:46px;line-height:1.2;font-weight:550;color:var(--accent);letter-spacing:-1.3px;margin-top:7px;font-variant-numeric:tabular-nums}.result-value small{font-size:14px;color:var(--muted);letter-spacing:0}.result-side{text-align:right}.result-side strong{display:block;font-size:19px;font-weight:550}.result-side span{font-size:10px;color:var(--muted)}.metric-triple{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;margin-bottom:16px}.metric-triple div{border-right:1px solid var(--line);padding-right:10px}.metric-triple div:last-child{border:0}.metric-triple small{font-size:9px;color:var(--muted)}.metric-triple strong{display:block;font-size:17px;font-weight:500;line-height:1.2;margin-top:5px;font-variant-numeric:tabular-nums}.button-row{display:flex;gap:9px;flex-wrap:wrap;margin-top:16px}.preset-row{display:flex;gap:7px;flex-wrap:wrap;margin:15px 0 19px}.preset-row button{border:1px solid var(--line);background:var(--raised);border-radius:20px;padding:5px 10px;font-size:9px;min-height:30px}.preset-row button:hover{color:var(--accent);border-color:var(--accent)}.saved-list{display:grid;gap:10px}.saved-item{display:flex;gap:9px;align-items:center;justify-content:space-between;padding:10px;background:var(--bg);border:1px solid var(--line);border-radius:8px}.saved-item strong{font-size:11px;overflow-wrap:anywhere}.saved-item small{display:block;font-size:9px;color:var(--muted)}.saved-item button{font-size:9px;min-height:32px}.empty{padding:27px 18px;text-align:center;border:1px dashed var(--line);border-radius:10px;color:var(--muted);font-size:11px}.empty strong{display:block;color:var(--text);margin-bottom:5px}.table-wrap{overflow:auto;border:1px solid var(--line);border-radius:10px}table{border-collapse:collapse;width:100%;font-variant-numeric:tabular-nums;white-space:nowrap}th{text-align:left;font-size:9px;color:var(--muted);font-weight:550;background:var(--raised);padding:11px 12px;border-bottom:1px solid var(--line)}td{padding:12px;font-size:11px;border-bottom:1px solid var(--line)}tbody tr:last-child td{border-bottom:0}tbody tr:hover{background:var(--hover)}td.number,th.number{text-align:right}td strong{font-weight:550}td small{display:block;color:var(--muted);font-size:9px}.selected-row{background:color-mix(in srgb,var(--accent) 5%,var(--surface))}.table-controls{display:flex;align-items:center;justify-content:space-between;gap:12px;margin:0 0 17px;flex-wrap:wrap}.table-controls input{min-width:230px}.pagination{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-top:15px;font-size:10px;color:var(--muted)}.pagination>div{display:flex;gap:8px}.model-bars{display:grid;gap:12px;margin:5px 0}.model-bar-row{display:grid;grid-template-columns:170px 1fr 80px;align-items:center;gap:13px;font-size:10px}.model-bar-row strong{font-weight:500;font-size:11px;text-align:right}.model-bar-row .bar-track{margin:0;height:9px}.section-space{margin-top:20px}.method-grid{display:grid;grid-template-columns:minmax(0,1.35fr) minmax(0,1fr);gap:20px}.prose p{font-size:12px;color:var(--muted);line-height:1.9;margin:12px 0}.prose h3{margin-top:22px;color:var(--text)}.prose h3:first-child{margin-top:0}.formula{font-family:ui-monospace,SFMono-Regular,Consolas,monospace;background:var(--bg);border:1px solid var(--line);padding:15px;border-radius:8px;font-size:11px;line-height:1.8;overflow-x:auto;white-space:pre-wrap}.source-path{font-family:ui-monospace,monospace;font-size:10px;word-break:break-all;color:var(--muted)}.flow{display:flex;gap:8px;align-items:center;margin:18px 0;flex-wrap:wrap}.flow>div{padding:9px 12px;border:1px solid var(--line);border-radius:8px;background:var(--raised);font-size:10px}.flow>span{color:var(--accent)}.toast{position:fixed;bottom:25px;left:50%;transform:translateX(-50%);background:var(--text);color:var(--bg);font-size:12px;border-radius:9px;padding:14px 20px;box-shadow:var(--shadow);z-index:50;max-width:min(560px,90vw)}dialog{background:var(--surface);color:var(--text);border:1px solid var(--line);border-radius:18px;padding:28px;width:min(570px,calc(100vw - 30px));max-height:85vh;box-shadow:var(--shadow)}dialog::backdrop{background:#030d16aa;backdrop-filter:blur(4px)}.dialog-head{display:flex;align-items:center;justify-content:space-between;gap:15px;margin-bottom:18px}.dialog-head .eyebrow{margin-bottom:8px}.guide-steps p{font-size:12px;color:var(--muted);line-height:1.8;margin:15px 0}.guide-steps strong{color:var(--text)}dialog label{display:block;font-size:12px;color:var(--muted);margin-bottom:7px}dialog input{width:100%}dialog p.muted{font-size:11px;margin:12px 0}.dialog-actions{display:flex;justify-content:flex-end;gap:10px;margin-top:24px}.skip-link{position:fixed;top:-60px;left:15px;z-index:100;padding:12px;background:var(--accent);color:var(--accent-ink);border-radius:8px}.skip-link:focus{top:12px}.sr-only{position:absolute;width:1px;height:1px;padding:0;margin:-1px;overflow:hidden;clip:rect(0,0,0,0);white-space:nowrap;border:0}.upload-label{display:inline-flex;align-items:center;gap:8px;cursor:pointer}.readout-caption{font-size:10px;color:var(--muted);margin:8px 0 16px}.state-loading{opacity:.7}.insight-callout{color:var(--accent)!important;margin:12px 0!important}.data-quality-grid{display:grid;grid-template-columns:repeat(3,1fr);gap:15px;margin-bottom:20px}.data-quality-grid .kpi-value{font-size:25px}.input-error{border-color:var(--rose)}.keyline{height:1px;background:var(--line);margin:18px 0}.pill-number{display:inline-flex;align-items:center;justify-content:center;width:22px;height:22px;border:1px solid var(--line);border-radius:7px;font-size:10px;color:var(--muted)}.api-result{padding:12px;border-radius:8px;border:1px solid var(--line);background:var(--raised);font-size:11px;margin-top:13px}.provenance-grid{display:grid;gap:15px}.mono{font-family:ui-monospace,Consolas,monospace;font-size:10px}
++@media(min-width:1550px){main{padding:36px 45px 20px}.topbar{padding:0 45px}.dashboard-grid{grid-template-columns:minmax(0,1fr) 320px}.chart{min-height:225px}.kpi-value{font-size:33px}.page-heading{margin-bottom:30px}.sidebar{width:258px;min-width:258px}.main-shell{margin-left:258px;width:calc(100% - 258px)}}
++@media(max-width:1200px){.sidebar{width:208px;min-width:208px;padding:28px 14px 18px}.main-shell{margin-left:208px;width:calc(100% - 208px)}.brand{font-size:20px}.brand small{font-size:7px}.topbar{padding:0 24px}main{padding:26px 24px 15px}.dashboard-grid{grid-template-columns:minmax(0,1fr) 240px;gap:15px}.panel{padding:18px}.kpi{padding:16px 14px}.kpi-value{font-size:24px}.kpi-grid{gap:12px}.lab-grid{grid-template-columns:320px minmax(0,1fr)}.period-label{width:100%;margin-left:0}.insight-title{font-size:20px}.metric-triple{gap:8px}.model-bar-row{grid-template-columns:140px 1fr 70px}}
++@media(max-width:1020px){.dashboard-grid{grid-template-columns:1fr}.insight-panel{display:grid;grid-template-columns:1fr 170px;gap:0 20px}.insight-panel .eyebrow{grid-column:1}.insight-panel .insight-title{grid-column:1}.insight-panel p{grid-column:1}.insight-panel .wind-glyph{grid-column:2;grid-row:1/5;height:110px}.insight-panel .button{grid-column:1;margin-top:12px;justify-self:start}.kpi-grid{grid-template-columns:repeat(2,1fr)}.split-grid,.method-grid{grid-template-columns:1fr}.lab-grid{grid-template-columns:1fr}.lab-grid>div:first-child{display:grid;grid-template-columns:1fr 1fr;gap:18px;align-items:start}.lab-grid>div:first-child>.panel{height:100%}.lab-grid>div:first-child>.section-space{margin:0}.lab-grid>div:first-child>.panel:only-child{grid-column:1/-1}.heading-tag{display:none}.top-actions{gap:9px}.topbar{padding:0 20px}h1{font-size:32px}.model-bar-row{grid-template-columns:160px 1fr 80px}.chart{min-height:200px}}
++@media(max-width:760px){.app-shell{display:block}.sidebar{position:sticky;top:0;inset:auto;width:100%;min-width:0;height:auto;padding:10px 14px 0;border-right:0;border-bottom:1px solid var(--line);background:var(--sidebar)}.brand{font-size:20px;gap:5px}.brand-symbol{width:25px;height:30px}.brand small{font-size:6px;display:inline-block;margin-left:9px}.workspace-badge,.nav-label,.sidebar-bottom{display:none}nav{flex-direction:row;gap:4px;padding:8px 0 7px;overflow-x:auto;scrollbar-width:thin}nav a{flex-shrink:0;padding:7px 10px;font-size:10px;min-height:36px;gap:7px}nav a svg{height:14px;width:14px}.nav-index{display:none}.main-shell{margin-left:0;width:100%}.topbar{min-height:55px;padding:0 18px}.topbar .breadcrumb{font-size:10px}.top-actions{gap:7px}.badge.synthetic{font-size:8px;padding:3px 6px}.top-actions .button{font-size:0;min-width:34px;padding:6px}.top-actions .button svg{width:15px;height:15px}.icon-button{min-width:32px;min-height:32px}.top-actions .icon-button{display:none}main{padding:23px 18px 12px}.page-heading{margin-bottom:18px}h1{font-size:30px}.page-heading p{font-size:11px;margin-top:8px}.page-heading .eyebrow{font-size:8px}.filterbar{gap:10px;padding:12px 0}.field-inline{width:100%;justify-content:space-between}.field-inline select{width:73%;max-width:300px}.period-control{width:100%;justify-content:space-between}.period-control button{flex:1;font-size:10px}.period-label{font-size:9px}.kpi-grid{gap:10px;margin-bottom:15px}.kpi{padding:14px}.kpi-value{font-size:25px;letter-spacing:-.7px;margin:11px 0 7px}.kpi-label{font-size:9px}.kpi-sub{font-size:9px}.kpi-value small{font-size:9px}.dashboard-grid,.split-grid{gap:15px;margin-bottom:15px}.panel{padding:17px;border-radius:12px}.panel-header{margin-bottom:13px;gap:10px}.panel-header h2{font-size:14px}.panel-header p{font-size:9px}.panel-header:has(.chart-toolbar){flex-wrap:wrap}.chart-toolbar button{padding:4px 9px}.chart-note{font-size:8px;flex-wrap:wrap}.chart{min-height:130px}.chart-summary{font-size:9px}.legend{font-size:9px;gap:11px;margin-bottom:10px}.insight-panel{grid-template-columns:1fr 95px;gap:0 10px}.insight-title{font-size:20px}.insight-panel .wind-glyph{height:120px}.insight-panel p{font-size:10px}.workspace-footer{font-size:8px;flex-wrap:wrap;margin-top:21px;padding-top:15px;gap:8px}.lab-grid>div:first-child{display:flex;flex-direction:column}.lab-grid>div:first-child>.panel{width:100%}.lab-grid{gap:15px}.result-value{font-size:40px}.result-side strong{font-size:16px}.metric-triple strong{font-size:16px}.notice{font-size:10px}.model-bar-row{grid-template-columns:115px 1fr 65px;font-size:9px;gap:9px}.model-bar-row strong{font-size:10px}.data-quality-grid{grid-template-columns:1fr 1fr;gap:10px}.data-quality-grid .kpi:last-child{grid-column:1/-1}.table-controls{gap:10px}.table-controls input{min-width:0;width:100%}.pagination{font-size:9px}.date-fields{flex-wrap:wrap;gap:8px}.date-fields input{font-size:10px}.table-wrap td{font-size:10px}.site-card{display:none}}
++@media(prefers-reduced-motion:reduce){*,*::before,*::after{animation:none!important;transition:none!important;scroll-behavior:auto!important}}
++@media print{.sidebar,.topbar,.filterbar,.workspace-footer,.button,.toast,dialog{display:none!important}.main-shell{margin:0;width:100%}:root{--bg:#fff;--surface:#fff;--raised:#eee;--line:#aaa;--text:#111;--muted:#333;--accent:#005541;--cyan:#005580;--gold:#705000;--grid:#ddd}body{background:#fff}main{padding:0}.panel,.kpi{break-inside:avoid;box-shadow:none}.dashboard-grid,.split-grid{grid-template-columns:1fr}.page-heading p{color:#222}}
++
++/* Dash patterns retain chart distinction without relying on hue. */
++.line-b {stroke-dasharray: 7 3;}
++.line-c {stroke-dasharray: 2 3;}
++@media (max-width:760px){.top-actions{gap:6px}.topbar{padding-inline:16px}.top-actions .synthetic{font-size:9px}}
++@media (max-width:760px){.top-actions .icon-button{display:flex}}
++@media (max-width:500px){.topbar{flex-wrap:wrap;gap:7px;padding:9px 16px}.topbar .breadcrumb{width:100%}.top-actions{width:100%;justify-content:flex-end}.top-actions .synthetic{margin-right:auto}}
++
++@media(max-width:760px){.chart text{font-size:18px}.chart{min-height:150px}}
+--- /dev/null
++++ b/start-python.sh
+@@ -0,0 +1,11 @@
++#!/usr/bin/env sh
++set -eu
++cd "$(CDPATH= cd -- "$(dirname -- "$0")" && pwd)"
++if [ ! -x .venv-champion/bin/python ]; then
++  python3 -c 'import sys; assert sys.version_info >= (3,11), "Python 3.11 or newer is required"'
++  python3 -m venv .venv-champion
++fi
++if ! .venv-champion/bin/python -c 'import zephyrtrade.app' >/dev/null 2>&1; then
++  .venv-champion/bin/python -m pip install -e .
++fi
++exec .venv-champion/bin/python -m zephyrtrade.app "$@"
+--- /dev/null
++++ b/tests/browser/engine.test.cjs
+@@ -0,0 +1,57 @@
++const test = require('node:test');
++const assert = require('node:assert/strict');
++const E = require('../../src/zephyrtrade/web/engine.js');
++const base = {capacity:30,da:400,up:600,down:200,hours:1,scenarios:[2,8,20],probabilities:[.2,.5,.3]};
++const close = (a,b) => assert.ok(Math.abs(a-b)<1e-7,`${a} != ${b}`);
++
++test('surplus, shortfall and interval settlement are explicit',()=>{
++ close(E.revenue(8,2,400,600,200),-400);
++ close(E.revenue(8,20,400,600,200,.5),2800);
++});
++test('weighted quantile agrees with every piecewise breakpoint',()=>{
++ const r=E.optimize(base);close(r.offer,8);r.curve.forEach(p=>assert.ok(p.revenue<=r.expected+1e-7));
++ close(r.expected,.2*(-400)+.5*3200+.3*5600);
++});
++test('duration scales objective, not offer',()=>{
++ const a=E.optimize(base),b=E.optimize({...base,hours:.25});close(a.offer,b.offer);close(a.expected*.25,b.expected);
++});
++test('quantile endpoints and floating-point rows do not wrap',()=>{
++ close(E.optimize({...base,da:600,probabilities:[.2,.3,.49999999]}).offer,20);
++ close(E.optimize({...base,da:200}).offer,2);
++});
++test('zero-probability scenarios are not quantile support',()=>{
++ close(E.optimize({...base,da:200,probabilities:[0,1,0]}).offer,8);
++});
++test('negative prices are supported under ordered assumptions',()=>{
++ const r=E.optimize({...base,da:-100,up:0,down:-200});r.curve.forEach(p=>assert.ok(p.revenue<=r.expected+1e-7));
++});
++test('invalid prices, capacities and probabilities are rejected',()=>{
++ for(const patch of [{capacity:NaN},{hours:0},{up:10},{scenarios:[-1]},{scenarios:[31]},
++ {probabilities:[1.2,-.5,.3]},{probabilities:[0,0,0]},{scenarios:[]},{probabilities:[1]},
++ {scenarios:Array(101).fill(1)}])assert.throws(()=>E.optimize({...base,...patch}));
++});
++test('zero-oracle capture and one-observation R2 are undefined',()=>{
++ const r=E.statistics([0],[0],[400],[600],[200]);assert.equal(r.capture,null);assert.equal(r.r2,null);close(r.total,0);
++});
++test('revenue statistics respect units and mean absolute error',()=>{
++ const r=E.statistics([2,8],[3,6],[400,400],[600,600],[200,200],.5);
++ close(r.mae,1.5);close(r.imbalance,1.5);close(r.rmse,Math.sqrt(2.5));close(r.oracle,2000);
++});
++test('CSV quotes and formula-neutralises text, not negative numbers',()=>{
++ assert.equal(E.csvCell('=SUM(A1)'),"'=SUM(A1)");assert.equal(E.csvCell(-20),'-20');
++ assert.equal(E.csvCell('a,"b"'),'"a,""b"""');
++});
++test('scenario parser accepts documented separators and rejects bad input',()=>{
++ assert.deepEqual(E.parseNumbers('1, 2;3\n4'),[1,2,3,4]);assert.deepEqual(E.parseNumbers(''),[]);
++ assert.throws(()=>E.parseNumbers('1,NaN'));assert.throws(()=>E.parseNumbers('1,word'));
++});
++test('statistics reject mismatched and nonfinite inputs',()=>{
++ assert.throws(()=>E.statistics([],[],[],[],[]));assert.throws(()=>E.statistics([1],[NaN],[1],[2],[0]));
++});
++
++test('malformed or mismatched Python results cannot produce a passed cross-check',()=>{
++ for(const bad of [null,{}, {offer_mw:8}, {offer_mw:NaN,expected_revenue_dkk:3200},
++  {offer_mw:31,expected_revenue_dkk:3200}, {offer_mw:8,expected_revenue_dkk:0}])
++  assert.throws(()=>E.verifyLPResult(bad,3200,30));
++ assert.equal(E.verifyLPResult({offer_mw:8,expected_revenue_dkk:3200},3200,30),true);
++});
+--- /dev/null
++++ b/tests/test_app.py
+@@ -0,0 +1,135 @@
++"""Local HTTP boundary and real SciPy solver integration tests."""
++
++import http.client
++import json
++from threading import Thread
++
++import pytest
++
++from zephyrtrade.app import LocalServer, optimize_payload
++
++
++@pytest.fixture(scope="module")
++def server():
++    service = LocalServer(0)
++    worker = Thread(target=service.serve_forever, daemon=True)
++    worker.start()
++    yield service
++    service.shutdown()
++    service.server_close()
++    worker.join(timeout=5)
++
++
++def request(server, method="GET", path="/api/health", body=None, headers=None):
++    connection = http.client.HTTPConnection("127.0.0.1", server.server_port, timeout=5)
++    connection.request(method, path, body, headers or {})
++    response = connection.getresponse()
++    result = response.status, dict(response.getheaders()), response.read()
++    connection.close()
++    return result
++
++
++def assumptions():
++    return {"capacity": 30, "hours": 1, "da": 400, "up": 600, "down": 200,
++            "scenarios": [2, 8, 20], "probabilities": [0.2, 0.5, 0.3]}
++
++
++def test_health_and_loopback_binding(server):
++    status, headers, body = request(server)
++    assert status == 200
++    assert json.loads(body)["service"] == "zephyrtrade-local"
++    assert server.server_address[0] == "127.0.0.1"
++    assert headers["Cache-Control"] == "no-store"
++    assert "frame-ancestors 'none'" in headers["Content-Security-Policy"]
++    assert "Access-Control-Allow-Origin" not in headers
++
++
++@pytest.mark.parametrize("path", ["/", "/styles.css", "/app.js", "/engine.js", "/snapshot.js"])
++def test_packaged_assets(server, path):
++    status, headers, body = request(server, path=path)
++    assert status == 200
++    assert len(body) > 100
++    assert headers["X-Content-Type-Options"] == "nosniff"
++
++
++@pytest.mark.parametrize("path", ["/../pyproject.toml", "/%2e%2e/LICENSE", "/data/raw/provenance.json", "/secret", "/artifacts/model.joblib"])
++def test_filesystem_not_exposed(server, path):
++    assert request(server, path=path)[0] == 404
++
++
++def test_head_has_no_body(server):
++    status, headers, body = request(server, method="HEAD", path="/")
++    assert status == 200 and len(body) == 0
++    assert int(headers["Content-Length"]) > 100
++
++
++def test_rebinding_host_is_rejected(server):
++    assert request(server, headers={"Host": "attacker.example"})[0] == 403
++
++
++@pytest.mark.parametrize("origin", ["null", "https://attacker.example", "http://localhost:1"])
++def test_cross_origin_posts_rejected(server, origin):
++    assert request(server, "POST", "/api/optimize", json.dumps(assumptions()),
++                   {"Content-Type": "application/json", "Origin": origin})[0] == 403
++
++
++def test_real_http_solver_and_duration(server):
++    payload = assumptions()
++    payload["hours"] = 0.5
++    status, headers, body = request(server, "POST", "/api/optimize", json.dumps(payload),
++        {"Content-Type": "application/json", "Origin": f"http://127.0.0.1:{server.server_port}"})
++    assert status == 200
++    result = json.loads(body)
++    # At offer 8, a 6 MW shortfall costs 6 * 600 = 3600 DKK.
++    expected = (0.2 * (-400) + 0.5 * 3200 + 0.3 * 5600) * 0.5
++    assert result["offer_mw"] == pytest.approx(8)
++    assert result["expected_revenue_dkk"] == pytest.approx(expected)
++    assert result["data_kind"] == "user_assumptions_not_live"
++
++
++@pytest.mark.parametrize("body", ["{", '{"capacity":NaN}', '{"da":1,"da":2}', '"text"', "null", "[]"])
++def test_bad_json_is_truthful_client_error(server, body):
++    status, headers, response = request(server, "POST", "/api/optimize", body,
++                                      {"Content-Type": "application/json"})
++    assert status == 400
++    assert "error" in json.loads(response)
++    assert b"Traceback" not in response
++
++
++def test_wrong_media_type_and_oversize(server):
++    assert request(server, "POST", "/api/optimize", "x", {"Content-Type": "text/plain"})[0] == 415
++    assert request(server, "POST", "/api/optimize", "x" * 32769,
++                   {"Content-Type": "application/json"})[0] == 413
++
++
++def test_busy_solver_returns_recoverable_failure(server):
++    with server.solver:
++        result = request(server, "POST", "/api/optimize", json.dumps(assumptions()),
++                         {"Content-Type": "application/json"})
++    assert result[0] == 503
++    assert b"retained" in result[2]
++    assert request(server)[0] == 200
++
++
++@pytest.mark.parametrize("key,value", [
++    ("capacity", True), ("capacity", 0), ("capacity", "30"),
++    ("hours", float("inf")), ("up", 100), ("down", 700),
++    ("scenarios", []), ("scenarios", [31]), ("scenarios", [float("nan")]),
++    ("probabilities", [-0.2, 0.9, 0.3]), ("probabilities", [1]),
++    ("probabilities", [0, 0, 0]), ("probabilities", "abc")])
++def test_payload_validation(key, value):
++    payload = assumptions()
++    payload[key] = value
++    with pytest.raises(ValueError):
++        optimize_payload(payload)
++
++
++def test_small_probability_rounding_is_normalized():
++    payload = assumptions()
++    payload.update(scenarios=[7], probabilities=[1.00000001])
++    assert optimize_payload(payload)["offer_mw"] == pytest.approx(7)
++
++
++def test_unknown_fields_rejected():
++    with pytest.raises(ValueError, match="unsupported"):
++        optimize_payload({**assumptions(), "execute_order": True})
+--- /dev/null
++++ b/tests/test_repair_regressions.py
+@@ -0,0 +1,71 @@
++"""Regression checks for defects identified in the supplied source."""
++import numpy as np
++import pytest
++from zephyrtrade.evaluate import realized_market_revenue, revenue_metrics, regression_metrics
++from zephyrtrade.optimize import expected_scenario_revenue, solve_single_period_offer_lp
++from zephyrtrade.direct import probability_quantile_classes, CapacityBracketEncoder
++
++
++def market_args():
++    return dict(offer_mw=np.array([0., 0.]), actual_power_mw=np.array([0., 0.]),
++                day_ahead_price_dkk_mwh=np.array([400., 400.]),
++                up_regulation_price_dkk_mwh=np.array([600., 600.]),
++                down_regulation_price_dkk_mwh=np.array([300., 300.]))
++
++
++def test_zero_generation_has_undefined_capture_not_crash():
++    result = revenue_metrics(**market_args())
++    assert result['total_revenue_dkk'] == 0
++    assert result['revenue_capture_pct'] is None
++
++
++@pytest.mark.parametrize('duration', [float('nan'), float('inf'), -1, 0])
++def test_duration_must_be_finite_positive(duration):
++    with pytest.raises(ValueError):
++        realized_market_revenue(**market_args(), interval_hours=duration)
++
++
++def test_single_interval_r2_is_explicitly_undefined():
++    result = regression_metrics(np.array([3.]), np.array([4.]))
++    assert result['rmse_mw'] == 1
++    assert result['r2'] is None
++
++
++@pytest.mark.parametrize('probabilities', [np.array([1.2, -.2]), np.array([-.5, 1.5])])
++def test_expected_revenue_rejects_negative_probability(probabilities):
++    with pytest.raises(ValueError, match='nonnegative'):
++        expected_scenario_revenue(5., np.array([2., 8.]), probabilities, 400., 600., 300.)
++
++
++@pytest.mark.parametrize('offer', [float('nan'), float('inf'), -1])
++def test_expected_revenue_rejects_invalid_offer(offer):
++    with pytest.raises(ValueError, match='offer'):
++        expected_scenario_revenue(offer, np.array([2., 8.]), np.array([.5, .5]), 400., 600., 300.)
++
++
++def test_expected_revenue_rejects_invalid_price_order():
++    with pytest.raises(ValueError, match='down-regulation'):
++        expected_scenario_revenue(5., np.array([2., 8.]), np.array([.5, .5]), 400., 300., 500.)
++
++
++@pytest.mark.parametrize('capacity', [float('nan'), float('inf')])
++def test_lp_rejects_nonfinite_capacity_at_boundary(capacity):
++    with pytest.raises(ValueError):
++        solve_single_period_offer_lp(np.array([2., 8.]), np.array([.5, .5]), 400., 600., 300., capacity)
++
++
++def test_quantile_one_cannot_wrap_to_lowest_class():
++    result = probability_quantile_classes(np.array([[.2, .3, .49999999]]), np.array([0, 1, 2]), 1.)
++    assert result.tolist() == [2]
++
++
++@pytest.mark.parametrize('classes', [np.array([0, 0]), np.array([-1, 1])])
++def test_probability_classes_are_unique_nonnegative(classes):
++    with pytest.raises(ValueError, match='unique and nonnegative'):
++        probability_quantile_classes(np.array([[.5, .5]]), classes, .5)
++
++
++@pytest.mark.parametrize('capacity', [float('nan'), 0, -1])
++def test_encoder_transform_validates_capacity_before_fit(capacity):
++    with pytest.raises(ValueError):
++        CapacityBracketEncoder(3, capacity).transform(np.array([0.]))
+--- /dev/null
++++ b/tests/test_snapshot.py
+@@ -0,0 +1,55 @@
++"""The compiled observation snapshot must reject misleading source artifacts."""
++import runpy
++import shutil
++from pathlib import Path
++
++import numpy as np
++import pandas as pd
++import pytest
++
++ROOT = Path(__file__).resolve().parents[1]
++make_snapshot = runpy.run_path(str(ROOT / "scripts/build_app.py"))["make_snapshot"]
++
++
++@pytest.fixture
++def source(tmp_path):
++    for relative in ["artifacts/phase2/test_predictions.csv.gz",
++                     "artifacts/phase3/test_direct_predictions.csv.gz",
++                     "data/raw/provenance.json", "data/raw/farm_metadata.csv"]:
++        target = tmp_path / relative
++        target.parent.mkdir(parents=True, exist_ok=True)
++        shutil.copy2(ROOT / relative, target)
++    return tmp_path
++
++
++def test_snapshot_reconciles_all_models():
++    snap = make_snapshot(ROOT)
++    assert snap["quality"]["revenue_values_checked"] == 34992
++    assert len(snap["models"]) == 9
++    assert snap["quality"]["maximum_revenue_error_dkk"] < 1e-7
++
++
++@pytest.mark.parametrize("defect", ["nan_saved_direct_revenue", "varying_capacity",
++                                   "bad_price_order", "duplicate_time", "wrong_metadata"])
++def test_snapshot_refuses_invalid_or_mislabelled_sources(source, defect):
++    paths = [source / "artifacts/phase2/test_predictions.csv.gz",
++             source / "artifacts/phase3/test_direct_predictions.csv.gz"]
++    frames = [pd.read_csv(p) for p in paths]
++    if defect == "nan_saved_direct_revenue":
++        frames[1].loc[0, "direct_regression_revenue_dkk"] = np.nan
++    elif defect == "wrong_metadata":
++        metadata = pd.read_csv(source / "data/raw/farm_metadata.csv")
++        metadata.loc[0, "capacity_mw"] = 31
++        metadata.to_csv(source / "data/raw/farm_metadata.csv", index=False)
++    else:
++        for frame in frames:
++            if defect == "varying_capacity":
++                frame.loc[0, "capacity_mw"] = 31
++            elif defect == "bad_price_order":
++                frame.loc[0, "up_reg_price_dkk_mwh"] = -100
++            elif defect == "duplicate_time":
++                frame.loc[0, "timestamp_utc"] = frame.loc[1, "timestamp_utc"]
++    for path, frame in zip(paths, frames, strict=True):
++        frame.to_csv(path, index=False)
++    with pytest.raises(ValueError):
++        make_snapshot(source)

@@ -1,0 +1,7 @@
+{
+  "status": "PASS",
+  "seed": 42,
+  "cases": 120,
+  "maximum_objective_difference_dkk": 1.1641532182693481e-10,
+  "comparison": "Browser module in Node vs actual SciPy LP; equal-objective offer ties permitted"
+}

@@ -1,0 +1,647 @@
+FFFFFFFFFFFFFFFFFFFF                                                     [100%]
+=================================== FAILURES ===================================
+_____________ test_zero_generation_has_undefined_capture_not_crash _____________
+
+    def test_zero_generation_has_undefined_capture_not_crash():
+>       result = revenue_metrics(**market_args())
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+../test_repair_regressions.py:17: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+offer_mw = array([0., 0.]), actual_power_mw = array([0., 0.])
+day_ahead_price_dkk_mwh = array([400., 400.])
+up_regulation_price_dkk_mwh = array([600., 600.])
+down_regulation_price_dkk_mwh = array([300., 300.]), interval_hours = 1.0
+
+    def revenue_metrics(
+        offer_mw: np.ndarray,
+        actual_power_mw: np.ndarray,
+        day_ahead_price_dkk_mwh: np.ndarray,
+        up_regulation_price_dkk_mwh: np.ndarray,
+        down_regulation_price_dkk_mwh: np.ndarray,
+        interval_hours: float = 1.0,
+    ) -> dict[str, Any]:
+        """Summarize realized revenue, imbalance, and perfect-foresight regret."""
+        values = _aligned_vectors(
+            offer_mw=offer_mw,
+            actual_power_mw=actual_power_mw,
+            day_ahead_price=day_ahead_price_dkk_mwh,
+            up_regulation_price=up_regulation_price_dkk_mwh,
+            down_regulation_price=down_regulation_price_dkk_mwh,
+        )
+        interval_revenue = realized_market_revenue(
+            values["offer_mw"],
+            values["actual_power_mw"],
+            values["day_ahead_price"],
+            values["up_regulation_price"],
+            values["down_regulation_price"],
+            interval_hours=interval_hours,
+        )
+        oracle_revenue = (
+            interval_hours * values["day_ahead_price"] * values["actual_power_mw"]
+        )
+        total_revenue = float(interval_revenue.sum())
+        total_oracle = float(oracle_revenue.sum())
+        imbalance = values["actual_power_mw"] - values["offer_mw"]
+        return {
+            "total_revenue_dkk": total_revenue,
+            "mean_revenue_dkk_per_interval": float(interval_revenue.mean()),
+            "perfect_foresight_revenue_dkk": total_oracle,
+>           "revenue_capture_pct": 100.0 * total_revenue / total_oracle,
+                                   ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+            "revenue_regret_dkk": total_oracle - total_revenue,
+            "mean_offer_mw": float(values["offer_mw"].mean()),
+            "mean_signed_imbalance_mw": float(imbalance.mean()),
+            "total_absolute_imbalance_mwh": float(interval_hours * np.abs(imbalance).sum()),
+            "interval_revenue_dkk": interval_revenue,
+        }
+E       ZeroDivisionError: float division by zero
+
+src/zephyrtrade/evaluate.py:105: ZeroDivisionError
+__________________ test_duration_must_be_finite_positive[nan] __________________
+
+duration = nan
+
+    @pytest.mark.parametrize('duration', [float('nan'), float('inf'), -1, 0])
+    def test_duration_must_be_finite_positive(duration):
+>       with pytest.raises(ValueError, match='finite and positive'):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE <class 'ValueError'>
+
+../test_repair_regressions.py:24: Failed
+__________________ test_duration_must_be_finite_positive[inf] __________________
+
+duration = inf
+
+    @pytest.mark.parametrize('duration', [float('nan'), float('inf'), -1, 0])
+    def test_duration_must_be_finite_positive(duration):
+        with pytest.raises(ValueError, match='finite and positive'):
+>           realized_market_revenue(**market_args(), interval_hours=duration)
+
+../test_repair_regressions.py:25: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+offer_mw = array([0., 0.]), actual_power_mw = array([0., 0.])
+day_ahead_price_dkk_mwh = array([400., 400.])
+up_regulation_price_dkk_mwh = array([600., 600.])
+down_regulation_price_dkk_mwh = array([300., 300.]), interval_hours = inf
+
+    def realized_market_revenue(
+        offer_mw: np.ndarray,
+        actual_power_mw: np.ndarray,
+        day_ahead_price_dkk_mwh: np.ndarray,
+        up_regulation_price_dkk_mwh: np.ndarray,
+        down_regulation_price_dkk_mwh: np.ndarray,
+        interval_hours: float = 1.0,
+    ) -> np.ndarray:
+        """Calculate realized day-ahead plus two-price imbalance revenue by interval."""
+        if interval_hours <= 0.0:
+            raise ValueError("interval_hours must be positive.")
+        values = _aligned_vectors(
+            offer_mw=offer_mw,
+            actual_power_mw=actual_power_mw,
+            day_ahead_price=day_ahead_price_dkk_mwh,
+            up_regulation_price=up_regulation_price_dkk_mwh,
+            down_regulation_price=down_regulation_price_dkk_mwh,
+        )
+        offer = values["offer_mw"]
+        actual = values["actual_power_mw"]
+        surplus = np.maximum(actual - offer, 0.0)
+        shortfall = np.maximum(offer - actual, 0.0)
+>       return interval_hours * (
+            values["day_ahead_price"] * offer
+            + values["down_regulation_price"] * surplus
+            - values["up_regulation_price"] * shortfall
+        )
+E       RuntimeWarning: invalid value encountered in multiply
+
+src/zephyrtrade/evaluate.py:64: RuntimeWarning
+__________________ test_duration_must_be_finite_positive[-1] ___________________
+
+duration = -1
+
+    @pytest.mark.parametrize('duration', [float('nan'), float('inf'), -1, 0])
+    def test_duration_must_be_finite_positive(duration):
+        with pytest.raises(ValueError, match='finite and positive'):
+>           realized_market_revenue(**market_args(), interval_hours=duration)
+
+../test_repair_regressions.py:25: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+offer_mw = array([0., 0.]), actual_power_mw = array([0., 0.])
+day_ahead_price_dkk_mwh = array([400., 400.])
+up_regulation_price_dkk_mwh = array([600., 600.])
+down_regulation_price_dkk_mwh = array([300., 300.]), interval_hours = -1
+
+    def realized_market_revenue(
+        offer_mw: np.ndarray,
+        actual_power_mw: np.ndarray,
+        day_ahead_price_dkk_mwh: np.ndarray,
+        up_regulation_price_dkk_mwh: np.ndarray,
+        down_regulation_price_dkk_mwh: np.ndarray,
+        interval_hours: float = 1.0,
+    ) -> np.ndarray:
+        """Calculate realized day-ahead plus two-price imbalance revenue by interval."""
+        if interval_hours <= 0.0:
+>           raise ValueError("interval_hours must be positive.")
+E           ValueError: interval_hours must be positive.
+
+src/zephyrtrade/evaluate.py:52: ValueError
+
+During handling of the above exception, another exception occurred:
+
+duration = -1
+
+    @pytest.mark.parametrize('duration', [float('nan'), float('inf'), -1, 0])
+    def test_duration_must_be_finite_positive(duration):
+>       with pytest.raises(ValueError, match='finite and positive'):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       AssertionError: Regex pattern did not match.
+E         Expected regex: 'finite and positive'
+E         Actual message: 'interval_hours must be positive.'
+
+../test_repair_regressions.py:24: AssertionError
+___________________ test_duration_must_be_finite_positive[0] ___________________
+
+duration = 0
+
+    @pytest.mark.parametrize('duration', [float('nan'), float('inf'), -1, 0])
+    def test_duration_must_be_finite_positive(duration):
+        with pytest.raises(ValueError, match='finite and positive'):
+>           realized_market_revenue(**market_args(), interval_hours=duration)
+
+../test_repair_regressions.py:25: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+offer_mw = array([0., 0.]), actual_power_mw = array([0., 0.])
+day_ahead_price_dkk_mwh = array([400., 400.])
+up_regulation_price_dkk_mwh = array([600., 600.])
+down_regulation_price_dkk_mwh = array([300., 300.]), interval_hours = 0
+
+    def realized_market_revenue(
+        offer_mw: np.ndarray,
+        actual_power_mw: np.ndarray,
+        day_ahead_price_dkk_mwh: np.ndarray,
+        up_regulation_price_dkk_mwh: np.ndarray,
+        down_regulation_price_dkk_mwh: np.ndarray,
+        interval_hours: float = 1.0,
+    ) -> np.ndarray:
+        """Calculate realized day-ahead plus two-price imbalance revenue by interval."""
+        if interval_hours <= 0.0:
+>           raise ValueError("interval_hours must be positive.")
+E           ValueError: interval_hours must be positive.
+
+src/zephyrtrade/evaluate.py:52: ValueError
+
+During handling of the above exception, another exception occurred:
+
+duration = 0
+
+    @pytest.mark.parametrize('duration', [float('nan'), float('inf'), -1, 0])
+    def test_duration_must_be_finite_positive(duration):
+>       with pytest.raises(ValueError, match='finite and positive'):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       AssertionError: Regex pattern did not match.
+E         Expected regex: 'finite and positive'
+E         Actual message: 'interval_hours must be positive.'
+
+../test_repair_regressions.py:24: AssertionError
+_______________ test_single_interval_r2_is_explicitly_undefined ________________
+
+    def test_single_interval_r2_is_explicitly_undefined():
+>       result = regression_metrics(np.array([3.]), np.array([4.]))
+                 ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+
+../test_repair_regressions.py:29: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+src/zephyrtrade/evaluate.py:38: in regression_metrics
+    "r2": float(r2_score(actual, predicted)),
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^
+/opt/pyvenv/lib/python3.13/site-packages/sklearn/utils/_param_validation.py:218: in wrapper
+    return func(*args, **kwargs)
+           ^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+y_true = array([[3.]]), y_pred = array([[4.]])
+
+    @validate_params(
+        {
+            "y_true": ["array-like"],
+            "y_pred": ["array-like"],
+            "sample_weight": ["array-like", None],
+            "multioutput": [
+                StrOptions({"raw_values", "uniform_average", "variance_weighted"}),
+                "array-like",
+                None,
+            ],
+            "force_finite": ["boolean"],
+        },
+        prefer_skip_nested_validation=True,
+    )
+    def r2_score(
+        y_true,
+        y_pred,
+        *,
+        sample_weight=None,
+        multioutput="uniform_average",
+        force_finite=True,
+    ):
+        """:math:`R^2` (coefficient of determination) regression score function.
+    
+        Best possible score is 1.0 and it can be negative (because the
+        model can be arbitrarily worse). In the general case when the true y is
+        non-constant, a constant model that always predicts the average y
+        disregarding the input features would get a :math:`R^2` score of 0.0.
+    
+        In the particular case when ``y_true`` is constant, the :math:`R^2` score
+        is not finite: it is either ``NaN`` (perfect predictions) or ``-Inf``
+        (imperfect predictions). To prevent such non-finite numbers to pollute
+        higher-level experiments such as a grid search cross-validation, by default
+        these cases are replaced with 1.0 (perfect predictions) or 0.0 (imperfect
+        predictions) respectively. You can set ``force_finite`` to ``False`` to
+        prevent this fix from happening.
+    
+        Note: when the prediction residuals have zero mean, the :math:`R^2` score
+        is identical to the
+        :func:`Explained Variance score <explained_variance_score>`.
+    
+        Read more in the :ref:`User Guide <r2_score>`.
+    
+        Parameters
+        ----------
+        y_true : array-like of shape (n_samples,) or (n_samples, n_outputs)
+            Ground truth (correct) target values.
+    
+        y_pred : array-like of shape (n_samples,) or (n_samples, n_outputs)
+            Estimated target values.
+    
+        sample_weight : array-like of shape (n_samples,), default=None
+            Sample weights.
+    
+        multioutput : {'raw_values', 'uniform_average', 'variance_weighted'}, \
+                array-like of shape (n_outputs,) or None, default='uniform_average'
+    
+            Defines aggregating of multiple output scores.
+            Array-like value defines weights used to average scores.
+            Default is "uniform_average".
+    
+            'raw_values' :
+                Returns a full set of scores in case of multioutput input.
+    
+            'uniform_average' :
+                Scores of all outputs are averaged with uniform weight.
+    
+            'variance_weighted' :
+                Scores of all outputs are averaged, weighted by the variances
+                of each individual output.
+    
+            .. versionchanged:: 0.19
+                Default value of multioutput is 'uniform_average'.
+    
+        force_finite : bool, default=True
+            Flag indicating if ``NaN`` and ``-Inf`` scores resulting from constant
+            data should be replaced with real numbers (``1.0`` if prediction is
+            perfect, ``0.0`` otherwise). Default is ``True``, a convenient setting
+            for hyperparameters' search procedures (e.g. grid search
+            cross-validation).
+    
+            .. versionadded:: 1.1
+    
+        Returns
+        -------
+        z : float or ndarray of floats
+            The :math:`R^2` score or ndarray of scores if 'multioutput' is
+            'raw_values'.
+    
+        Notes
+        -----
+        This is not a symmetric function.
+    
+        Unlike most other scores, :math:`R^2` score may be negative (it need not
+        actually be the square of a quantity R).
+    
+        This metric is not well-defined for single samples and will return a NaN
+        value if n_samples is less than two.
+    
+        References
+        ----------
+        .. [1] `Wikipedia entry on the Coefficient of determination
+                <https://en.wikipedia.org/wiki/Coefficient_of_determination>`_
+    
+        Examples
+        --------
+        >>> from sklearn.metrics import r2_score
+        >>> y_true = [3, -0.5, 2, 7]
+        >>> y_pred = [2.5, 0.0, 2, 8]
+        >>> r2_score(y_true, y_pred)
+        0.948...
+        >>> y_true = [[0.5, 1], [-1, 1], [7, -6]]
+        >>> y_pred = [[0, 2], [-1, 2], [8, -5]]
+        >>> r2_score(y_true, y_pred,
+        ...          multioutput='variance_weighted')
+        0.938...
+        >>> y_true = [1, 2, 3]
+        >>> y_pred = [1, 2, 3]
+        >>> r2_score(y_true, y_pred)
+        1.0
+        >>> y_true = [1, 2, 3]
+        >>> y_pred = [2, 2, 2]
+        >>> r2_score(y_true, y_pred)
+        0.0
+        >>> y_true = [1, 2, 3]
+        >>> y_pred = [3, 2, 1]
+        >>> r2_score(y_true, y_pred)
+        -3.0
+        >>> y_true = [-2, -2, -2]
+        >>> y_pred = [-2, -2, -2]
+        >>> r2_score(y_true, y_pred)
+        1.0
+        >>> r2_score(y_true, y_pred, force_finite=False)
+        nan
+        >>> y_true = [-2, -2, -2]
+        >>> y_pred = [-2, -2, -2 + 1e-8]
+        >>> r2_score(y_true, y_pred)
+        0.0
+        >>> r2_score(y_true, y_pred, force_finite=False)
+        -inf
+        """
+        xp, _, device_ = get_namespace_and_device(
+            y_true, y_pred, sample_weight, multioutput
+        )
+    
+        _, y_true, y_pred, sample_weight, multioutput = (
+            _check_reg_targets_with_floating_dtype(
+                y_true, y_pred, sample_weight, multioutput, xp=xp
+            )
+        )
+    
+        if _num_samples(y_pred) < 2:
+            msg = "R^2 score is not well-defined with less than two samples."
+>           warnings.warn(msg, UndefinedMetricWarning)
+E           sklearn.exceptions.UndefinedMetricWarning: R^2 score is not well-defined with less than two samples.
+
+/opt/pyvenv/lib/python3.13/site-packages/sklearn/metrics/_regression.py:1288: UndefinedMetricWarning
+______ test_expected_revenue_rejects_negative_probability[probabilities0] ______
+
+probabilities = array([ 1.2, -0.2])
+
+    @pytest.mark.parametrize('probabilities', [np.array([1.2, -.2]), np.array([-.5, 1.5])])
+    def test_expected_revenue_rejects_negative_probability(probabilities):
+>       with pytest.raises(ValueError, match='nonnegative'):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE <class 'ValueError'>
+
+../test_repair_regressions.py:36: Failed
+______ test_expected_revenue_rejects_negative_probability[probabilities1] ______
+
+probabilities = array([-0.5,  1.5])
+
+    @pytest.mark.parametrize('probabilities', [np.array([1.2, -.2]), np.array([-.5, 1.5])])
+    def test_expected_revenue_rejects_negative_probability(probabilities):
+>       with pytest.raises(ValueError, match='nonnegative'):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE <class 'ValueError'>
+
+../test_repair_regressions.py:36: Failed
+_______________ test_expected_revenue_rejects_invalid_offer[nan] _______________
+
+offer = nan
+
+    @pytest.mark.parametrize('offer', [float('nan'), float('inf'), -1])
+    def test_expected_revenue_rejects_invalid_offer(offer):
+>       with pytest.raises(ValueError, match='offer'):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE <class 'ValueError'>
+
+../test_repair_regressions.py:42: Failed
+_______________ test_expected_revenue_rejects_invalid_offer[inf] _______________
+
+offer = inf
+
+    @pytest.mark.parametrize('offer', [float('nan'), float('inf'), -1])
+    def test_expected_revenue_rejects_invalid_offer(offer):
+        with pytest.raises(ValueError, match='offer'):
+>           expected_scenario_revenue(offer, np.array([2., 8.]), np.array([.5, .5]), 400., 600., 300.)
+
+../test_repair_regressions.py:43: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+offer_mw = inf, production_scenarios_mw = array([2., 8.])
+scenario_probabilities = array([0.5, 0.5]), day_ahead_price_dkk_mwh = 400.0
+up_regulation_price_dkk_mwh = 600.0, down_regulation_price_dkk_mwh = 300.0
+
+    def expected_scenario_revenue(
+        offer_mw: float,
+        production_scenarios_mw: np.ndarray,
+        scenario_probabilities: np.ndarray,
+        day_ahead_price_dkk_mwh: float,
+        up_regulation_price_dkk_mwh: float,
+        down_regulation_price_dkk_mwh: float,
+    ) -> float:
+        """Evaluate the expected objective value for a fixed offer and scenarios."""
+        scenarios = _as_finite_vector(
+            production_scenarios_mw,
+            "production_scenarios_mw",
+        )
+        probabilities = _as_finite_vector(
+            scenario_probabilities,
+            "scenario_probabilities",
+        )
+        if scenarios.size != probabilities.size or not np.isclose(
+            probabilities.sum(),
+            1.0,
+        ):
+            raise ValueError("Scenario probabilities must align and sum to one.")
+        surplus = np.maximum(scenarios - offer_mw, 0.0)
+        shortfall = np.maximum(offer_mw - scenarios, 0.0)
+        scenario_revenue = (
+>           day_ahead_price_dkk_mwh * offer_mw
+            + down_regulation_price_dkk_mwh * surplus
+            - up_regulation_price_dkk_mwh * shortfall
+        )
+E       RuntimeWarning: invalid value encountered in subtract
+
+src/zephyrtrade/optimize.py:238: RuntimeWarning
+_______________ test_expected_revenue_rejects_invalid_offer[-1] ________________
+
+offer = -1
+
+    @pytest.mark.parametrize('offer', [float('nan'), float('inf'), -1])
+    def test_expected_revenue_rejects_invalid_offer(offer):
+>       with pytest.raises(ValueError, match='offer'):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE <class 'ValueError'>
+
+../test_repair_regressions.py:42: Failed
+______________ test_expected_revenue_rejects_invalid_price_order _______________
+
+    def test_expected_revenue_rejects_invalid_price_order():
+>       with pytest.raises(ValueError, match='down-regulation'):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE <class 'ValueError'>
+
+../test_repair_regressions.py:47: Failed
+_____________ test_lp_rejects_nonfinite_capacity_at_boundary[nan] ______________
+
+capacity = nan
+
+    @pytest.mark.parametrize('capacity', [float('nan'), float('inf')])
+    def test_lp_rejects_nonfinite_capacity_at_boundary(capacity):
+>       with pytest.raises(ValueError, match='finite and positive'):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE <class 'ValueError'>
+
+../test_repair_regressions.py:53: Failed
+_____________ test_lp_rejects_nonfinite_capacity_at_boundary[inf] ______________
+
+capacity = inf
+
+    @pytest.mark.parametrize('capacity', [float('nan'), float('inf')])
+    def test_lp_rejects_nonfinite_capacity_at_boundary(capacity):
+>       with pytest.raises(ValueError, match='finite and positive'):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE <class 'ValueError'>
+
+../test_repair_regressions.py:53: Failed
+________________ test_quantile_one_cannot_wrap_to_lowest_class _________________
+
+    def test_quantile_one_cannot_wrap_to_lowest_class():
+        result = probability_quantile_classes(np.array([[.2, .3, .49999999]]), np.array([0, 1, 2]), 1.)
+>       assert result.tolist() == [2]
+E       assert [0] == [2]
+E         
+E         At index 0 diff: 0 != 2
+E         
+E         Full diff:
+E           [
+E         -     2,
+E         ?     ^
+E         +     0,
+E         ?     ^
+E           ]
+
+../test_repair_regressions.py:59: AssertionError
+__________ test_probability_classes_are_unique_nonnegative[classes0] ___________
+
+classes = array([0, 0])
+
+    @pytest.mark.parametrize('classes', [np.array([0, 0]), np.array([-1, 1])])
+    def test_probability_classes_are_unique_nonnegative(classes):
+>       with pytest.raises(ValueError, match='unique and nonnegative'):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE <class 'ValueError'>
+
+../test_repair_regressions.py:64: Failed
+__________ test_probability_classes_are_unique_nonnegative[classes1] ___________
+
+classes = array([-1,  1])
+
+    @pytest.mark.parametrize('classes', [np.array([0, 0]), np.array([-1, 1])])
+    def test_probability_classes_are_unique_nonnegative(classes):
+>       with pytest.raises(ValueError, match='unique and nonnegative'):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE <class 'ValueError'>
+
+../test_repair_regressions.py:64: Failed
+__________ test_encoder_transform_validates_capacity_before_fit[nan] ___________
+
+capacity = nan
+
+    @pytest.mark.parametrize('capacity', [float('nan'), 0, -1])
+    def test_encoder_transform_validates_capacity_before_fit(capacity):
+>       with pytest.raises(ValueError, match='finite and positive'):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE <class 'ValueError'>
+
+../test_repair_regressions.py:70: Failed
+___________ test_encoder_transform_validates_capacity_before_fit[0] ____________
+
+capacity = 0
+
+    @pytest.mark.parametrize('capacity', [float('nan'), 0, -1])
+    def test_encoder_transform_validates_capacity_before_fit(capacity):
+>       with pytest.raises(ValueError, match='finite and positive'):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       Failed: DID NOT RAISE <class 'ValueError'>
+
+../test_repair_regressions.py:70: Failed
+___________ test_encoder_transform_validates_capacity_before_fit[-1] ___________
+
+capacity = -1
+
+    @pytest.mark.parametrize('capacity', [float('nan'), 0, -1])
+    def test_encoder_transform_validates_capacity_before_fit(capacity):
+        with pytest.raises(ValueError, match='finite and positive'):
+>           CapacityBracketEncoder(3, capacity).transform(np.array([0.]))
+
+../test_repair_regressions.py:71: 
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+src/zephyrtrade/direct.py:52: in transform
+    target = self._validate_target(target_mw)
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+_ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ _ 
+
+self = CapacityBracketEncoder(n_brackets=3, capacity_mw=-1)
+target_mw = array([0.])
+
+    def _validate_target(self, target_mw: np.ndarray) -> np.ndarray:
+        """Validate targets against the physical offer interval."""
+        target = _finite_vector(target_mw, "target_mw")
+        if (target < 0.0).any() or (target > self.capacity_mw).any():
+>           raise ValueError("Targets must lie between zero and capacity_mw.")
+E           ValueError: Targets must lie between zero and capacity_mw.
+
+src/zephyrtrade/direct.py:76: ValueError
+
+During handling of the above exception, another exception occurred:
+
+capacity = -1
+
+    @pytest.mark.parametrize('capacity', [float('nan'), 0, -1])
+    def test_encoder_transform_validates_capacity_before_fit(capacity):
+>       with pytest.raises(ValueError, match='finite and positive'):
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+E       AssertionError: Regex pattern did not match.
+E         Expected regex: 'finite and positive'
+E         Actual message: 'Targets must lie between zero and capacity_mw.'
+
+../test_repair_regressions.py:70: AssertionError
+=========================== short test summary info ============================
+FAILED ../test_repair_regressions.py::test_zero_generation_has_undefined_capture_not_crash - ZeroDivisionError: float division by zero
+FAILED ../test_repair_regressions.py::test_duration_must_be_finite_positive[nan] - Failed: DID NOT RAISE <class 'ValueError'>
+FAILED ../test_repair_regressions.py::test_duration_must_be_finite_positive[inf] - RuntimeWarning: invalid value encountered in multiply
+FAILED ../test_repair_regressions.py::test_duration_must_be_finite_positive[-1] - AssertionError: Regex pattern did not match.
+  Expected regex: 'finite and positive'
+  Actual message: 'interval_hours must be positive.'
+FAILED ../test_repair_regressions.py::test_duration_must_be_finite_positive[0] - AssertionError: Regex pattern did not match.
+  Expected regex: 'finite and positive'
+  Actual message: 'interval_hours must be positive.'
+FAILED ../test_repair_regressions.py::test_single_interval_r2_is_explicitly_undefined - sklearn.exceptions.UndefinedMetricWarning: R^2 score is not well-defined with less than two samples.
+FAILED ../test_repair_regressions.py::test_expected_revenue_rejects_negative_probability[probabilities0] - Failed: DID NOT RAISE <class 'ValueError'>
+FAILED ../test_repair_regressions.py::test_expected_revenue_rejects_negative_probability[probabilities1] - Failed: DID NOT RAISE <class 'ValueError'>
+FAILED ../test_repair_regressions.py::test_expected_revenue_rejects_invalid_offer[nan] - Failed: DID NOT RAISE <class 'ValueError'>
+FAILED ../test_repair_regressions.py::test_expected_revenue_rejects_invalid_offer[inf] - RuntimeWarning: invalid value encountered in subtract
+FAILED ../test_repair_regressions.py::test_expected_revenue_rejects_invalid_offer[-1] - Failed: DID NOT RAISE <class 'ValueError'>
+FAILED ../test_repair_regressions.py::test_expected_revenue_rejects_invalid_price_order - Failed: DID NOT RAISE <class 'ValueError'>
+FAILED ../test_repair_regressions.py::test_lp_rejects_nonfinite_capacity_at_boundary[nan] - Failed: DID NOT RAISE <class 'ValueError'>
+FAILED ../test_repair_regressions.py::test_lp_rejects_nonfinite_capacity_at_boundary[inf] - Failed: DID NOT RAISE <class 'ValueError'>
+FAILED ../test_repair_regressions.py::test_quantile_one_cannot_wrap_to_lowest_class - assert [0] == [2]
+  
+  At index 0 diff: 0 != 2
+  
+  Full diff:
+    [
+  -     2,
+  ?     ^
+  +     0,
+  ?     ^
+    ]
+FAILED ../test_repair_regressions.py::test_probability_classes_are_unique_nonnegative[classes0] - Failed: DID NOT RAISE <class 'ValueError'>
+FAILED ../test_repair_regressions.py::test_probability_classes_are_unique_nonnegative[classes1] - Failed: DID NOT RAISE <class 'ValueError'>
+FAILED ../test_repair_regressions.py::test_encoder_transform_validates_capacity_before_fit[nan] - Failed: DID NOT RAISE <class 'ValueError'>
+FAILED ../test_repair_regressions.py::test_encoder_transform_validates_capacity_before_fit[0] - Failed: DID NOT RAISE <class 'ValueError'>
+FAILED ../test_repair_regressions.py::test_encoder_transform_validates_capacity_before_fit[-1] - AssertionError: Regex pattern did not match.
+  Expected regex: 'finite and positive'
+  Actual message: 'Targets must lie between zero and capacity_mw.'
+20 failed in 0.71s

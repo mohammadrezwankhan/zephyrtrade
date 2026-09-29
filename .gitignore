@@ -1,0 +1,33 @@
+# Python
+__pycache__/
+*.py[cod]
+*.egg-info/
+build/
+dist/
+.pytest_cache/
+.ruff_cache/
+.coverage
+htmlcov/
+.venv/
+
+# Generated datasets and artifacts
+data/raw/*.csv
+data/raw/*.csv.gz
+data/raw/*.json
+data/processed/*.csv
+data/processed/*.csv.gz
+data/processed/*.json
+data/processed/*.joblib
+artifacts/
+
+# Jupyter and editors
+.ipynb_checkpoints/
+.idea/
+.vscode/
+
+# Operating systems
+.DS_Store
+Thumbs.db
+
+.venv-champion/
+build/

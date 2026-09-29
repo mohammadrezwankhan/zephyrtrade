@@ -1,0 +1,33 @@
+Traceback (most recent call last):
+  File "/mnt/data/ZephyrTrade_Champion/scripts/check_browser.py", line 167, in <module>
+    expect(page.locator('#saved-list')).to_contain_text('not executable')
+    ~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~~^^^^^^^^^^^^^^^^^^
+  File "/opt/pyvenv/lib/python3.13/site-packages/playwright/sync_api/_generated.py", line 19319, in to_contain_text
+    self._sync(
+    ~~~~~~~~~~^
+        self._impl_obj.to_contain_text(
+        ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+    ...<4 lines>...
+        )
+        ^
+    )
+    ^
+  File "/opt/pyvenv/lib/python3.13/site-packages/playwright/_impl/_sync_base.py", line 115, in _sync
+    return task.result()
+           ~~~~~~~~~~~^^
+  File "/opt/pyvenv/lib/python3.13/site-packages/playwright/_impl/_assertions.py", line 229, in to_contain_text
+    await self._expect_impl(
+    ...<9 lines>...
+    )
+  File "/opt/pyvenv/lib/python3.13/site-packages/playwright/_impl/_assertions.py", line 85, in _expect_impl
+    raise AssertionError(
+        f"{out_message}\nActual value: {actual}{error_message} {format_call_log(result.get('log'))}"
+    )
+AssertionError: Locator expected to contain text 'not executable'
+Actual value: Your experiments belong here.Calculate an offer, then save the assumptions for another comparison. 
+Call log:
+  - Expect "to_contain_text" with timeout 5000ms
+  - waiting for locator("#saved-list")
+    9 × locator resolved to <div id="saved-list">…</div>
+      - unexpected value "Your experiments belong here.Calculate an offer, then save the assumptions for another comparison."
+

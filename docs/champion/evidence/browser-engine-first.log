@@ -1,0 +1,82 @@
+TAP version 13
+# Subtest: surplus, shortfall and interval settlement are explicit
+ok 1 - surplus, shortfall and interval settlement are explicit
+  ---
+  duration_ms: 1.325301
+  type: 'test'
+  ...
+# Subtest: weighted quantile agrees with every piecewise breakpoint
+ok 2 - weighted quantile agrees with every piecewise breakpoint
+  ---
+  duration_ms: 0.531923
+  type: 'test'
+  ...
+# Subtest: duration scales objective, not offer
+ok 3 - duration scales objective, not offer
+  ---
+  duration_ms: 0.233243
+  type: 'test'
+  ...
+# Subtest: quantile endpoints and floating-point rows do not wrap
+ok 4 - quantile endpoints and floating-point rows do not wrap
+  ---
+  duration_ms: 0.23069
+  type: 'test'
+  ...
+# Subtest: zero-probability scenarios are not quantile support
+ok 5 - zero-probability scenarios are not quantile support
+  ---
+  duration_ms: 0.288044
+  type: 'test'
+  ...
+# Subtest: negative prices are supported under ordered assumptions
+ok 6 - negative prices are supported under ordered assumptions
+  ---
+  duration_ms: 0.321343
+  type: 'test'
+  ...
+# Subtest: invalid prices, capacities and probabilities are rejected
+ok 7 - invalid prices, capacities and probabilities are rejected
+  ---
+  duration_ms: 0.560055
+  type: 'test'
+  ...
+# Subtest: zero-oracle capture and one-observation R2 are undefined
+ok 8 - zero-oracle capture and one-observation R2 are undefined
+  ---
+  duration_ms: 0.277939
+  type: 'test'
+  ...
+# Subtest: revenue statistics respect units and mean absolute error
+ok 9 - revenue statistics respect units and mean absolute error
+  ---
+  duration_ms: 0.483422
+  type: 'test'
+  ...
+# Subtest: CSV quotes and formula-neutralises text, not negative numbers
+ok 10 - CSV quotes and formula-neutralises text, not negative numbers
+  ---
+  duration_ms: 0.397996
+  type: 'test'
+  ...
+# Subtest: scenario parser accepts documented separators and rejects bad input
+ok 11 - scenario parser accepts documented separators and rejects bad input
+  ---
+  duration_ms: 0.960424
+  type: 'test'
+  ...
+# Subtest: statistics reject mismatched and nonfinite inputs
+ok 12 - statistics reject mismatched and nonfinite inputs
+  ---
+  duration_ms: 0.174126
+  type: 'test'
+  ...
+1..12
+# tests 12
+# suites 0
+# pass 12
+# fail 0
+# cancelled 0
+# skipped 0
+# todo 0
+# duration_ms 60.168011

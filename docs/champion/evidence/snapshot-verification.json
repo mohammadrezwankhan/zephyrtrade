@@ -1,0 +1,21 @@
+{
+  "status": "PASS",
+  "quality": {
+    "rows": 3888,
+    "expected_hours_between_endpoints": 3941,
+    "excluded_hours_between_endpoints": 53,
+    "source_negative_price_rows_removed": 319,
+    "revenue_values_checked": 34992,
+    "maximum_revenue_error_dkk": 3.637978807091713e-12
+  },
+  "sources": [
+    {
+      "path": "artifacts/phase2/test_predictions.csv.gz",
+      "sha256": "082476e06d676874f92332b1347393f5eb5f35bb64f19750362f506050a4ae72"
+    },
+    {
+      "path": "artifacts/phase3/test_direct_predictions.csv.gz",
+      "sha256": "eff44a8cc642b8f3f2fcf542c42d28b81ed3540b7a03ca71e7327669f87afd5c"
+    }
+  ]
+}

@@ -1,0 +1,23 @@
+{
+  "schema_version": 1,
+  "application": "ZephyrTrade Champion",
+  "data_kind": "user_assumptions_not_live",
+  "name": "Quarter-hour sensitivity",
+  "input": {
+    "capacity": 30,
+    "da": 400,
+    "up": 600,
+    "down": 200,
+    "hours": 0.25,
+    "scenarios": [
+      2,
+      8,
+      20
+    ],
+    "probabilities": [
+      0.2,
+      0.5,
+      0.3
+    ]
+  }
+}

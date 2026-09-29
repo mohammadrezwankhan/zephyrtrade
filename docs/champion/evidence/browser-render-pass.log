@@ -1,0 +1,247 @@
+TITLE Overview · ZephyrTrade Champion ERRORS []
+METRICS dict_keys(['rows', 'total', 'oracle', 'capture', 'regret', 'rmse', 'mae', 'r2', 'imbalance', 'meanOffer', 'meanActual', 'signed', 'values'])
+BODY Skip to workspace
+ZephyrTrade
+CHAMPION / RESEARCH DESK
+Wind-market workspace
+Local research · No real orders
+WORKSPACE
+Overview
+01
+Strategy lab
+02
+Model arena
+03
+Data explorer
+04
+Method & evidence
+05
+EVALUATED SITE
+Ronne Coastal Proxy
+
+30 MW · synthetic DK2 case
+
+Four source proxies. One evaluated site.
+Switch to light theme
+v1.1.0
+Offline-first research
+Workspace / Overview
+Synthetic snapshot
+Export data
+WIND INTELLIGENCE / DK2
+From wind to value.
+
+Explore the forecast. Understand the offer. See the trade-off.
+
+30 MW
+Synthetic site capacity
+Strategy
+Direct continuous
+Direct bid brackets
+Locally weighted linear
+Polynomial OLS
+Polynomial Ridge
+Clustered Ridge
+Linear OLS
+Polynomial Lasso
+24-hour persistence
+7 days
+30 days
+All data
+Custom
+20 Jul 2024 — 31 Dec 2024 · UTC
+Realised revenue
+18.76mDKK
++2.04m vs persistence
+Perfect-foresight capture
+99.38%
+Revenue ÷ benchmark revenue
+Absolute imbalance
+1.4kMWh
+0.36 MW mean absolute offer error
+Retained test intervals
+3,888hours
+53 excluded hours between endpoints
+Production meets strategy
+
+Direct continuous · held-out synthetic observations
+
+Output
+Revenue
+Prices
+Actual output
+Selected offer
+0
+8
+15
+23
+30
+20 Jul
+12 Sept
+06 Nov
+31 Dec
+MW
+Daily means of retained hours. Metrics use every hourly record.
+UTC · 3,888 records
+
+14.58 MW mean output · 14.48 MW mean offer · 117.9k DKK regret to perfect foresight
+
+EXPLORE THE DECISION
+The best forecast
+is not the whole story.
+
+A shortfall costs the up-regulation price. A surplus earns the down-regulation price. Explore how that changes your offer.
+
+Open strategy lab
+Leading strategies
+
+Ranked by revenue within the selected window
+
+Compare all
+01
+Direct continuous
+Direct learning
+18.76m
+DKK · 99.38% capture
+02
+Direct bid brackets
+Direct learning
+18.67m
+DKK · 98.90% capture
+03
+Locally weighted linear
+Forecast → optimise
+18.50m
+DKK · 97.98% capture
+The research context
+
+Keep the assumptions in view
+
+OFFLINE
+Evaluated farm
+Ronne Coastal Proxy
+Price regime
+Down ≤ day-ahead ≤ up
+Interval / settlement
+1 hour / DKK
+Not a complete calendar backtest: negative-price hours were removed upstream. These results are not evidence of live profitability.
+Browser engine · local calculations
+Synthetic research only · no live prices or order execution
+Saved scenarios could not be read. The stored data has not been changed.
+LAB Skip to workspace
+ZephyrTrade
+CHAMPION / RESEARCH DESK
+Wind-market workspace
+Local research · No real orders
+WORKSPACE
+Overview
+01
+Strategy lab
+02
+Model arena
+03
+Data explorer
+04
+Method & evidence
+05
+EVALUATED SITE
+Ronne Coastal Proxy
+
+30 MW · synthetic DK2 case
+
+Four source proxies. One evaluated site.
+Switch to light theme
+v1.1.0
+Offline-first research
+Workspace / Strategy lab
+Synthetic snapshot
+Export data
+SCENARIOS / STOCHASTIC OFFERING
+Test the trade-off.
+
+Change your assumptions. Find the optimal offer. No real trades.
+
+Independent scenario sandbox. These are editable assumptions, not a forecast or live bid. The dashboard strategy and date filters do not affect this calculation. Negative prices are allowed here only when the required price ordering holds.
+Build your scenario
+
+Empirical production distribution + settlement prices
+
+WHAT-IF
+Balanced spread
+Costly shortfall
+Low surplus value
+Physical capacity
+MW
+Settlement interval
+hours
+Day-ahead price
+DKK/MWh
+Up-regulation price
+DKK/MWh
+Down-regulation price
+DKK/MWh
+Decision rule
+q = (DA − down)
+ / (up − down)
+Production scenarios (MW)
+1–100 values, separated by commas. Every value must be within capacity.
+Probabilities (optional)
+One nonnegative probability per scenario; sum must equal 1.
+Calculate optimal offer
+Saved scenarios
+
+Stored in this browser only
+
+Import JSON
+Your experiments belong here.
+Calculate an offer, then save the assumptions for another comparison.
+Calculated offer
+
+Browser engine · weighted empirical quantile
+
+CALCULATED LOCALLY
+OPTIMAL DAY-AHEAD OFFER
+9.00 MW
+Expected scenario revenue
+4,902.86 DKK
+per 1.00-hour interval
+Decision quantile
+36.7%
+Expected production
+14.14 MW
+Value vs mean offer
++144.49 DKK
+Expected revenue by offer
+0.0
+0.0
+1.2k
+7.5
+2.5k
+15.0
+3.7k
+22.5
+4.9k
+30.0
+DKK
+Offer (MW)
+
+7 scenarios · 30.0 MW physical limit · prices in DKK/MWh. This is not a trade instruction.
+
+Save scenario
+Export JSON
+Export curve CSV
+Why this is the optimal offer
+
+For a given offer, a surplus earns the down-regulation price and a shortfall pays the up-regulation price. Under the stated ordering, expected revenue is concave and piecewise linear.
+
+R(b, p) = Δt × [DA × b + down × max(p − b, 0)
+                        − up × max(b − p, 0)]
+
+The weighted empirical quantile at q = (DA − down) / (up − down) gives an optimum. Ties can produce more than one equally good offer. The line chart evaluates every scenario breakpoint and both capacity bounds.
+
+How to enable the Python cross-check
+Browser engine · local calculations
+Synthetic research only · no live prices or order execution
+Saved scenarios could not be read. The stored data has not been changed.
+OVERFLOW {'width': 390, 'scroll': 390}
+ERRORS []

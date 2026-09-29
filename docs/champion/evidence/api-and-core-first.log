@@ -1,0 +1,32 @@
+................F....................................................... [ 90%]
+........                                                                 [100%]
+=================================== FAILURES ===================================
+______________________ test_real_http_solver_and_duration ______________________
+
+server = <zephyrtrade.app.LocalServer object at 0x7f2c8add3b60>
+
+    def test_real_http_solver_and_duration(server):
+        payload = assumptions()
+        payload["hours"] = 0.5
+        status, headers, body = request(server, "POST", "/api/optimize", json.dumps(payload),
+            {"Content-Type": "application/json", "Origin": f"http://127.0.0.1:{server.server_port}"})
+        assert status == 200
+        result = json.loads(body)
+        # At offer 8: revenues are 3200-1200, 3200, 3200+2400.
+        expected = (0.2 * 2000 + 0.5 * 3200 + 0.3 * 5600) * 0.5
+        assert result["offer_mw"] == pytest.approx(8)
+>       assert result["expected_revenue_dkk"] == pytest.approx(expected)
+E       assert 1600.0 == 1840.0 ± 0.00184
+E         
+E         comparison failed
+E         Obtained: 1600.0
+E         Expected: 1840.0 ± 0.00184
+
+tests/test_app.py:86: AssertionError
+=========================== short test summary info ============================
+FAILED tests/test_app.py::test_real_http_solver_and_duration - assert 1600.0 == 1840.0 ± 0.00184
+  
+  comparison failed
+  Obtained: 1600.0
+  Expected: 1840.0 ± 0.00184
+1 failed, 79 passed in 2.49s

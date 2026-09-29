@@ -1,0 +1,20 @@
+WARNING: The directory '/home/oai/.cache/pip' or its parent directory is not owned or is not writable by the current user. The cache has been disabled. Check the permissions and owner of that directory. If executing pip with sudo, you should use sudo's -H flag.
+Processing ./dist/zephyrtrade-1.1.0-py3-none-any.whl
+Installing collected packages: zephyrtrade
+Successfully installed zephyrtrade-1.1.0
+{
+  "status": "PASS",
+  "installed_import": "/tmp/zephyr-wheel-check-3w3c0_yw/zephyrtrade/__init__.py",
+  "version": "1.1.0",
+  "verified": "five static assets, health and real loopback SciPy solve",
+  "solution": {
+    "offer_mw": 8.0,
+    "expected_revenue_dkk": 3200.0,
+    "interval_hours": 1.0,
+    "solver": "scipy.optimize.linprog / HiGHS",
+    "data_kind": "user_assumptions_not_live"
+  },
+  "limitations": "Existing system scientific dependencies reused; not a clean dependency-resolution environment, normal browser session, Windows execution or deployment."
+}
+Wheel matches all 16 final Python/web source files.
+Wheel ZIP integrity, exact-source parity and installed-package HTTP smoke: PASS.
