@@ -31,3 +31,15 @@ Thumbs.db
 
 .venv-champion/
 build/
+
+# Local environments and sensitive state
+node_modules/
+.venv/
+.venv-*/
+__pycache__/
+.pytest_cache/
+.ruff_cache/
+.env
+.env.*
+!.env.example
+*.log
