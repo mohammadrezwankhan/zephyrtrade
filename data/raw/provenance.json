@@ -1,0 +1,33 @@
+{
+  "project": "ZephyrTrade",
+  "data_kind": "synthetic_source_aligned",
+  "generated_at_utc": "2026-07-13T17:42:44.545187+00:00",
+  "configuration": {
+    "start": "2022-01-01",
+    "end": "2025-01-01",
+    "timezone_name": "Europe/Copenhagen",
+    "seed": 42,
+    "negative_price_probability": 0.012,
+    "output_dir": "data\\raw"
+  },
+  "public_source_references": {
+    "energinet_api": "https://api.energidataservice.dk/index.html",
+    "energinet_historical_spot": "https://www.energidataservice.dk/tso-electricity/Elspotprices",
+    "energinet_imbalance_price": "https://www.energidataservice.dk/tso-electricity/ImbalancePrice",
+    "entso_e_transparency": "https://transparency.entsoe.eu/",
+    "open_meteo_archive": "https://open-meteo.com/en/docs/historical-weather-api"
+  },
+  "price_filter": {
+    "rows_before_filter": 26304,
+    "rows_after_filter": 25985,
+    "negative_price_rows_removed": 319,
+    "negative_price_share_removed": 0.012127433090024332
+  },
+  "row_counts": {
+    "farm_metadata": 4,
+    "wind_power": 105216,
+    "climate": 105216,
+    "market_prices": 25985
+  },
+  "disclaimer": "Farm names, capacities, observations, and prices are synthetic and must not be interpreted as measurements from commercial assets."
+}

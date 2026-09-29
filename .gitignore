@@ -20,6 +20,18 @@ data/processed/*.json
 data/processed/*.joblib
 artifacts/
 
+# Reviewed synthetic fixtures required by snapshot reconciliation tests.
+!artifacts/
+artifacts/*
+!artifacts/phase2/
+artifacts/phase2/*
+!artifacts/phase2/test_predictions.csv.gz
+!artifacts/phase3/
+artifacts/phase3/*
+!artifacts/phase3/test_direct_predictions.csv.gz
+!data/raw/provenance.json
+!data/raw/farm_metadata.csv
+
 # Jupyter and editors
 .ipynb_checkpoints/
 .idea/
@@ -31,3 +43,15 @@ Thumbs.db
 
 .venv-champion/
 build/
+
+# Local environments and sensitive state
+node_modules/
+.venv/
+.venv-*/
+__pycache__/
+.pytest_cache/
+.ruff_cache/
+.env
+.env.*
+!.env.example
+*.log

@@ -1,4 +1,5 @@
 """The compiled observation snapshot must reject misleading source artifacts."""
+
 import runpy
 import shutil
 from pathlib import Path
@@ -13,9 +14,12 @@ make_snapshot = runpy.run_path(str(ROOT / "scripts/build_app.py"))["make_snapsho
 
 @pytest.fixture
 def source(tmp_path):
-    for relative in ["artifacts/phase2/test_predictions.csv.gz",
-                     "artifacts/phase3/test_direct_predictions.csv.gz",
-                     "data/raw/provenance.json", "data/raw/farm_metadata.csv"]:
+    for relative in [
+        "artifacts/phase2/test_predictions.csv.gz",
+        "artifacts/phase3/test_direct_predictions.csv.gz",
+        "data/raw/provenance.json",
+        "data/raw/farm_metadata.csv",
+    ]:
         target = tmp_path / relative
         target.parent.mkdir(parents=True, exist_ok=True)
         shutil.copy2(ROOT / relative, target)
@@ -29,11 +33,21 @@ def test_snapshot_reconciles_all_models():
     assert snap["quality"]["maximum_revenue_error_dkk"] < 1e-7
 
 
-@pytest.mark.parametrize("defect", ["nan_saved_direct_revenue", "varying_capacity",
-                                   "bad_price_order", "duplicate_time", "wrong_metadata"])
+@pytest.mark.parametrize(
+    "defect",
+    [
+        "nan_saved_direct_revenue",
+        "varying_capacity",
+        "bad_price_order",
+        "duplicate_time",
+        "wrong_metadata",
+    ],
+)
 def test_snapshot_refuses_invalid_or_mislabelled_sources(source, defect):
-    paths = [source / "artifacts/phase2/test_predictions.csv.gz",
-             source / "artifacts/phase3/test_direct_predictions.csv.gz"]
+    paths = [
+        source / "artifacts/phase2/test_predictions.csv.gz",
+        source / "artifacts/phase3/test_direct_predictions.csv.gz",
+    ]
     frames = [pd.read_csv(p) for p in paths]
     if defect == "nan_saved_direct_revenue":
         frames[1].loc[0, "direct_regression_revenue_dkk"] = np.nan

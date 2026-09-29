@@ -1,0 +1,5 @@
+flowchart LR
+    I["Synthetic weather and prices"] --> R["Forecast and offer strategies"]
+    R --> V["Revenue and parity evidence"]
+    V --> L["Device-local state / explicit export"]
+    T["Regression and build checks"] -. verifies .-> R

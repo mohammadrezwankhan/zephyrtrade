@@ -64,7 +64,9 @@ def optimize_payload(payload: Any) -> dict[str, Any]:
     else:
         if not isinstance(probabilities, list) or len(probabilities) != len(scenarios):
             raise ValueError("Probabilities must align with the scenarios.")
-        probabilities = np.array([_number(x, "Probability", 0, 1.0000001) for x in probabilities])
+        probabilities = np.array(
+            [_number(x, "Probability", 0, 1.0000001) for x in probabilities]
+        )
         total = float(probabilities.sum())
         if abs(total - 1) > 1e-7:
             raise ValueError("Probabilities must sum to 1 within 0.0000001.")
@@ -112,7 +114,10 @@ class LocalServer(ThreadingHTTPServer):
         """Reject excess work rather than creating an unbounded thread pool."""
         if not self.workers.acquire(blocking=False):
             try:
-                request.sendall(b"HTTP/1.0 503 Service Unavailable\r\nContent-Length: 0\r\nConnection: close\r\n\r\n")
+                request.sendall(
+                    b"HTTP/1.0 503 Service Unavailable\r\n"
+                    b"Content-Length: 0\r\nConnection: close\r\n\r\n"
+                )
             finally:
                 self.shutdown_request(request)
             return
@@ -150,7 +155,12 @@ class Handler(BaseHTTPRequestHandler):
         self.send_header("X-Content-Type-Options", "nosniff")
         self.send_header("Referrer-Policy", "no-referrer")
         self.send_header("X-Frame-Options", "DENY")
-        self.send_header("Content-Security-Policy", "default-src 'none'; script-src 'self'; style-src 'self' 'unsafe-inline'; img-src 'self' data:; connect-src 'self'; base-uri 'none'; frame-ancestors 'none'; form-action 'self'")
+        self.send_header(
+            "Content-Security-Policy",
+            "default-src 'none'; script-src 'self'; style-src 'self' 'unsafe-inline'; "
+            "img-src 'self' data:; connect-src 'self'; base-uri 'none'; "
+            "frame-ancestors 'none'; form-action 'self'",
+        )
         self.send_header("Connection", "close")
         self.end_headers()
         if self.command != "HEAD":
@@ -159,14 +169,24 @@ class Handler(BaseHTTPRequestHandler):
 
     def _json(self, code: int, value: dict[str, Any]) -> None:
         """Serialize responses without nonfinite numbers."""
-        self._reply(code, json.dumps(value, allow_nan=False).encode(), "application/json; charset=utf-8")
+        self._reply(
+            code,
+            json.dumps(value, allow_nan=False).encode(),
+            "application/json; charset=utf-8",
+        )
 
     def _trusted_host(self) -> bool:
         """Reject non-loopback Host headers, including DNS-rebinding hosts."""
         hosts = self.headers.get_all("Host", [])
-        expected = {f"127.0.0.1:{self.server.server_port}", f"localhost:{self.server.server_port}"}
+        expected = {
+            f"127.0.0.1:{self.server.server_port}",
+            f"localhost:{self.server.server_port}",
+        }
         if len(hosts) != 1 or hosts[0].lower() not in expected:
-            self._json(HTTPStatus.FORBIDDEN, {"error": "Use the local loopback application address."})
+            self._json(
+                HTTPStatus.FORBIDDEN,
+                {"error": "Use the local loopback application address."},
+            )
             return False
         return True
 
@@ -176,7 +196,14 @@ class Handler(BaseHTTPRequestHandler):
             return
         path = urlsplit(self.path).path
         if path == "/api/health":
-            self._json(200, {"service": "zephyrtrade-local", "version": __version__, "scope": "local_research_only"})
+            self._json(
+                200,
+                {
+                    "service": "zephyrtrade-local",
+                    "version": __version__,
+                    "scope": "local_research_only",
+                },
+            )
             return
         if path == "/favicon.ico":
             self._reply(204, b"", "image/x-icon")
@@ -189,7 +216,10 @@ class Handler(BaseHTTPRequestHandler):
         try:
             data = (WEB_ROOT / filename).read_bytes()
         except OSError:
-            self._json(503, {"error": "A packaged UI asset is missing. Reinstall the application."})
+            self._json(
+                503,
+                {"error": "A packaged UI asset is missing. Reinstall the application."},
+            )
             return
         self._reply(200, data, content_type)
 
@@ -205,7 +235,10 @@ class Handler(BaseHTTPRequestHandler):
             self._json(404, {"error": "Resource not found."})
             return
         origins = self.headers.get_all("Origin", [])
-        allowed = {f"http://127.0.0.1:{self.server.server_port}", f"http://localhost:{self.server.server_port}"}
+        allowed = {
+            f"http://127.0.0.1:{self.server.server_port}",
+            f"http://localhost:{self.server.server_port}",
+        }
         # Non-browser CLI requests may omit Origin. Cross-origin browser posts may not.
         if len(origins) > 1 or (origins and origins[0] not in allowed):
             self._json(403, {"error": "Cross-origin requests are not permitted."})
@@ -232,12 +265,30 @@ class Handler(BaseHTTPRequestHandler):
             body = self.rfile.read(length)
             if len(body) != length:
                 raise ValueError("Incomplete request body.")
-            payload = json.loads(body, parse_constant=_reject_constant, object_pairs_hook=_unique_keys)
+            payload = json.loads(
+                body, parse_constant=_reject_constant, object_pairs_hook=_unique_keys
+            )
         except (ValueError, UnicodeDecodeError, RecursionError):
-            self._json(400, {"error": "Send complete, valid JSON without duplicate fields or nonfinite values."})
+            self._json(
+                400,
+                {
+                    "error": (
+                        "Send complete, valid JSON without duplicate fields "
+                        "or nonfinite values."
+                    )
+                },
+            )
             return
         if not self.server.solver.acquire(blocking=False):
-            self._json(503, {"error": "The local solver is busy. Your inputs are retained; retry shortly."})
+            self._json(
+                503,
+                {
+                    "error": (
+                        "The local solver is busy. Your inputs are retained; "
+                        "retry shortly."
+                    )
+                },
+            )
             return
         try:
             result = optimize_payload(payload)
@@ -245,7 +296,15 @@ class Handler(BaseHTTPRequestHandler):
         except (ValueError, TypeError, OverflowError) as exc:
             self._json(400, {"error": str(exc)})
         except RuntimeError:
-            self._json(503, {"error": "The optimisation could not be completed. Review the assumptions and retry."})
+            self._json(
+                503,
+                {
+                    "error": (
+                        "The optimisation could not be completed. "
+                        "Review the assumptions and retry."
+                    )
+                },
+            )
         finally:
             self.server.solver.release()
 
@@ -267,7 +326,11 @@ def main() -> None:
     except OSError as exc:
         parser.exit(1, f"Could not start the local server: {exc}. Try --port 8766.\n")
     url = f"http://127.0.0.1:{server.server_port}"
-    print(f"ZephyrTrade Champion {__version__}\n{url}\nSynthetic research only. Press Ctrl+C to stop.", flush=True)
+    print(
+        f"ZephyrTrade Champion {__version__}\n{url}\n"
+        "Synthetic research only. Press Ctrl+C to stop.",
+        flush=True,
+    )
     if not args.no_browser:
         threading.Timer(0.5, webbrowser.open, args=(url,)).start()
     try:

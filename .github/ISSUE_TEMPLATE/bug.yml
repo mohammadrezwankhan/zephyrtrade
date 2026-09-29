@@ -1,0 +1,16 @@
+name: Bug report
+description: A reproducible problem using fictional inputs
+title: "[Bug] "
+body:
+  - type: textarea
+    id: reproduction
+    attributes:
+      label: Reproduction
+      description: Include commit, OS/runtime, command, steps, expected and actual behavior. Use synthetic data only.
+    validations:
+      required: true
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Evidence
+      description: Redacted logs or screenshots; no private records or credentials.
