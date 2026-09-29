@@ -1,4 +1,5 @@
 flowchart LR
-  S["ZephyrTrade source"] --> B["Local build"] --> U["Browser demo"]
-  D["Synthetic examples"] --> U
-  T["Tests and evidence"] -.-> S
+    I["Synthetic weather and prices"] --> R["Forecast and offer strategies"]
+    R --> V["Revenue and parity evidence"]
+    V --> L["Device-local state / explicit export"]
+    T["Regression and build checks"] -. verifies .-> R

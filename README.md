@@ -1,5 +1,7 @@
 # ZephyrTrade
 
+[![CI](https://github.com/mohammadrezwankhan/zephyrtrade/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/mohammadrezwankhan/zephyrtrade/actions/workflows/ci.yml) · [MIT license](LICENSE) · [Verification and limits](QUALITY_REPORT.md)
+
 Research application that generates synthetic wind/weather/price tables, compares wind-forecast and direct-offer strategies, backtests revenue and explores hypothetical offers without placing trades.
 
 If ZephyrTrade helps you study this workflow, a star helps other wind-market and numerical-method researchers find it.
@@ -7,6 +9,8 @@ If ZephyrTrade helps you study this workflow, a star helps other wind-market and
 ![Actual desktop demo](docs/repository/demo-desktop.png)
 
 ## Try the demo
+
+[Open the hosted synthetic demo](https://mohammadrezwankhan.github.io/zephyrtrade/) or run the identical standalone artifact locally:
 
 Prerequisite: Node.js 22 or later; tested here with Node.js 24. This runs locally with synthetic examples. It does not connect to a live provider or publish user input.
 
@@ -20,7 +24,9 @@ Open **http://127.0.0.1:4173**. Stop the server with Ctrl+C. The first screen is
 
 ## Why inspect this project?
 
-It gives wind-market and numerical-method researchers a working example of a domain workflow with visible evidence and limitations. Start with the rendered demo, then follow the implementation map in [PROJECT_ANALYSIS.md](PROJECT_ANALYSIS.md). The supplied engineering guide below explains the actual product rules and tradeoffs.
+ZephyrTrade generates synthetic wind, weather and price tables, compares forecast and direct-offer strategies, and reconciles hypothetical revenue. Its Python and browser engines expose the assumptions so a researcher can inspect numerical agreement instead of relying on a dashboard alone.
+
+Read the [engineering walkthrough](docs/engineering/CASE_STUDY.md) and [adjacent-tool comparison](docs/ALTERNATIVES.md), or follow the [source map](PROJECT_ANALYSIS.md).
 
 - [Current verification and limits](QUALITY_REPORT.md)
 - [Architecture and source map](docs/architecture/system-overview.md)
@@ -29,7 +35,7 @@ It gives wind-market and numerical-method researchers a working example of a dom
 
 ## Develop and verify
 
-Install the Python project with its development extras in an isolated environment; follow the original guide below. HelioForge also has a separately locked web workspace.
+Install ZephyrTrade with its Python development extras in an isolated environment; follow the detailed guide below. The browser numerical tests use Node.js and the Python parity check uses the same installed package.
 
 ```sh
 python -m pytest
