@@ -1,0 +1,15 @@
+name: Feature proposal
+description: A specific workflow improvement
+body:
+  - type: textarea
+    id: problem
+    attributes:
+      label: Problem and intended user
+    validations:
+      required: true
+  - type: textarea
+    id: acceptance
+    attributes:
+      label: Proposed behavior, boundaries and acceptance evidence
+    validations:
+      required: true
