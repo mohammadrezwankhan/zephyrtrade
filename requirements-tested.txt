@@ -1,5 +1,5 @@
 # Observed Linux / Python 3.13.5 runtime. Not a cross-platform lockfile.
-numpy==2.3.5
+numpy==2.4.6
 pandas==2.2.3
 scipy==1.17.0
 scikit-learn==1.8.0
