@@ -1,3 +1,53 @@
+# ZephyrTrade
+
+Research application that generates synthetic wind/weather/price tables, compares wind-forecast and direct-offer strategies, backtests revenue and explores hypothetical offers without placing trades.
+
+If ZephyrTrade helps you study this workflow, a star helps other wind-market and numerical-method researchers find it.
+
+![Actual desktop demo](docs/repository/demo-desktop.png)
+
+## Try the demo
+
+Prerequisite: Node.js 22 or later; tested here with Node.js 24. This runs locally with synthetic examples. It does not connect to a live provider or publish user input.
+
+```sh
+git clone https://github.com/mohammadrezwankhan/zephyrtrade.git
+cd zephyrtrade
+node scripts/preview-demo.mjs
+```
+
+Open **http://127.0.0.1:4173**. Stop the server with Ctrl+C. The first screen is a demonstration, not verified current information. Keep private or real-world records out of this evaluation.
+
+## Why inspect this project?
+
+It gives wind-market and numerical-method researchers a working example of a domain workflow with visible evidence and limitations. Start with the rendered demo, then follow the implementation map in [PROJECT_ANALYSIS.md](PROJECT_ANALYSIS.md). The supplied engineering guide below explains the actual product rules and tradeoffs.
+
+- [Current verification and limits](QUALITY_REPORT.md)
+- [Architecture and source map](docs/architecture/system-overview.md)
+- [Contribution guide](CONTRIBUTING.md) and [small contribution tasks](docs/CHAMPION_QUESTS.md)
+- [Security reporting](SECURITY.md), [support](SUPPORT.md), and [roadmap](ROADMAP.md)
+
+## Develop and verify
+
+Install the Python project with its development extras in an isolated environment; follow the original guide below. HelioForge also has a separately locked web workspace.
+
+```sh
+python -m pytest
+python -m ruff check src tests
+node --test tests/browser/engine.test.cjs
+python scripts/verify_engines.py
+python -m build
+```
+
+Prior reports under `docs/` describe the supplied candidate. They do not replace the current [quality report](QUALITY_REPORT.md). Passing software checks is not clinical, educational, financial, safety, or production-service validation.
+
+## License and scope
+
+First-party source is available under [MIT](LICENSE). Bundled dependencies retain their upstream notices; trademarks and third-party content are not relicensed.
+
+<details>
+<summary>Supplied engineering guide, product boundaries, and detailed usage</summary>
+
 # ZephyrTrade Champion
 ### A local wind-market research desk • candidate 1.1.0
 
@@ -147,3 +197,6 @@ SVG diagrams and interface code are original and use that project licence. No fo
 files, model-environment executables or third-party frontend bundles are included.
 The root ZIP includes the original datasets and reports. The wheel is a Python app
 package with its precompiled web snapshot, not a standalone Windows executable.
+
+
+</details>

@@ -1,0 +1,34 @@
+{
+  "repository": "zephyrtrade",
+  "file": "ZephyrTrade-Champion.html",
+  "browser": "Microsoft Edge (Chromium)",
+  "checks": [
+    {
+      "viewport": "desktop",
+      "width": 1440,
+      "title": "Overview · ZephyrTrade Champion",
+      "bodyCharacters": 2249,
+      "horizontalOverflow": false,
+      "controls": 30,
+      "readyState": "complete",
+      "loadMilliseconds": 146.2000000178814
+    },
+    {
+      "viewport": "mobile",
+      "width": 390,
+      "title": "Overview · ZephyrTrade Champion",
+      "bodyCharacters": 1982,
+      "horizontalOverflow": false,
+      "controls": 30,
+      "readyState": "complete",
+      "loadMilliseconds": 146.2000000178814
+    }
+  ],
+  "errors": [],
+  "externalRequests": [
+    "http://local.adguard.org/?ts=1790720762079&type=content-script&dmn=127.0.0.1:63676&url=http%3A%2F%2F127.0.0.1%3A63676%2F&app=msedge.exe&css=2&js=1&rel=1&rji=1&sbe=1&stealth=1&st-dnt",
+    "http://local.adguard.org/?ts=1790720762079&name=AdGuard%20Extra&name=AdGuard%20Popup%20Blocker&type=user-script"
+  ],
+  "status": "passed",
+  "scope": "Real loopback origin; initial render and responsive viewport checks only. No claim of complete user-journey, PWA, accessibility, or production validation."
+}
