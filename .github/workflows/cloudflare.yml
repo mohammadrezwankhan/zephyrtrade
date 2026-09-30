@@ -22,3 +22,5 @@ jobs:
           node-version: '24'
       - run: node scripts/build-cloudflare.mjs
       - run: node scripts/check-cloudflare.mjs
+      - run: node scripts/build-domain.mjs
+      - run: node scripts/check-domain.mjs
