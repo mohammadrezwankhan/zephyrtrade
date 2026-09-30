@@ -1,0 +1,27 @@
+// Check the distributable, not just the build source.
+import fs from 'node:fs';
+import path from 'node:path';
+import {fileURLToPath} from 'node:url';
+import {createHash} from 'node:crypto';
+import assert from 'node:assert/strict';
+const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
+const config=JSON.parse(fs.readFileSync(path.join(root,'cloudflare.json'),'utf8'));
+const output=path.join(root,'.cloudflare/app');
+const read=file=>fs.readFileSync(path.join(output,file),'utf8');
+const html=read('index.html'),runtime=read('run/index.html'),facts=JSON.parse(read('app.json'));
+assert.equal(facts.url,config.canonical);assert.equal(facts.access,'public; no sign-in');
+assert.equal(facts.runtimeSha256,createHash('sha256').update(runtime).digest('hex'));
+assert.match(html,/<h1>(?:[^<]|<wbr>)+<\/h1>/);assert.match(html,/name="robots" content="index,follow/);
+assert.match(runtime,/name="robots" content="noindex,follow"/);
+assert.equal((html.match(/rel="canonical"/g)||[]).length,1);
+assert.match(html,/href="\.\/run\/"/);
+const schemas=[...html.matchAll(/<script type="application\/ld\+json">(.*?)<\/script>/gs)].map(m=>JSON.parse(m[1]));
+assert.equal(schemas.length,1);assert.equal(schemas[0]['@graph'][0].url,config.canonical);
+assert.equal(schemas[0]['@graph'][0].name,config.title);
+assert.equal(facts.features.length,3);assert.equal(facts.steps.length,3);
+assert.ok(facts.limitations.length>=2);assert.ok(read('llms.txt').includes(config.canonical));
+assert.ok(fs.statSync(path.join(output,'social-preview.png')).size>100);
+assert.ok(fs.statSync(path.join(output,'preview.png')).size>100);
+const paths=[];function scan(dir){for(const entry of fs.readdirSync(dir,{withFileTypes:true})){assert.equal(entry.isSymbolicLink(),false);const file=path.join(dir,entry.name);if(entry.isDirectory())scan(file);else{const relative=path.relative(output,file).split(path.sep).join('/');assert.ok(!/(^|\/)(\.git|\.env|node_modules|server\.mjs|package(?:-lock)?\.json)(\/|$)/.test(relative),'Private/server file in export: '+relative);assert.ok(!/\.(sqlite3?|db|map)$/.test(relative),'Runtime-only export contains '+relative);assert.ok(fs.statSync(file).size<=25*1024*1024);paths.push(relative);}}}scan(output);
+assert.ok(paths.length<1000);
+console.log(JSON.stringify({app:config.slug,status:'passed',checks:['static HTML','canonical','structured data','runtime hash','public facts','runtime noindex','assets','no source/config/database files'],files:paths.length}));

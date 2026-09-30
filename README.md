@@ -1,5 +1,9 @@
 # ZephyrTrade
 
+## Cloudflare browser edition
+
+[Open the public browser app](https://khanlab.co.technology/apps/zephyrtrade/run/) · [Purpose, usage and limits](https://khanlab.co.technology/apps/zephyrtrade/) · [Build and deployment guide](docs/CLOUDFLARE.md)
+
 [![CI](https://github.com/mohammadrezwankhan/zephyrtrade/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/mohammadrezwankhan/zephyrtrade/actions/workflows/ci.yml) · [MIT license](LICENSE) · [Verification and limits](QUALITY_REPORT.md)
 
 Research application that generates synthetic wind/weather/price tables, compares wind-forecast and direct-offer strategies, backtests revenue and explores hypothetical offers without placing trades.
