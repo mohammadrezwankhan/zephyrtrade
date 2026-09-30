@@ -1,0 +1,48 @@
+{
+  "schemaVersion": 1,
+  "slug": "zephyrtrade",
+  "title": "ZephyrTrade",
+  "shortDescription": "Explore synthetic wind-market observations, compare nine strategies, and calculate hypothetical offers without placing trades.",
+  "summary": "ZephyrTrade is a local research application for synthetic wind, weather, and price data. Its browser demo supports scenario calculations and strategy comparisons; an optional local Python service adds a separate SciPy cross-check.",
+  "features": [
+    "Explore a bundled hourly dataset with filters, charts, and CSV inspection.",
+    "Compare nine sample strategies and review their evidence and method notes.",
+    "Edit assumptions to calculate hypothetical offers and save named scenarios locally."
+  ],
+  "steps": [
+    "Use Overview to filter the bundled observations by strategy or date.",
+    "Open the Strategy lab to edit assumptions and calculate a hypothetical offer.",
+    "Compare strategies in Model arena or inspect observations in Data explorer."
+  ],
+  "limitations": [
+    "The bundled snapshot is historical and synthetic; it does not show live prices or current forecasts.",
+    "There are no real orders, brokers, accounts, or trading connections.",
+    "The optional Python service is a local cross-check, not an automatic model retraining service or public backend."
+  ],
+  "faqs": [
+    {
+      "question": "Does ZephyrTrade use live wind or market data?",
+      "answer": "No. The browser demo uses a bundled historical test snapshot and synthetic data."
+    },
+    {
+      "question": "Does the Python service train a new forecast model?",
+      "answer": "No. It provides a separate local SciPy cross-check; changing filters does not train a new model."
+    }
+  ],
+  "category": "Wind",
+  "canonical": "https://khanlab.co.technology/apps/zephyrtrade/",
+  "updated": "2026-09-30",
+  "publicSource": "https://github.com/mohammadrezwankhan/zephyrtrade",
+  "demoArtifact": "ZephyrTrade-Champion.html",
+  "runtimePatches": [
+    {
+      "from": "location.protocol==='http:'&&['127.0.0.1','localhost'].includes(location.hostname)",
+      "to": "false",
+      "occurrences": 1,
+      "reason": "Cloudflare preview must not probe a nonexistent local Python cross-check API."
+    }
+  ],
+  "noticeFiles": [
+    "LICENSE"
+  ]
+}

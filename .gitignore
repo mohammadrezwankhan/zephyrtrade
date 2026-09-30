@@ -55,3 +55,6 @@ __pycache__/
 .env.*
 !.env.example
 *.log
+
+# Generated public browser export
+/.cloudflare/
