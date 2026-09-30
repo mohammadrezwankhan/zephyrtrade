@@ -1,7 +1,7 @@
 # Cloudflare browser edition
 
-Public overview: <https://khanlab.co.technology/apps/zephyrtrade/>
-Public application: <https://khanlab.co.technology/apps/zephyrtrade/run/>
+Public overview: <https://mklab.co.technology/apps/zephyrtrade/>
+Public application: <https://mklab.co.technology/apps/zephyrtrade/run/>
 
 The GitHub repository's visibility is independent of the public browser demo. Only the explicit browser export and public introduction are uploaded. No Git history, environment files, databases, server data, promotion drafts or private source tree is copied.
 
@@ -18,7 +18,7 @@ The second command opens a loopback-only preview at `http://127.0.0.1:4179/`. Se
 
 ## Deployment contract
 
-The app is mounted at `/apps/zephyrtrade/` in the existing Cloudflare Pages project `datacenter-twin-lab` on `khanlab.co.technology`. **Do not upload this one app directory over that project's root:** a Pages deployment replaces the whole site. Use the Champion collection builder to combine all app exports with the preserved Datacenter Twin Lab build before uploading the complete site.
+The app is mounted at `/apps/zephyrtrade/` in the dedicated Cloudflare Pages project `mklab-apps` on `mklab.co.technology`. **Do not upload this one app directory over the project's root:** a Pages deployment replaces the whole site. Run the Champion `_astra-control/mklab-migration/build-collection.mjs` builder to assemble all 37 apps, then upload its complete `dist` output. `khanlab.co.technology` and its `datacenter-twin-lab` project are reserved for Datacenter Twin Lab. Old `/apps/` URLs redirect to MKLab. Browser storage is scoped to each origin and is not transferred between domains.
 
 For a separate project, update `canonical` in `cloudflare.json`, build, and upload the app directory at the root. Internal runtime assets are relative to their runtime directory. Review canonical URLs before publishing another host.
 
