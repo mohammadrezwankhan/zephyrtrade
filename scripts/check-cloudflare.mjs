@@ -9,7 +9,11 @@ const config=JSON.parse(fs.readFileSync(path.join(root,'cloudflare.json'),'utf8'
 const output=path.join(root,'.cloudflare/app');
 const read=file=>fs.readFileSync(path.join(output,file),'utf8');
 const html=read('index.html'),runtime=read('run/index.html'),facts=JSON.parse(read('app.json'));
-assert.equal(facts.url,config.canonical);assert.equal(facts.access,'public; no sign-in');
+assert.equal(facts.url,config.canonical);
+assert.equal(new URL(config.canonical).origin,'https://mklab.co.technology');
+assert.ok(html.includes('MKLab Browser Apps'));
+assert.ok(!html.includes('https://khanlab.co.technology/apps/'));
+assert.equal(facts.access,'public; no sign-in');
 assert.equal(facts.runtimeSha256,createHash('sha256').update(runtime).digest('hex'));
 assert.match(html,/<h1>(?:[^<]|<wbr>)+<\/h1>/);assert.match(html,/name="robots" content="index,follow/);
 assert.match(runtime,/name="robots" content="noindex,follow"/);
