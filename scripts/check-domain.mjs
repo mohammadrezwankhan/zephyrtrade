@@ -16,7 +16,7 @@ for(const [file,url] of [['index.html',site.canonical],['methodology/index.html'
  const persons=findAll(graph,item=>item['@type']==='Person');assert.ok(persons.length>0);for(const person of persons){assert.equal(person['@id'],maintainerId);assert.equal(person.url,maintainerUrl);}
  const types=findAll(graph,item=>typeof item['@type']==='string').map(item=>item['@type']);assert.ok(!types.includes('Dataset'));assert.ok(!types.includes('FinancialProduct'));
  if(file==='about/index.html')assert.ok(html.includes(`href="${maintainerUrl}"`));
- if(file==='methodology/index.html'){assert.ok(html.includes('https://mkgrid.co.technology/'));assert.ok(html.includes('separate hybrid model'));}
+ if(file==='methodology/index.html'){const links=[...html.matchAll(/<a\b[^>]*href="([^"]+)"/g)].map(m=>new URL(m[1],origin).href);assert.ok(links.some(link=>link==='https://mkgrid.co.technology/'));assert.ok(html.includes('separate hybrid model'));}
  for(const m of html.matchAll(/(?:href|src)="(\/[^"#?]*)"/g)){const ref=m[1].endsWith('/')?m[1]+'index.html':m[1];assert.ok(fs.existsSync(path.join(out,ref)),`${file}: missing ${ref}`);}
 }
 const googleVerification='xZhKdS0U-QfuZ7T0-Rz75ERIZu732Mh0sa85UiwUcgs',home=read('index.html');assert.equal((home.match(/<meta name="google-site-verification"/g)||[]).length,1);assert.ok(home.includes(`<meta name="google-site-verification" content="${googleVerification}">`));
