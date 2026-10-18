@@ -76,7 +76,7 @@ class KhanGridHero extends HTMLElement {
           const url=new URL(this.localURL(this.getAttribute('scene-src'),'./index.html'));
           url.searchParams.set('site',this.getAttribute('site')||'mrkhan');url.searchParams.set('embed','1');url.searchParams.set('autoplay','0');
           const iframe=document.createElement('iframe');this._iframe=iframe;iframe.title='Interactive engineering workbenches';
-          iframe.loading='lazy';iframe.referrerPolicy='same-origin';iframe.hidden=true;iframe.src=url.href;
+          iframe.loading='eager';iframe.referrerPolicy='same-origin';iframe.hidden=true;iframe.src=url.href;
           this._frame.insertBefore(iframe,this.shadowRoot.querySelector('.controls'));
           this._readyTimeout=setTimeout(()=>{if(this._disposed||generation!==this._generation||this._frameReady)return;this.pause();this._status.textContent='Interactive rendering is unavailable. The poster and text summary remain available.';},15000);
         }
