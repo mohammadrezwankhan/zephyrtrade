@@ -14,6 +14,12 @@ node scripts/check-domain.mjs
 
 Upload the entire `.cloudflare/site` directory to `mktrade-zephyr`. `cloudflare-domain.json` defines its canonical address and project. The site includes an overview, methodology and About page, the browser runtime, a three-page sitemap, robots directives, structured data and matching app facts. Synthetic runtime screens and Pages aliases use noindex. No paid Worker, database, storage or provider integration is required.
 
+## Engineering film integration and rollback
+
+The overview’s supplementary engineering-film section is enabled by `engineeringHero` in `cloudflare-domain.json`. Its build verifies `assets/engineering-hero/v1/release-media.json` and every listed size/SHA-256, then copies only verified release files plus the manifest. It preserves the existing overview heading, preview image and `/run/` action; the film uses a same-origin poster and manual play, with a readable summary and no WebGL scene loaded initially. The suggested CSP and `X-Frame-Options` exception apply only to the standalone film routes in `_headers`.
+
+To roll back, set `engineeringHero` to `false`, rebuild with `node scripts/build-domain.mjs`, run `node scripts/check-domain.mjs`, then publish the rebuilt `.cloudflare/site` through the normal release process. To build and check in an isolated, initially nonexistent output directory without clearing an earlier export, set `CLOUDFLARE_OUTPUT_ROOT` to a new path beneath `.cloudflare` before both commands. The feature flag remains the single enable/rollback switch.
+
 The GitHub repository's visibility is independent of the public browser demo. Only the explicit browser export and public introduction are uploaded. No Git history, environment files, databases, server data, promotion drafts or private source tree is copied.
 
 ## Build and run

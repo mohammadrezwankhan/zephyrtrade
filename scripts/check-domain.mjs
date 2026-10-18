@@ -3,7 +3,7 @@ import path from 'node:path';
 import assert from 'node:assert/strict';
 import {fileURLToPath} from 'node:url';
 import {createHash} from 'node:crypto';
-const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..'),out=path.join(root,'.cloudflare/site');
+const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..'),outputRoot=process.env.CLOUDFLARE_OUTPUT_ROOT===undefined?path.join(root,'.cloudflare'):path.resolve(root,process.env.CLOUDFLARE_OUTPUT_ROOT),out=path.join(outputRoot,'site');
 const site=JSON.parse(fs.readFileSync(path.join(root,'cloudflare-domain.json'),'utf8'));
 const origin=new URL(site.canonical).origin,read=p=>fs.readFileSync(path.join(out,p),'utf8');
 const maintainerUrl='https://mrkhan.co.technology/',maintainerId=maintainerUrl+'#person';
@@ -18,6 +18,38 @@ for(const [file,url] of [['index.html',site.canonical],['methodology/index.html'
  if(file==='about/index.html')assert.ok(html.includes(`href="${maintainerUrl}"`));
  if(file==='methodology/index.html'){const links=[...html.matchAll(/<a\b[^>]*href="([^"]+)"/g)].map(m=>new URL(m[1],origin).href);assert.ok(links.some(link=>link==='https://mkgrid.co.technology/'));assert.ok(html.includes('separate hybrid model'));}
  for(const m of html.matchAll(/(?:href|src)="(\/[^"#?]*)"/g)){const ref=m[1].endsWith('/')?m[1]+'index.html':m[1];assert.ok(fs.existsSync(path.join(out,ref)),`${file}: missing ${ref}`);}
+}
+const overview=read('index.html'),headers=read('_headers'),heroDirectory='assets/engineering-hero/v1';
+if(site.engineeringHero===true){
+ assert.ok(overview.includes('<h1>Explore the assumptions behind an energy offer.</h1>'));
+ assert.ok(overview.includes('href="/run/">Open ZephyrTrade'));
+ assert.ok(overview.includes('src="/preview.png"'));
+ assert.ok(overview.includes('<khan-grid-hero site="mktrade" mode="video"'));
+ assert.ok(overview.includes('A short visual introduction to the engineering context sits alongside'));
+ assert.ok(overview.includes('src="/assets/engineering-hero/v1/poster.png"'));
+ assert.ok(overview.includes('/assets/engineering-hero/v1/integration/vanilla/host.css'));
+ assert.ok(overview.includes('/assets/engineering-hero/v1/integration/vanilla/khan-grid-hero.js'));
+ assert.ok(read('domain.css').includes('.engineering-hero{display:grid;'));
+ for(const file of ['index.html','release-media.json','hero-1080p60.mp4','poster.png','csp.json','integration/vanilla/host.css','integration/vanilla/khan-grid-hero.js'])assert.ok(files.includes(heroDirectory+'/'+file),`missing published engineering media ${file}`);
+ const policy=JSON.parse(read(heroDirectory+'/csp.json')).suggestedContentSecurityPolicy;
+ for(const route of ['/assets/engineering-hero/v1/index.html','/assets/engineering-hero/v1/']){
+  const start=headers.indexOf(route+'\n');
+  assert.notEqual(start,-1,`missing scoped frame route ${route}`);
+  const nextRoute=headers.indexOf('\n/assets/engineering-hero/v1/',start+route.length);
+  const block=headers.slice(start,nextRoute<0?headers.length:nextRoute);
+  assert.ok(block.includes('\n  ! Content-Security-Policy\n'));
+  assert.ok(block.includes('\n  Content-Security-Policy: '+policy+'\n'));
+  assert.ok(block.includes('\n  ! X-Frame-Options\n'));
+ }
+ const globalHeaders=headers.slice(0,headers.indexOf('/assets/engineering-hero/v1/index.html'));
+ assert.ok(globalHeaders.includes('X-Frame-Options: DENY'));
+ assert.ok(!globalHeaders.includes('Content-Security-Policy:'));
+}else{
+ assert.ok(!overview.includes('khan-grid-hero'));
+ assert.ok(!overview.includes('/assets/engineering-hero/v1/'));
+ assert.ok(!headers.includes('/assets/engineering-hero/v1/index.html'));
+ assert.ok(!headers.includes('/assets/engineering-hero/v1/\n'));
+ assert.ok(!files.some(file=>file.startsWith(heroDirectory+'/')));
 }
 const googleVerification='xZhKdS0U-QfuZ7T0-Rz75ERIZu732Mh0sa85UiwUcgs',home=read('index.html');assert.equal((home.match(/<meta name="google-site-verification"/g)||[]).length,1);assert.ok(home.includes(`<meta name="google-site-verification" content="${googleVerification}">`));
 const facts=JSON.parse(read('app.json')),runtime=read('run/index.html');assert.equal(facts.url,site.canonical);assert.equal(facts.applicationUrl,origin+'/run/');assert.equal(facts.authorUrl,maintainerUrl);assert.equal(facts.runtimeSha256,createHash('sha256').update(runtime).digest('hex'));assert.match(runtime,/name="robots" content="noindex,follow"/);assert.ok(runtime.includes(`rel="canonical" href="${site.canonical}"`));assert.ok(!runtime.includes("location.protocol==='http:'&&['127.0.0.1','localhost'].includes(location.hostname)"));

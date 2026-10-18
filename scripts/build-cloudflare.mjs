@@ -8,7 +8,20 @@ import { createServer } from 'node:http';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const config = JSON.parse(fs.readFileSync(path.join(root, 'cloudflare.json'), 'utf8'));
-const out = path.join(root, '.cloudflare', 'app');
+const publicSourceRevision = process.env.PUBLIC_SOURCE_REVISION;
+if (publicSourceRevision !== undefined && !/^[a-f0-9]{40}$/i.test(publicSourceRevision)) {
+  throw Error('PUBLIC_SOURCE_REVISION must be a 40-character hexadecimal commit SHA');
+}
+const outputRootOverride = process.env.CLOUDFLARE_OUTPUT_ROOT;
+const outputRoot = outputRootOverride === undefined
+  ? path.join(root, '.cloudflare')
+  : path.resolve(root, outputRootOverride);
+const freshOutput = outputRootOverride !== undefined;
+const outputRelative = path.relative(path.join(root, '.cloudflare'), outputRoot);
+if (outputRelative === '..' || outputRelative.startsWith('..' + path.sep) || path.isAbsolute(outputRelative)) {
+  throw Error('CLOUDFLARE_OUTPUT_ROOT must stay beneath .cloudflare');
+}
+const out = path.join(outputRoot, 'app');
 const escape = value => String(value).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
 const json = value => JSON.stringify(value).replace(/</g, '\\u003c');
 const sha = buffer => createHash('sha256').update(buffer).digest('hex');
@@ -27,11 +40,19 @@ if (config.prepareScript) {
   if (!/^scripts\/[a-z0-9-]+\.mjs$/.test(config.prepareScript)) throw Error('Invalid preparation script');
   execFileSync(process.execPath, [local(config.prepareScript)], {cwd:root, stdio:'inherit', windowsHide:true});
 }
-// Only remove this builder's generated directory, after checking its absolute location.
-if (path.relative(root, out) !== path.join('.cloudflare','app')) throw Error('Invalid output');
-if (fs.existsSync(path.join(root,'.cloudflare')) && fs.lstatSync(path.join(root,'.cloudflare')).isSymbolicLink()) throw Error('Symlink output rejected');
-if (fs.existsSync(out) && fs.lstatSync(out).isSymbolicLink()) throw Error('Symlink output rejected');
-fs.rmSync(out, {recursive:true, force:true});
+// The optional output root enables isolated verification without clearing a prior build.
+if (!path.relative(root, out).startsWith('.cloudflare' + path.sep)) throw Error('Invalid output');
+let outputPath = path.parse(outputRoot).root;
+for (const component of outputRoot.slice(outputPath.length).split(path.sep).filter(Boolean)) {
+  outputPath = path.join(outputPath, component);
+  if (fs.existsSync(outputPath) && fs.lstatSync(outputPath).isSymbolicLink()) throw Error('Symlink output rejected');
+}
+if (freshOutput) {
+  if (fs.existsSync(outputRoot)) throw Error('CLOUDFLARE_OUTPUT_ROOT must be a fresh, nonexistent directory');
+} else {
+  if (fs.existsSync(out) && fs.lstatSync(out).isSymbolicLink()) throw Error('Symlink output rejected');
+  fs.rmSync(out, {recursive:true, force:true});
+}
 fs.mkdirSync(path.join(out, 'run'), {recursive:true});
 const runtimeRoot = config.runtimeDirectory ? local(config.runtimeDirectory) : null;
 if (runtimeRoot) {
@@ -63,8 +84,10 @@ fs.copyFileSync(local('scripts/cloudflare-site.css'),path.join(out,'site.css'));
 fs.copyFileSync(local('docs/repository/social-preview.png'),path.join(out,'social-preview.png'));
 fs.copyFileSync(local(config.previewArtifact||'docs/repository/demo-desktop.png'),path.join(out,'preview.png'));
 fs.writeFileSync(path.join(out,'favicon.svg'),'<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"><rect width="64" height="64" rx="14" fill="#132923"/><path d="M14 49V15h8l10 17 10-17h8v34h-8V30L32 47 22 30v19z" fill="#c9ee8b"/></svg>');
-let revision = 'unversioned';
-try { revision = execFileSync('git',['rev-parse','HEAD'],{cwd:root,encoding:'utf8',windowsHide:true}).trim(); } catch { /* Exported source still builds without Git. */ }
+let revision = publicSourceRevision?.toLowerCase() ?? 'unversioned';
+if (!publicSourceRevision) {
+  try { revision = execFileSync('git',['rev-parse','HEAD'],{cwd:root,encoding:'utf8',windowsHide:true}).trim(); } catch { /* Exported source still builds without Git. */ }
+}
 const copyright = (config.noticeFiles ?? []).map(name => `===== ${name} =====\n\n${fs.readFileSync(local(name),'utf8')}\n`).join('\n');
 fs.writeFileSync(path.join(out,'NOTICES.txt'),`Browser release: ${config.title}\n\nBundled third-party notices remain applicable. Public browser access does not grant a new license over private source or third-party material.\n\n${copyright}`);
 if(!fs.existsSync(path.join(out,'run','THIRD-PARTY-NOTICES.txt')))fs.copyFileSync(path.join(out,'NOTICES.txt'),path.join(out,'run','THIRD-PARTY-NOTICES.txt'));
