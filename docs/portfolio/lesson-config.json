@@ -1,0 +1,281 @@
+{
+  "schema_version": 1,
+  "repository": "mohammadrezwankhan/zephyrtrade",
+  "display_name": "ZephyrTrade · Wind Market Research",
+  "description": "Synthetic wind-market research with forecasting comparisons, chronological backtests and explicit application limits.",
+  "domain": "DOMAIN_C",
+  "theme": {
+    "accent": "#FFAB00",
+    "secondary": "#448AFF",
+    "surface": "#161B22",
+    "glow": "rgba(255, 171, 0, 0.35)",
+    "label": "Software & research applications",
+    "short": "Software"
+  },
+  "repo_type": "research application",
+  "source_revision": "090c28970f1a6c6f3032aaa4cf086e0d475a84da",
+  "source_snapshot_date": "2026-10-19",
+  "repo_url": "https://github.com/mohammadrezwankhan/zephyrtrade",
+  "homepage": "https://mktrade.co.business/",
+  "upstream": null,
+  "lessons": [
+    {
+      "id": "path-01",
+      "title": "Trace synthetic observations",
+      "summary": "Explain generated wind/weather/price data, chronological splits and excluded negative-price hours.",
+      "objective": "Explain generated wind/weather/price data, chronological splits and excluded negative-price hours.",
+      "checkpoint": "Check retained rows and missing-hour notices; do not call excluded hours zero.",
+      "level": "Foundation",
+      "tags": [
+        "foundations",
+        "engineering",
+        "forecasting",
+        "evidence"
+      ],
+      "source_paths": [
+        "src/zephyrtrade/data_loader.py",
+        "src/zephyrtrade/preprocessing.py",
+        "tests/test_data_loader.py",
+        "tests/test_preprocessing.py"
+      ],
+      "source_urls": [
+        "https://github.com/mohammadrezwankhan/zephyrtrade/blob/090c28970f1a6c6f3032aaa4cf086e0d475a84da/src/zephyrtrade/data_loader.py",
+        "https://github.com/mohammadrezwankhan/zephyrtrade/blob/090c28970f1a6c6f3032aaa4cf086e0d475a84da/src/zephyrtrade/preprocessing.py",
+        "https://github.com/mohammadrezwankhan/zephyrtrade/blob/090c28970f1a6c6f3032aaa4cf086e0d475a84da/tests/test_data_loader.py",
+        "https://github.com/mohammadrezwankhan/zephyrtrade/blob/090c28970f1a6c6f3032aaa4cf086e0d475a84da/tests/test_preprocessing.py"
+      ],
+      "parameters": [
+        {
+          "source_inputs": [
+            "source fixture and preprocessing settings"
+          ],
+          "expected_outputs": [
+            "retained timestamps",
+            "data provenance",
+            "source-file hashes"
+          ],
+          "note": "Source reference; execution and scientific verification are separate."
+        }
+      ],
+      "command": null,
+      "native_id": null,
+      "native_route": null,
+      "execution_status": "source-linked guide; no execution by this dashboard"
+    },
+    {
+      "id": "path-02",
+      "title": "Compare forecast and direct-offer models",
+      "summary": "Distinguish production forecasting from learning an offer directly.",
+      "objective": "Distinguish production forecasting from learning an offer directly.",
+      "checkpoint": "Prevent future rows from entering training. Keep supplied models unchanged during a bounded smoke run and use a new output directory.",
+      "level": "Foundation",
+      "tags": [
+        "foundations",
+        "engineering",
+        "forecasting",
+        "evidence"
+      ],
+      "source_paths": [
+        "src/zephyrtrade/models.py",
+        "src/zephyrtrade/direct.py",
+        "src/zephyrtrade/phase2.py",
+        "src/zephyrtrade/phase3.py",
+        "tests/test_models.py",
+        "tests/test_direct.py"
+      ],
+      "source_urls": [
+        "https://github.com/mohammadrezwankhan/zephyrtrade/blob/090c28970f1a6c6f3032aaa4cf086e0d475a84da/src/zephyrtrade/models.py",
+        "https://github.com/mohammadrezwankhan/zephyrtrade/blob/090c28970f1a6c6f3032aaa4cf086e0d475a84da/src/zephyrtrade/direct.py",
+        "https://github.com/mohammadrezwankhan/zephyrtrade/blob/090c28970f1a6c6f3032aaa4cf086e0d475a84da/src/zephyrtrade/phase2.py",
+        "https://github.com/mohammadrezwankhan/zephyrtrade/blob/090c28970f1a6c6f3032aaa4cf086e0d475a84da/src/zephyrtrade/phase3.py",
+        "https://github.com/mohammadrezwankhan/zephyrtrade/blob/090c28970f1a6c6f3032aaa4cf086e0d475a84da/tests/test_models.py",
+        "https://github.com/mohammadrezwankhan/zephyrtrade/blob/090c28970f1a6c6f3032aaa4cf086e0d475a84da/tests/test_direct.py"
+      ],
+      "parameters": [
+        {
+          "source_inputs": [
+            "chronological train/test windows",
+            "existing candidate model settings"
+          ],
+          "expected_outputs": [
+            "model outputs",
+            "held-out metrics"
+          ],
+          "note": "Source reference; execution and scientific verification are separate."
+        }
+      ],
+      "command": null,
+      "native_id": null,
+      "native_route": null,
+      "execution_status": "source-linked guide; no execution by this dashboard"
+    },
+    {
+      "id": "path-03",
+      "title": "Calculate a weighted-quantile offer",
+      "summary": "Predict how production probabilities and asymmetric settlement prices change a hypothetical offer.",
+      "objective": "Predict how production probabilities and asymmetric settlement prices change a hypothetical offer.",
+      "checkpoint": "Validate probability normalization/nonfinite inputs and settlement ordering. Compare JavaScript objective to existing SciPy cross-check.",
+      "level": "Applied",
+      "tags": [
+        "application",
+        "engineering",
+        "optimization",
+        "evidence"
+      ],
+      "source_paths": [
+        "src/zephyrtrade/web/engine.js",
+        "src/zephyrtrade/optimize.py",
+        "tests/test_optimize.py",
+        "tests/browser/engine.test.cjs"
+      ],
+      "source_urls": [
+        "https://github.com/mohammadrezwankhan/zephyrtrade/blob/090c28970f1a6c6f3032aaa4cf086e0d475a84da/src/zephyrtrade/web/engine.js",
+        "https://github.com/mohammadrezwankhan/zephyrtrade/blob/090c28970f1a6c6f3032aaa4cf086e0d475a84da/src/zephyrtrade/optimize.py",
+        "https://github.com/mohammadrezwankhan/zephyrtrade/blob/090c28970f1a6c6f3032aaa4cf086e0d475a84da/tests/test_optimize.py",
+        "https://github.com/mohammadrezwankhan/zephyrtrade/blob/090c28970f1a6c6f3032aaa4cf086e0d475a84da/tests/browser/engine.test.cjs"
+      ],
+      "parameters": [
+        {
+          "source_inputs": [
+            "production scenarios",
+            "probabilities",
+            "day-ahead and balancing prices"
+          ],
+          "expected_outputs": [
+            "optimal offer MW",
+            "expected hypothetical revenue DKK"
+          ],
+          "note": "Source reference; execution and scientific verification are separate."
+        }
+      ],
+      "command": null,
+      "native_id": null,
+      "native_route": null,
+      "execution_status": "source-linked guide; no execution by this dashboard"
+    },
+    {
+      "id": "path-04",
+      "title": "Compare strategies on the same window",
+      "summary": "Compare nine strategies while interpreting perfect foresight only as an analytical benchmark.",
+      "objective": "Compare nine strategies while interpreting perfect foresight only as an analytical benchmark.",
+      "checkpoint": "Use the same retained observations for every strategy. Handle revenue_capture_pct and single-row r2 None as undefined.",
+      "level": "Applied",
+      "tags": [
+        "application",
+        "engineering",
+        "validation",
+        "evidence"
+      ],
+      "source_paths": [
+        "src/zephyrtrade/evaluate.py",
+        "src/zephyrtrade/web/app.js",
+        "tests/test_evaluate.py"
+      ],
+      "source_urls": [
+        "https://github.com/mohammadrezwankhan/zephyrtrade/blob/090c28970f1a6c6f3032aaa4cf086e0d475a84da/src/zephyrtrade/evaluate.py",
+        "https://github.com/mohammadrezwankhan/zephyrtrade/blob/090c28970f1a6c6f3032aaa4cf086e0d475a84da/src/zephyrtrade/web/app.js",
+        "https://github.com/mohammadrezwankhan/zephyrtrade/blob/090c28970f1a6c6f3032aaa4cf086e0d475a84da/tests/test_evaluate.py"
+      ],
+      "parameters": [
+        {
+          "source_inputs": [
+            "strategy selector",
+            "shared date window"
+          ],
+          "expected_outputs": [
+            "cumulative revenue",
+            "model metrics",
+            "undefined ratios where applicable"
+          ],
+          "note": "Source reference; execution and scientific verification are separate."
+        }
+      ],
+      "command": null,
+      "native_id": null,
+      "native_route": null,
+      "execution_status": "source-linked guide; no execution by this dashboard"
+    },
+    {
+      "id": "path-05",
+      "title": "Save and recover scenario inputs",
+      "summary": "Round-trip named scenarios and recover from invalid or unavailable browser storage.",
+      "objective": "Round-trip named scenarios and recover from invalid or unavailable browser storage.",
+      "checkpoint": "Recalculate edited inputs before save/export. Exercise invalid JSON, localStorage failures and view navigation with draft retention.",
+      "level": "Advanced",
+      "tags": [
+        "verification",
+        "engineering",
+        "evidence"
+      ],
+      "source_paths": [
+        "src/zephyrtrade/web/app.js",
+        "src/zephyrtrade/app.py",
+        "tests/test_app.py"
+      ],
+      "source_urls": [
+        "https://github.com/mohammadrezwankhan/zephyrtrade/blob/090c28970f1a6c6f3032aaa4cf086e0d475a84da/src/zephyrtrade/web/app.js",
+        "https://github.com/mohammadrezwankhan/zephyrtrade/blob/090c28970f1a6c6f3032aaa4cf086e0d475a84da/src/zephyrtrade/app.py",
+        "https://github.com/mohammadrezwankhan/zephyrtrade/blob/090c28970f1a6c6f3032aaa4cf086e0d475a84da/tests/test_app.py"
+      ],
+      "parameters": [
+        {
+          "source_inputs": [
+            "named validated scenario",
+            "JSON import/export"
+          ],
+          "expected_outputs": [
+            "portable scenario JSON",
+            "recoverable UI feedback"
+          ],
+          "note": "Source reference; execution and scientific verification are separate."
+        }
+      ],
+      "command": null,
+      "native_id": null,
+      "native_route": null,
+      "execution_status": "source-linked guide; no execution by this dashboard"
+    },
+    {
+      "id": "path-06",
+      "title": "Reproduce numerical and snapshot evidence",
+      "summary": "Bind snapshot rows and browser calculations to the Python research source.",
+      "objective": "Bind snapshot rows and browser calculations to the Python research source.",
+      "checkpoint": "Run existing parity command after build; retain actual command, SHA and output. Do not present numerical parity as financial validation.",
+      "level": "Advanced",
+      "tags": [
+        "verification",
+        "engineering",
+        "evidence"
+      ],
+      "source_paths": [
+        "scripts/verify_engines.py",
+        "scripts/build_app.py",
+        "tests/test_snapshot.py",
+        "tests/browser/engine.test.cjs"
+      ],
+      "source_urls": [
+        "https://github.com/mohammadrezwankhan/zephyrtrade/blob/090c28970f1a6c6f3032aaa4cf086e0d475a84da/scripts/verify_engines.py",
+        "https://github.com/mohammadrezwankhan/zephyrtrade/blob/090c28970f1a6c6f3032aaa4cf086e0d475a84da/scripts/build_app.py",
+        "https://github.com/mohammadrezwankhan/zephyrtrade/blob/090c28970f1a6c6f3032aaa4cf086e0d475a84da/tests/test_snapshot.py",
+        "https://github.com/mohammadrezwankhan/zephyrtrade/blob/090c28970f1a6c6f3032aaa4cf086e0d475a84da/tests/browser/engine.test.cjs"
+      ],
+      "parameters": [
+        {
+          "source_inputs": [
+            "bundled observation snapshot",
+            "seeded parity cases"
+          ],
+          "expected_outputs": [
+            "reconciliation and parity report",
+            "source hashes"
+          ],
+          "note": "Source reference; execution and scientific verification are separate."
+        }
+      ],
+      "command": null,
+      "native_id": null,
+      "native_route": null,
+      "execution_status": "source-linked guide; no execution by this dashboard"
+    }
+  ]
+}

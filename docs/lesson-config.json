@@ -1,98 +1,317 @@
 {
-  "repository": "zephyrtrade",
-  "domain": "DOMAIN_C",
-  "title": "ZephyrTrade Wind Power Trading Workbench",
-  "version": "2.0.0",
-  "author": "Mohammad Rezwan Khan",
-  "lessons": [
+  "$schema": "./lesson-config.schema.json",
+  "schema_version": "1.0",
+  "repository": {
+    "owner": "mohammadrezwankhan",
+    "slug": "zephyrtrade",
+    "name": "zephyrtrade",
+    "title": "ZephyrTrade Wind-Market Lab",
+    "url": "https://github.com/mohammadrezwankhan/zephyrtrade",
+    "default_branch": "main",
+    "description": "Study synthetic wind forecasts, asymmetric offer decisions & reproducible revenue backtests through transparent lessons.",
+    "summary": "ZephyrTrade links synthetic wind forecasts, offer optimization, backtests, and a local browser/Python research app. The companion begins with a generic gross-versus-net calculation before the source’s asymmetric settlement model.",
+    "audience": "Wind-energy students, forecasting researchers, and developers comparing hypothetical offer strategies.",
+    "topics": [
+      "wind-energy",
+      "electricity-markets",
+      "forecasting",
+      "probabilistic-forecasting",
+      "machine-learning",
+      "backtesting",
+      "energy-trading",
+      "optimization",
+      "python",
+      "scipy",
+      "scikit-learn",
+      "time-series",
+      "synthetic-data",
+      "reproducible-research",
+      "interactive-learning"
+    ],
+    "source_paths": [
+      "README.md",
+      "README_RESEARCH.md",
+      "pyproject.toml",
+      "ZephyrTrade-Champion.html",
+      "src/zephyrtrade/optimize.py",
+      "src/zephyrtrade/evaluate.py",
+      "src/zephyrtrade/app.py",
+      "src/zephyrtrade/web/engine.js",
+      "tests/test_optimize.py",
+      "scripts/verify_engines.py",
+      "QUALITY_REPORT.md"
+    ],
+    "is_fork": false,
+    "upstream": null
+  },
+  "domain": {
+    "id": "C",
+    "name": "Markets and software",
+    "primary": "#FFAB00",
+    "secondary": "#448AFF",
+    "surface": "#161B22",
+    "glow": "rgba(255,171,0,0.35)"
+  },
+  "model": {
+    "title": "Wind-market reasoning · synthetic cost sensitivity",
+    "timeUnit": "h",
+    "horizon": 24,
+    "parameters": [
+      {
+        "key": "baseSpreadBps",
+        "label": "Base spread",
+        "unit": "bps",
+        "min": 0,
+        "max": 100,
+        "step": 1,
+        "default": 30,
+        "calibration": "Illustrative input; verified against the declared analytical model, not field measurements."
+      },
+      {
+        "key": "feeBps",
+        "label": "Round-trip fees",
+        "unit": "bps",
+        "min": 0,
+        "max": 50,
+        "step": 1,
+        "default": 10,
+        "calibration": "Illustrative input; verified against the declared analytical model, not field measurements."
+      },
+      {
+        "key": "slippageBps",
+        "label": "Slippage estimate",
+        "unit": "bps",
+        "min": 0,
+        "max": 30,
+        "step": 1,
+        "default": 5,
+        "calibration": "Illustrative input; verified against the declared analytical model, not field measurements."
+      },
+      {
+        "key": "notionalUSD",
+        "label": "Scenario notional",
+        "unit": "USD",
+        "min": 1000,
+        "max": 100000,
+        "step": 1000,
+        "default": 10000,
+        "calibration": "Illustrative input; verified against the declared analytical model, not field measurements."
+      }
+    ],
+    "metrics": [
+      {
+        "key": "spreadBps",
+        "label": "Synthetic spread",
+        "unit": "bps",
+        "decimals": 1
+      },
+      {
+        "key": "netEdgeBps",
+        "label": "Net scenario edge",
+        "unit": "bps",
+        "decimals": 1
+      },
+      {
+        "key": "netPnlUSD",
+        "label": "Scenario P&L",
+        "unit": "USD",
+        "decimals": 2
+      },
+      {
+        "key": "costUSD",
+        "label": "Fees and slippage",
+        "unit": "USD",
+        "decimals": 2
+      }
+    ],
+    "equation": "spread = b + 12 sin(2πt/12) + 5 sin(2πt/5); edge = spread − fees − slippage; P&L = notional · edge/10000.",
+    "assumptions": [
+      "All prices, spreads, and returns are synthetic; no exchange or trading API is connected.",
+      "P&L is one hypothetical opportunity at the selected time, not accumulated realized performance.",
+      "Execution latency, inventory, liquidity, funding, and exchange risk are omitted.",
+      "Every spread, cost, and notional input is synthetic; no market data or trading connection is used.",
+      "The native source has separate forecast-error and market-value metrics; a higher toy P&L does not establish a better wind forecast.",
+      "The retained native observations have documented filtering and gaps. Neither this exercise nor a perfect-foresight benchmark establishes live trading performance."
+    ],
+    "kind": "markets",
+    "introduction": "The browser is a generic USD/basis-point sensitivity exercise. It does not execute ZephyrTrade’s DKK/MWh settlement, production scenarios, weighted-quantile offer, trained forecasts, or retained backtest snapshot.",
+    "calibration_status": "Uncalibrated synthetic teaching proxy"
+  },
+  "modules": [
     {
-      "id": "L01",
-      "title": "Numerical Weather Prediction (NWP) to Power Curve Transfer",
-      "level": "Beginner",
-      "duration": "30 mins",
-      "config_file": "configs/wind_power_curve.json",
-      "summary": "Convert wind speed, air density, and wind shear profile to aerodynamic turbine power output using nonlinear cubic and saturation curves.",
-      "inputs": [
-        "Hourly wind speed anemometer data",
-        "Ambient temperature and barometric pressure"
+      "id": "module-1",
+      "title": "Separate forecast quality from economic value",
+      "objective": "Identify the units and objective behind a reported wind-market result.",
+      "minutes": 12,
+      "steps": [
+        "Read the native regression and revenue metric entry points in evaluate.py.",
+        "Apply 30 bps base spread, 10 bps fees, 5 bps slippage, and 10,000 USD notional.",
+        "At time zero, reconcile gross spread, total costs, net edge, and hypothetical P&L."
       ],
-      "parameters": {
-        "CutInSpeed_m_s": 3.0,
-        "RatedSpeed_m_s": 12.0,
-        "CutOutSpeed_m_s": 25.0,
-        "TurbineRating_MW": 3.4
+      "preset": {
+        "baseSpreadBps": 30,
+        "feeBps": 10,
+        "slippageBps": 5,
+        "notionalUSD": 10000
       },
       "checkpoints": [
-        "Account for wake loss array efficiency factor (92%)",
-        "Map power output distribution accurately across seasons"
-      ]
+        {
+          "label": "Opening net edge is 15 bps",
+          "metric": "netEdgeBps",
+          "operator": "==",
+          "expected": 15,
+          "tolerance": 0.02,
+          "atTime": 0
+        },
+        {
+          "label": "Opening hypothetical P&L is 15 USD",
+          "metric": "netPnlUSD",
+          "operator": "==",
+          "expected": 15,
+          "tolerance": 0.02,
+          "atTime": 0
+        }
+      ],
+      "reflection": "Why can a forecasting model with a smaller RMSE still yield a different ranking under asymmetric imbalance prices?",
+      "source_paths": [
+        "src/zephyrtrade/evaluate.py",
+        "src/zephyrtrade/optimize.py"
+      ],
+      "level": "Foundation"
     },
     {
-      "id": "L02",
-      "title": "Quantile Regression & Probabilistic Wind Power Density Function",
-      "level": "Intermediate",
-      "duration": "45 mins",
-      "config_file": "configs/quantile_forecast.json",
-      "summary": "Train pinball-loss gradient boosting models generating P10, P50, and P90 power generation quantiles rather than point forecasts.",
-      "inputs": [
-        "Multi-horizon meteorological ensemble forecasts",
-        "Historical farm generation logs"
+      "id": "module-2",
+      "title": "Stress an economic assumption",
+      "objective": "Explain why a gross opportunity is sensitive to the cost model.",
+      "minutes": 15,
+      "steps": [
+        "Retain the base spread and notional but raise slippage from 5 to 25 bps.",
+        "Predict the sign change in the opening opportunity before running.",
+        "Read validate_price_order and critical_fractile in the native optimizer; distinguish its asymmetric settlement prices from this toy slippage cost."
       ],
-      "parameters": {
-        "Quantiles": [
-          0.1,
-          0.25,
-          0.5,
-          0.75,
-          0.9
-        ],
-        "PinballAlpha": 0.5,
-        "LeadTime_Hours": 24
+      "preset": {
+        "baseSpreadBps": 30,
+        "feeBps": 10,
+        "slippageBps": 25,
+        "notionalUSD": 10000
       },
       "checkpoints": [
-        "Verify calibration curve reliability diagram",
-        "Measure Continuous Ranked Probability Score (CRPS) < 0.082"
-      ]
+        {
+          "label": "Opening net edge becomes negative 5 bps",
+          "metric": "netEdgeBps",
+          "operator": "==",
+          "expected": -5,
+          "tolerance": 0.02,
+          "atTime": 0
+        },
+        {
+          "label": "Declared friction cost is 35 USD",
+          "metric": "costUSD",
+          "operator": "==",
+          "expected": 35,
+          "tolerance": 0.02,
+          "atTime": 0
+        }
+      ],
+      "reflection": "Which source variables determine the native optimal production quantile, and why is it not generally the mean forecast?",
+      "source_paths": [
+        "src/zephyrtrade/optimize.py",
+        "tests/test_optimize.py"
+      ],
+      "level": "Parameter study"
     },
     {
-      "id": "L03",
-      "title": "Asymmetric Under/Over-Generation Penalties Offer Optimization",
-      "level": "Advanced",
-      "duration": "60 mins",
-      "config_file": "configs/imbalance_bidding.json",
-      "summary": "Derive optimal strategic bid quantity Q* under dual-settlement systems where short positions incur higher penalties than long positions.",
-      "inputs": [
-        "Day-ahead clearing price P_DA",
-        "Real-time imbalance penalty spread Delta_P"
+      "id": "module-3",
+      "title": "Separate exposure size from strategy skill",
+      "objective": "Show that scaling exposure changes money at risk without improving per-unit economics.",
+      "minutes": 18,
+      "steps": [
+        "Keep the stressed 30/10/25 bps assumptions and increase notional to 40,000 USD.",
+        "Predict how costs and P&L scale while the net edge stays unchanged.",
+        "Read the native perfect-foresight description and identify why it is an upper-bound reference rather than an operational forecast."
       ],
-      "parameters": {
-        "PenaltyRatio_UnderGen": 1.45,
-        "PenaltyRatio_OverGen": 0.85
+      "preset": {
+        "baseSpreadBps": 30,
+        "feeBps": 10,
+        "slippageBps": 25,
+        "notionalUSD": 40000
       },
       "checkpoints": [
-        "Demonstrate bid shifting toward lower quantiles (P35-P40) to minimize asymmetric penalty risk",
-        "Prove mathematical optimality via newsvendor theorem"
-      ]
+        {
+          "label": "Per-unit edge remains negative 5 bps",
+          "metric": "netEdgeBps",
+          "operator": "==",
+          "expected": -5,
+          "tolerance": 0.02,
+          "atTime": 0
+        },
+        {
+          "label": "The larger exposure loses 20 USD in the opening toy case",
+          "metric": "netPnlUSD",
+          "operator": "==",
+          "expected": -20,
+          "tolerance": 0.02,
+          "atTime": 0
+        }
+      ],
+      "reflection": "What would a fair native strategy comparison need to hold constant across methods, timestamps, and price observations?",
+      "source_paths": [
+        "src/zephyrtrade/optimize.py",
+        "src/zephyrtrade/evaluate.py",
+        "README_RESEARCH.md"
+      ],
+      "level": "Stress test"
     },
     {
-      "id": "L04",
-      "title": "Multi-Year Revenue Backtesting vs. Naive Climatology Benchmarks",
-      "level": "Production",
-      "duration": "75 mins",
-      "config_file": "configs/backtest_engine.json",
-      "summary": "Run full 3-year backtest across 105,120 settlement intervals, outputting Sharpe ratio, maximum drawdown, and net cash flow distributions.",
-      "inputs": [
-        "Full historical market clearing and weather time series",
-        "Trading strategy execution logic"
+      "id": "module-4",
+      "title": "Create a source-backed offer-study record",
+      "objective": "Document scenario assumptions and distinguish numerical parity from performance validation.",
+      "minutes": 18,
+      "steps": [
+        "Apply 50 bps base spread, 10 bps fees, 10 bps slippage, and 10,000 USD notional.",
+        "Run to twelve hours and export this single synthetic opportunity with its units.",
+        "Read the source data boundary and parity checker; prepare a native study record containing production scenarios, probabilities, price order, interval duration, and filtering limitations."
       ],
-      "parameters": {
-        "TransactionFee_USD_MWh": 0.25,
-        "InitialCapital_USD": 1000000
+      "preset": {
+        "baseSpreadBps": 50,
+        "feeBps": 10,
+        "slippageBps": 10,
+        "notionalUSD": 10000
       },
       "checkpoints": [
-        "Generate interactive equity curve and drawdown chart",
-        "Demonstrate +14.2% annualized revenue uplift over baseline naive bidding"
-      ]
+        {
+          "label": "Declared friction cost is 20 USD",
+          "metric": "costUSD",
+          "operator": "==",
+          "expected": 20,
+          "tolerance": 0.02,
+          "atTime": 12
+        },
+        {
+          "label": "Twelve-hour hypothetical scenario P&L",
+          "metric": "netPnlUSD",
+          "operator": "==",
+          "expected": 32.938926,
+          "tolerance": 0.02,
+          "atTime": 12
+        }
+      ],
+      "reflection": "Why can Python/browser numerical agreement support implementation consistency while leaving forecast calibration and market performance unproven?",
+      "source_paths": [
+        "scripts/verify_engines.py",
+        "src/zephyrtrade/web/engine.js",
+        "QUALITY_REPORT.md",
+        "README.md"
+      ],
+      "level": "Transfer to source"
     }
-  ]
+  ],
+  "source": {
+    "commit": "090c28970f1a6c6f3032aaa4cf086e0d475a84da",
+    "audited_at": "2026-10-19T08:39:24Z",
+    "url": "https://github.com/mohammadrezwankhan/zephyrtrade/tree/090c28970f1a6c6f3032aaa4cf086e0d475a84da",
+    "calibration_status": "synthetic-analytical-fixtures",
+    "scope": "This browser lab is a standalone teaching approximation. Use the linked source for the project implementation."
+  },
+  "dashboard_url": "https://mohammadrezwankhan.github.io/zephyrtrade/"
 }

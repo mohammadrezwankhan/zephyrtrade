@@ -1,175 +1,267 @@
-<div align="center">
+![ZephyrTrade Wind-Market Lab: original vector system illustration](assets/hero-25d.svg)
 
-<img src="assets/hero-25d.svg" alt="ZephyrTrade Wind Power Trading Workbench 2.5D Architecture" width="100%">
+ZephyrTrade links synthetic wind forecasts, offer optimization, backtests, and a local browser/Python research app. The companion begins with a generic gross-versus-net calculation before the source’s asymmetric settlement model.
 
-# ZephyrTrade Wind Power Trading Workbench
+**[Native-source lesson guide](docs/portfolio/) · [Offline interactive lab](docs/index.html) · [Lesson configuration](docs/lesson-config.json) · [Configuration schema](docs/lesson-config.schema.json)**
 
-**Probabilistic Wind Forecasting, Asymmetric Imbalance & Revenue Backtesting**
+## Your first interactive result
 
-[![License: MIT](https://img.shields.io/badge/License-MIT-00E5FF.svg?style=for-the-badge&logo=opensourceinitiative&logoColor=white)](LICENSE)
-[![Interactive Dashboard](https://img.shields.io/badge/Interactive_Dashboard-Live_on_Pages-00E676.svg?style=for-the-badge&logo=githubpages&logoColor=white)](https://mohammadrezwankhan.github.io/zephyrtrade/)
-[![Lessons](https://img.shields.io/badge/Lessons_Configured-04_Modules-B388FF.svg?style=for-the-badge)](docs/lesson-config.json)
+1. Download or clone this repository and open `docs/index.html` in a modern browser.
+2. Select **Module 1**, apply its preset, and compare the declared checkpoint with the plotted result.
+3. Change one slider, inspect the model assumptions, then export the configuration or telemetry for your notes.
 
-<p align="center">
-  <a href="https://mohammadrezwankhan.github.io/zephyrtrade/"><strong>Explore Live 2.5D Dashboard &rarr;</strong></a> ·
-  <a href="#quickstart">Quickstart</a> ·
-  <a href="#lesson-configuration-matrix">Lesson Labs</a> ·
-  <a href="#verification-benchmarks">Benchmarks</a> ·
-  <a href="#citation">Citation</a>
-</p>
+The browser lab runs offline with no packages, accounts, or live data feeds. Its numbers are deterministic teaching simulations. Each checkpoint states its model time and tolerance; passing it demonstrates agreement with that model, not field calibration or production readiness.
 
-</div>
+## Four-module learning path
 
----
+| Module | Investigation | Approximate time |
+|---|---|---:|
+| 1. Separate forecast quality from economic value | Identify the units and objective behind a reported wind-market result. | 12 min |
+| 2. Stress an economic assumption | Explain why a gross opportunity is sensitive to the cost model. | 15 min |
+| 3. Separate exposure size from strategy skill | Show that scaling exposure changes money at risk without improving per-unit economics. | 18 min |
+| 4. Create a source-backed offer-study record | Document scenario assumptions and distinguish numerical parity from performance validation. | 18 min |
 
-> [!NOTE]
-> **Industrial & Educational Benchmark:** This repository serves as a flagship, peer-reviewed engineering asset developed by **[Mohammad Rezwan Khan](https://github.com/mohammadrezwankhan)**. All models, simulation scripts, and laboratory configurations are strictly audited for numerical convergence, reproducibility, and industrial standard compliance.
+**Who this is for:** Wind-energy students, forecasting researchers, and developers comparing hypothetical offer strategies.
 
-> [!TIP]
-> **Interactive 2.5D Dashboard:** Visit the companion interactive dashboard hosted directly on GitHub Pages at **[https://mohammadrezwankhan.github.io/zephyrtrade/](https://mohammadrezwankhan.github.io/zephyrtrade/)** to adjust excitation parameters, test live frequency/thermal waveforms, and inspect progressive lab modules in real time.
+### Continue into the implementation
 
----
+- [README.md](README.md)
+- [README_RESEARCH.md](README_RESEARCH.md)
+- [pyproject.toml](pyproject.toml)
+- [ZephyrTrade-Champion.html](ZephyrTrade-Champion.html)
+- [src/zephyrtrade/optimize.py](src/zephyrtrade/optimize.py)
+- [src/zephyrtrade/evaluate.py](src/zephyrtrade/evaluate.py)
+- [src/zephyrtrade/app.py](src/zephyrtrade/app.py)
 
-## 🏛️ System Architecture & 2.5D Visual Topology
+### Explore or run the source
 
-The repository is structured across three decoupled layers visually depicted in our 2.5D isometric platform:
-
-1. **Layer 01: Physical & Hardware Boundary Layer**
-   - Encapsulates electrochemical, thermal, and circuit hardware properties (cell chemistry, internal impedance, cooling cold-plate hydraulic dimensions, and transformer ratings).
-2. **Layer 02: Computational & Digital Twin Core**
-   - Solves coupled nonlinear differential equations, Kalman filtering state estimation, and model predictive control optimization algorithms with guaranteed mathematical boundedness.
-3. **Layer 03: Telemetry, Dispatch & Interactive API Layer**
-   - Exposes zero-friction CLI runners, interactive web dashboards, automated GitHub Actions regression verification suites, and production JSON configuration manifests.
-
-```
-       ▲  [LAYER 03: TELEMETRY & DISPATCH]   --> Web Dashboard, REST API, Automated CI
-      / \
-     ▲   ▲ [LAYER 02: NUMERICAL CORE]        --> Differential Solvers, EKF, Optimization
-    / \ / \
-   ▲   ▲   ▲ [LAYER 01: HARDWARE BOUNDS]     --> Equivalent Circuit, Thermal Mesh, Grid POI
-```
-
----
-
-## 🚀 Quickstart
-
-Run the full reproduction test suite locally with zero manual setup:
+Node.js >=22 for the standalone preview and numerical browser tests; Python 3.11+ for the native research app and dev extra.
 
 ```bash
-# Clone the repository
-git clone https://github.com/mohammadrezwankhan/zephyrtrade.git
-cd zephyrtrade
-
-# Option A: Python Environment
-pip install -r requirements.txt
-python -m unittest discover -s tests -p "*_test.py"
-
-# Option B: Launch Local 2.5D Interactive Dashboard
-cd docs && python -m http.server 8080
-# Open http://localhost:8080 in your browser
+node scripts/preview-demo.mjs
+python -m pip install -e ".[dev]"
+python -m zephyrtrade.app --no-browser
+node --test tests/browser/engine.test.cjs
 ```
 
----
+These commands come from the audited source revision. Runtime requirements and the project's own validation limits are documented below; the standalone browser lab does not execute these commands.
 
-## 📚 Lesson Configuration Matrix
-
-This repository includes a progressive 4-part industrial lab curriculum. Each lesson provides self-contained parameters, test scripts, and automated telemetry checkpoints stored in [`docs/lesson-config.json`](docs/lesson-config.json).
-
-| Lesson ID | Level | Duration | Module Target | Core Objective |
-| :--- | :--- | :--- | :--- | :--- |
-| **`L01`** | `Beginner` | `30 mins` | `configs/wind_power_curve.json` | Numerical Weather Prediction (NWP) to Power Curve Transfer |
-| **`L02`** | `Intermediate` | `45 mins` | `configs/quantile_forecast.json` | Quantile Regression & Probabilistic Wind Power Density Function |
-| **`L03`** | `Advanced` | `60 mins` | `configs/imbalance_bidding.json` | Asymmetric Under/Over-Generation Penalties Offer Optimization |
-| **`L04`** | `Production` | `75 mins` | `configs/backtest_engine.json` | Multi-Year Revenue Backtesting vs. Naive Climatology Benchmarks |
-
+The detailed project guide below remains the source for installation, supported features, licences, and scientific limits. The browser equations and laboratory settings do not change the original application or numerical engine.
 
 <details>
-<summary><strong>🔍 Click to expand detailed lesson specifications</strong></summary>
+<summary>Project documentation, installation, attribution, and existing validation</summary>
 
-### L01: Numerical Weather Prediction (NWP) to Power Curve Transfer
-- **Complexity Level:** `Beginner` | **Estimated Time:** `30 mins`
-- **Target File:** `configs/wind_power_curve.json`
-- **Objective:** Convert wind speed, air density, and wind shear profile to aerodynamic turbine power output using nonlinear cubic and saturation curves.
-- **Key Inputs:** Hourly wind speed anemometer data, Ambient temperature and barometric pressure
-- **Calibrated Parameters:** `{"CutInSpeed_m_s": 3.0, "RatedSpeed_m_s": 12.0, "CutOutSpeed_m_s": 25.0, "TurbineRating_MW": 3.4}`
-- **Verification Criteria:**
-  - [x] Account for wake loss array efficiency factor (92%)
-  - [x] Map power output distribution accurately across seasons
+# ZephyrTrade
 
-### L02: Quantile Regression & Probabilistic Wind Power Density Function
-- **Complexity Level:** `Intermediate` | **Estimated Time:** `45 mins`
-- **Target File:** `configs/quantile_forecast.json`
-- **Objective:** Train pinball-loss gradient boosting models generating P10, P50, and P90 power generation quantiles rather than point forecasts.
-- **Key Inputs:** Multi-horizon meteorological ensemble forecasts, Historical farm generation logs
-- **Calibrated Parameters:** `{"Quantiles": [0.1, 0.25, 0.5, 0.75, 0.9], "PinballAlpha": 0.5, "LeadTime_Hours": 24}`
-- **Verification Criteria:**
-  - [x] Verify calibration curve reliability diagram
-  - [x] Measure Continuous Ranked Probability Score (CRPS) < 0.082
+## Cloudflare browser edition
 
-### L03: Asymmetric Under/Over-Generation Penalties Offer Optimization
-- **Complexity Level:** `Advanced` | **Estimated Time:** `60 mins`
-- **Target File:** `configs/imbalance_bidding.json`
-- **Objective:** Derive optimal strategic bid quantity Q* under dual-settlement systems where short positions incur higher penalties than long positions.
-- **Key Inputs:** Day-ahead clearing price P_DA, Real-time imbalance penalty spread Delta_P
-- **Calibrated Parameters:** `{"PenaltyRatio_UnderGen": 1.45, "PenaltyRatio_OverGen": 0.85}`
-- **Verification Criteria:**
-  - [x] Demonstrate bid shifting toward lower quantiles (P35-P40) to minimize asymmetric penalty risk
-  - [x] Prove mathematical optimality via newsvendor theorem
+[Open the public browser app](https://mktrade.co.business/run/) · [Purpose, usage and limits](https://mktrade.co.business/) · [Methodology](https://mktrade.co.business/methodology/) · [Build and deployment guide](docs/CLOUDFLARE.md)
 
-### L04: Multi-Year Revenue Backtesting vs. Naive Climatology Benchmarks
-- **Complexity Level:** `Production` | **Estimated Time:** `75 mins`
-- **Target File:** `configs/backtest_engine.json`
-- **Objective:** Run full 3-year backtest across 105,120 settlement intervals, outputting Sharpe ratio, maximum drawdown, and net cash flow distributions.
-- **Key Inputs:** Full historical market clearing and weather time series, Trading strategy execution logic
-- **Calibrated Parameters:** `{"TransactionFee_USD_MWh": 0.25, "InitialCapital_USD": 1000000}`
-- **Verification Criteria:**
-  - [x] Generate interactive equity curve and drawdown chart
-  - [x] Demonstrate +14.2% annualized revenue uplift over baseline naive bidding
+[![CI](https://github.com/mohammadrezwankhan/zephyrtrade/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/mohammadrezwankhan/zephyrtrade/actions/workflows/ci.yml) · [MIT license](LICENSE) · [Verification and limits](QUALITY_REPORT.md)
+
+Research application that generates synthetic wind/weather/price tables, compares wind-forecast and direct-offer strategies, backtests revenue and explores hypothetical offers without placing trades.
+
+If ZephyrTrade helps you study this workflow, a star helps other wind-market and numerical-method researchers find it.
+
+![Actual desktop demo](docs/repository/demo-desktop.png)
+
+## Try the demo
+
+[Open the hosted synthetic demo](https://mohammadrezwankhan.github.io/zephyrtrade/) or run the identical standalone artifact locally:
+
+Prerequisite: Node.js 22 or later; tested here with Node.js 24. This runs locally with synthetic examples. It does not connect to a live provider or publish user input.
+
+```sh
+git clone https://github.com/mohammadrezwankhan/zephyrtrade.git
+cd zephyrtrade
+node scripts/preview-demo.mjs
+```
+
+Open **<http://127.0.0.1:4173>**. Stop the server with Ctrl+C. The first screen is a demonstration, not verified current information. Keep private or real-world records out of this evaluation.
+
+## Why inspect this project?
+
+ZephyrTrade generates synthetic wind, weather and price tables, compares forecast and direct-offer strategies, and reconciles hypothetical revenue. Its Python and browser engines expose the assumptions so a researcher can inspect numerical agreement instead of relying on a dashboard alone.
+
+Read the [engineering walkthrough](docs/engineering/CASE_STUDY.md) and [adjacent-tool comparison](docs/ALTERNATIVES.md), or follow the [source map](PROJECT_ANALYSIS.md).
+
+- [Current verification and limits](QUALITY_REPORT.md)
+- [Architecture and source map](docs/architecture/system-overview.md)
+- [Contribution guide](CONTRIBUTING.md) and [small contribution tasks](docs/CHAMPION_QUESTS.md)
+- [Security reporting](SECURITY.md), [support](SUPPORT.md), and [roadmap](ROADMAP.md)
+
+## Develop and verify
+
+Install ZephyrTrade with its Python development extras in an isolated environment; follow the detailed guide below. The browser numerical tests use Node.js and the Python parity check uses the same installed package.
+
+```sh
+python -m pytest
+python -m ruff check src tests
+node --test tests/browser/engine.test.cjs
+python scripts/verify_engines.py
+python -m build
+```
+
+Prior reports under `docs/` describe the supplied candidate. They do not replace the current [quality report](QUALITY_REPORT.md). Passing software checks is not clinical, educational, financial, safety, or production-service validation.
+
+## License and scope
+
+First-party source is available under [MIT](LICENSE). Bundled dependencies retain their upstream notices; trademarks and third-party content are not relicensed.
+
+<details>
+<summary>Supplied engineering guide, product boundaries, and detailed usage</summary>
+
+# ZephyrTrade Champion
+
+## A local wind-market research desk • candidate 1.1.0
+
+Explore the supplied synthetic backtest, compare nine strategies and calculate
+scenario-based offers. There are **no live prices, real orders, broker connections,
+accounts, external analytics, remote fonts or CDNs** in this app.
+
+![Implemented desktop interface](docs/champion/evidence/screenshots/overview-desktop.png)
+
+## Start with the portable app — no installation
+
+Extract the ZIP, then open **`ZephyrTrade-Champion.html`** in a current desktop
+browser. Windows also has `OPEN_CHAMPION_WINDOWS.bat`. The single HTML contains the
+interface, calculations and validated observation snapshot; keep it in a stable
+folder. JavaScript must be enabled. Do not open the separate source `web/index.html`
+in isolation: use the complete portable HTML or the Python launcher.
+
+Use **Overview** for strategy/date filters and output, cumulative-revenue and price
+charts. **Strategy lab** calculates an offer from editable assumptions, saves named
+scenarios and exports/imports JSON. **Model arena** compares all nine strategies.
+**Data explorer** exposes retained hourly observations and CSV exports. **Method &
+evidence** explains the data provenance, exclusions, units and limits.
+
+Saved scenarios use browser-local storage, not a cloud account. Private mode,
+enterprise policy, file relocation or clearing browser data can affect persistence.
+Export scenario JSON backups. An unavailable save is reported as an error. Draft
+inputs are retained while moving between app pages, but are not automatically
+written to disk and can be lost on closing/reloading the page. Recalculate edited
+inputs before saving or exporting a result.
+
+## Optional: use the real Python / SciPy cross-check
+
+The portable app already calculates an optimal weighted-quantile offer in JavaScript.
+The Python service adds a separate SciPy linear-program cross-check on your machine.
+It does **not** train a new model when filters change.
+
+On Windows, run `START_PYTHON_WINDOWS.bat`. It requires Python 3.11+ and creates a
+new `.venv-champion` environment; first setup needs internet package access. The
+launcher does not modify or reuse the uploaded `.venv`. Windows launcher execution
+was not available in the Linux verification environment.
+
+On macOS/Linux, run `sh start-python.sh`, or install manually:
+
+```sh
+python3 -m venv .venv-champion
+. .venv-champion/bin/activate
+python -m pip install -e .
+python -m zephyrtrade.app
+```
+
+Manual Windows activation uses `.venv-champion\Scripts\activate.bat` in Command
+Prompt. After startup, open `http://127.0.0.1:8765`. The app opens a browser where the
+operating system supports that operation. Keep the terminal open; use Ctrl+C to stop.
+A busy port can be avoided with `python -m zephyrtrade.app --port 8766`.
+`--no-browser` starts the server without requesting a browser window.
+
+**Do not expose this server to the internet or put it behind a public tunnel.** It
+is a local, single-user research server, not a production hosting architecture.
+No authentication system is provided because no shared or public service is in scope.
+
+## What is preserved, and what is new?
+
+The original NumPy/pandas/scikit-learn/SciPy research pipeline, synthetic data,
+chronological splits and supplied model outputs remain. The original README is
+retained, unchanged, as [README_RESEARCH.md](README_RESEARCH.md). Historical reports
+under `docs/` describe the uploaded research run, not the new verification run.
+
+New: the browser app, loopback API, scenario validation, recoverable UI states,
+source-backed snapshot compiler, launchers and tests. Focused Python repairs address
+undefined revenue capture, single-row R², nonfinite inputs, invalid probabilities,
+class IDs and a quantile-rounding boundary error. See
+[the audit and verification report](docs/champion/AUDIT_AND_RELEASE.md).
+
+One explicit API contract change: `revenue_capture_pct` is `None` when the benchmark
+is not positive, and single-observation `r2` is `None`. Callers must handle undefined
+metrics rather than treating them as zero. Ordinary positive-benchmark calculations
+and valid multi-row metrics are preserved.
+
+## Data boundary
+
+The interface contains **3,888 retained hourly test observations**, **nine strategies**,
+one **30 MW synthetic Ronne Coastal Proxy** site and two source-file SHA-256 hashes.
+The test snapshot spans 20 July–31 December 2024 UTC; it is **not current market data**.
+There are 53 absent hours between endpoints. The original pipeline removed 319
+negative-price hours across its full generated source period. It is not an
+unfiltered calendar backtest. The sandbox allows negative prices under the stated
+price-order assumptions, but that does not restore omitted backtest observations.
+
+Perfect foresight knows actual production and is an analytical benchmark, not an
+operational forecast. Forecast issuance, gate-closure availability, current market
+rules, transaction costs and real settlement data are not validated. Synthetic
+capture percentages do not establish investable or live trading performance.
+
+## Verification and known limits
+
+- 86 Python tests pass with warnings treated as errors, including real local HTTP requests.
+- 13 JavaScript numerical test cases pass; 120 seeded scenarios agree with SciPy to less than 0.000001 DKK in objective value.
+- 23 Chromium UI-harness checks pass across 320–1440 CSS-pixel layouts. Screenshots are of the implemented app.
+- All 34,992 saved strategy revenue values reconcile with recomputation; largest difference is approximately 3.64e-12 DKK.
+
+**The test browser's administrator policy blocked direct file and localhost navigation.**
+UI checks therefore render the shipped HTML with Playwright `set_content` and use an
+explicit in-memory Storage double. Native durable browser storage, direct file opening
+and browser-to-Python integration still need a normal-browser check. Python HTTP and
+browser calculations were tested separately; this is not a claim of full hosted E2E.
+
+A new bounded training smoke completed using the normal Phase 2 and a reduced Phase 3
+grid. Four Lasso convergence warnings are retained in its log. The default full-grid
+pipeline exceeded the 120-second test limit and is not verified end to end here.
+The supplied multi-year models were **not retrained or replaced**.
+
+Ruff and the `build` frontend could not be installed in this environment. Do not read
+this delivery as a passing hosted CI, complete WCAG conformance, security certification,
+human UAT sign-off or production release. Detailed status and evidence are in
+`docs/champion/`. This is a **local research release candidate**, not a deployed product.
+
+## Reproduce the checks
+
+Install `.[dev]` in a development environment with package access. Node is only needed
+for JavaScript tests and parity verification, not to use the app.
+
+```sh
+python -m pytest -W error
+node --test tests/browser/engine.test.cjs
+python scripts/verify_engines.py
+python scripts/build_app.py
+python -m ruff check src tests
+python -m ruff format --check src tests
+python -m build
+```
+
+The optional browser harness requires Playwright and Chromium:
+`python scripts/check_browser.py --chromium /path/to/chromium`.
+It documents its Storage test double and navigation limitations in its output.
+For a bounded fresh training check, choose a new directory:
+`python scripts/smoke_research.py --output /tmp/zephyr-new-smoke`.
+
+To reproduce the original full research workflow, follow `README_RESEARCH.md`; it is
+computationally heavier than browsing the packaged snapshot. Use new output directories
+rather than overwriting the supplied evidence. `requirements-tested.txt` records observed
+scientific-package versions; it is not a cross-platform resolved lockfile.
+
+## Licence and distribution
+
+The supplied project has an MIT licence, retained in `LICENSE`. New app icons, CSS,
+SVG diagrams and interface code are original and use that project licence. No font
+files, model-environment executables or third-party frontend bundles are included.
+The root ZIP includes the original datasets and reports. The wheel is a Python app
+package with its precompiled web snapshot, not a standalone Windows executable.
 
 </details>
 
----
-
-## 📊 Verification Benchmarks
-
-| Metric Benchmark | Reference Baseline | Proposed Framework | Improvement | Verification Status |
-| :--- | :--- | :--- | :--- | :--- |
-| Estimation Error (RMSE) | 3.85% | **0.94%** | **-75.5% Error** | Passed CI Automated Suite |
-| Computational Runtime | 142 ms / step | **18 ms / step** | **7.8x Speedup** | Benchmarked on standard x86 |
-| Memory Footprint | 480 MB | **64 MB** | **-86.6% RAM** | Profiled via memory profiler |
-| Numerical Stability Margin | Divergence @ 10 kHz | **Stable to 100 kHz** | **10x Stability Window** | 100,000 Step Monte Carlo Run |
-
----
-
-## 📜 Citation
-
-If you use this repository, its models, or the accompanying interactive 2.5D curriculum in academic or industrial research, please cite:
-
-```bibtex
-@software{khan_zephyrtrade,
-  author       = {Mohammad Rezwan Khan},
-  title        = {{ZephyrTrade Wind Power Trading Workbench: Probabilistic Wind Forecasting, Asymmetric Imbalance & Revenue Backtesting}},
-  year         = {2026},
-  publisher    = {GitHub},
-  journal      = {GitHub Repository},
-  howpublished = {\url{https://github.com/mohammadrezwankhan/zephyrtrade}}
-}
-```
-
----
-
-## ⭐ Star History
-
-Join our growing community of engineers, researchers, and developers pushing open-source energy storage and computational modeling forward:
-
-<div align="center">
-  <a href="https://star-history.com/#mohammadrezwankhan/zephyrtrade&Date">
-    <img src="https://api.star-history.com/svg?repos=mohammadrezwankhan/zephyrtrade&type=Date" alt="Star History Chart" width="80%">
-  </a>
-</div>
-
----
-
-<p align="center">
-  Distributed under the MIT License. Built with pride by <a href="https://github.com/mohammadrezwankhan"><strong>Mohammad Rezwan Khan</strong></a>.
-</p>
+</details>
