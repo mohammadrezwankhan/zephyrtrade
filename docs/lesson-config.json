@@ -1,0 +1,98 @@
+{
+  "repository": "zephyrtrade",
+  "domain": "DOMAIN_C",
+  "title": "ZephyrTrade Wind Power Trading Workbench",
+  "version": "2.0.0",
+  "author": "Mohammad Rezwan Khan",
+  "lessons": [
+    {
+      "id": "L01",
+      "title": "Numerical Weather Prediction (NWP) to Power Curve Transfer",
+      "level": "Beginner",
+      "duration": "30 mins",
+      "config_file": "configs/wind_power_curve.json",
+      "summary": "Convert wind speed, air density, and wind shear profile to aerodynamic turbine power output using nonlinear cubic and saturation curves.",
+      "inputs": [
+        "Hourly wind speed anemometer data",
+        "Ambient temperature and barometric pressure"
+      ],
+      "parameters": {
+        "CutInSpeed_m_s": 3.0,
+        "RatedSpeed_m_s": 12.0,
+        "CutOutSpeed_m_s": 25.0,
+        "TurbineRating_MW": 3.4
+      },
+      "checkpoints": [
+        "Account for wake loss array efficiency factor (92%)",
+        "Map power output distribution accurately across seasons"
+      ]
+    },
+    {
+      "id": "L02",
+      "title": "Quantile Regression & Probabilistic Wind Power Density Function",
+      "level": "Intermediate",
+      "duration": "45 mins",
+      "config_file": "configs/quantile_forecast.json",
+      "summary": "Train pinball-loss gradient boosting models generating P10, P50, and P90 power generation quantiles rather than point forecasts.",
+      "inputs": [
+        "Multi-horizon meteorological ensemble forecasts",
+        "Historical farm generation logs"
+      ],
+      "parameters": {
+        "Quantiles": [
+          0.1,
+          0.25,
+          0.5,
+          0.75,
+          0.9
+        ],
+        "PinballAlpha": 0.5,
+        "LeadTime_Hours": 24
+      },
+      "checkpoints": [
+        "Verify calibration curve reliability diagram",
+        "Measure Continuous Ranked Probability Score (CRPS) < 0.082"
+      ]
+    },
+    {
+      "id": "L03",
+      "title": "Asymmetric Under/Over-Generation Penalties Offer Optimization",
+      "level": "Advanced",
+      "duration": "60 mins",
+      "config_file": "configs/imbalance_bidding.json",
+      "summary": "Derive optimal strategic bid quantity Q* under dual-settlement systems where short positions incur higher penalties than long positions.",
+      "inputs": [
+        "Day-ahead clearing price P_DA",
+        "Real-time imbalance penalty spread Delta_P"
+      ],
+      "parameters": {
+        "PenaltyRatio_UnderGen": 1.45,
+        "PenaltyRatio_OverGen": 0.85
+      },
+      "checkpoints": [
+        "Demonstrate bid shifting toward lower quantiles (P35-P40) to minimize asymmetric penalty risk",
+        "Prove mathematical optimality via newsvendor theorem"
+      ]
+    },
+    {
+      "id": "L04",
+      "title": "Multi-Year Revenue Backtesting vs. Naive Climatology Benchmarks",
+      "level": "Production",
+      "duration": "75 mins",
+      "config_file": "configs/backtest_engine.json",
+      "summary": "Run full 3-year backtest across 105,120 settlement intervals, outputting Sharpe ratio, maximum drawdown, and net cash flow distributions.",
+      "inputs": [
+        "Full historical market clearing and weather time series",
+        "Trading strategy execution logic"
+      ],
+      "parameters": {
+        "TransactionFee_USD_MWh": 0.25,
+        "InitialCapital_USD": 1000000
+      },
+      "checkpoints": [
+        "Generate interactive equity curve and drawdown chart",
+        "Demonstrate +14.2% annualized revenue uplift over baseline naive bidding"
+      ]
+    }
+  ]
+}
