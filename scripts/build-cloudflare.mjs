@@ -5,6 +5,7 @@ import { fileURLToPath } from 'node:url';
 import { createHash } from 'node:crypto';
 import { execFileSync } from 'node:child_process';
 import { createServer } from 'node:http';
+import { runtimeSecurity, runtimeHeaderBlock } from './runtime-security.mjs';
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
 const config = JSON.parse(fs.readFileSync(path.join(root, 'cloudflare.json'), 'utf8'));
@@ -80,6 +81,8 @@ runtime = runtime.replace(/<meta\b[^>]*\bname\s*=\s*["']robots["'][^>]*>/gi, '')
   .replace(/<link\b[^>]*\brel\s*=\s*["']canonical["'][^>]*>/gi, '')
   .replace(/<head\b[^>]*>/i, match => match + `\n<meta name="robots" content="noindex,follow"><link rel="canonical" href="${escape(canonical)}">\n`);
 fs.writeFileSync(path.join(out,'run','index.html'),runtime);
+fs.writeFileSync(path.join(out,'_headers'), `/*\n  X-Content-Type-Options: nosniff\n  Referrer-Policy: strict-origin-when-cross-origin\n  X-Frame-Options: DENY\n  Permissions-Policy: camera=(), microphone=(), geolocation=()\n${runtimeHeaderBlock(runtime)}`);
+fs.writeFileSync(path.join(outputRoot,'app-security-headers.json'), JSON.stringify(runtimeSecurity(runtime),null,2)+'\n');
 fs.copyFileSync(local('scripts/cloudflare-site.css'),path.join(out,'site.css'));
 fs.copyFileSync(local('docs/repository/social-preview.png'),path.join(out,'social-preview.png'));
 fs.copyFileSync(local(config.previewArtifact||'docs/repository/demo-desktop.png'),path.join(out,'preview.png'));

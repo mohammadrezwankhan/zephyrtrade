@@ -95,7 +95,7 @@ def make_snapshot(root: Path = ROOT) -> dict:
                         'source_negative_price_rows_removed': provenance['price_filter']['negative_price_rows_removed'],
                         'revenue_values_checked': len(a)*len(models),
                         'maximum_revenue_error_dkk': maximum_error},
-            'sources': [{'path': str(p.relative_to(root)), 'sha256': hashlib.sha256(p.read_bytes()).hexdigest()} for p in paths]}
+            'sources': [{'path': p.relative_to(root).as_posix(), 'sha256': hashlib.sha256(p.read_bytes()).hexdigest()} for p in paths]}
     return snap
 
 
@@ -103,16 +103,16 @@ def build() -> None:
     """Write snapshot, provenance verification and the portable HTML artifact."""
     snap = make_snapshot()
     data = 'window.ZEPHYR_DATA = ' + json.dumps(snap, ensure_ascii=False, allow_nan=False, separators=(',', ':')).replace('</', '<\\/') + ';\n'
-    (WEB / 'snapshot.js').write_text(data, encoding='utf-8')
+    (WEB / 'snapshot.js').write_text(data, encoding='utf-8', newline='\n')
     index = (WEB / 'index.html').read_text(encoding='utf-8')
     index = index.replace('<link rel="stylesheet" href="styles.css">', '<style>\n' + (WEB/'styles.css').read_text() + '\n</style>')
     for name in ['snapshot.js', 'engine.js', 'app.js']:
         content = (WEB/name).read_text(encoding='utf-8').replace('</script', '<\\/script')
         index = index.replace(f'<script src="{name}" defer></script>', '<script>\n' + content + '\n</script>')
-    (ROOT / 'ZephyrTrade-Champion.html').write_text(index, encoding='utf-8')
+    (ROOT / 'ZephyrTrade-Champion.html').write_text(index, encoding='utf-8', newline='\n')
     out = ROOT / 'docs/champion/evidence/snapshot-verification.json'
     out.parent.mkdir(parents=True, exist_ok=True)
-    out.write_text(json.dumps({'status': 'PASS', 'quality': snap['quality'], 'sources': snap['sources']}, indent=2))
+    out.write_text(json.dumps({'status': 'PASS', 'quality': snap['quality'], 'sources': snap['sources']}, indent=2), encoding='utf-8', newline='\n')
     print(json.dumps({'status': 'PASS', 'output': 'ZephyrTrade-Champion.html', 'rows':len(snap['timestamps']),
                       'models':len(snap['models']), **snap['quality']}, indent=2))
 

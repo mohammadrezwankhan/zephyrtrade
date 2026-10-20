@@ -3,6 +3,7 @@ import path from 'node:path';
 import assert from 'node:assert/strict';
 import {fileURLToPath} from 'node:url';
 import {createHash} from 'node:crypto';
+import {runtimeSecurity, runtimeHeaderBlock} from './runtime-security.mjs';
 const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..'),outputRoot=process.env.CLOUDFLARE_OUTPUT_ROOT===undefined?path.join(root,'.cloudflare'):path.resolve(root,process.env.CLOUDFLARE_OUTPUT_ROOT),out=path.join(outputRoot,'site');
 const site=JSON.parse(fs.readFileSync(path.join(root,'cloudflare-domain.json'),'utf8'));
 const origin=new URL(site.canonical).origin,read=p=>fs.readFileSync(path.join(out,p),'utf8');
@@ -20,6 +21,8 @@ for(const [file,url] of [['index.html',site.canonical],['methodology/index.html'
  for(const m of html.matchAll(/(?:href|src)="(\/[^"#?]*)"/g)){const ref=m[1].endsWith('/')?m[1]+'index.html':m[1];assert.ok(fs.existsSync(path.join(out,ref)),`${file}: missing ${ref}`);}
 }
 const overview=read('index.html'),headers=read('_headers'),heroDirectory='assets/engineering-hero/v1';
+assert.ok(headers.includes(runtimeHeaderBlock(read('run/index.html'))));
+assert.deepEqual(JSON.parse(fs.readFileSync(path.join(outputRoot,'runtime-security-headers.json'),'utf8')),runtimeSecurity(read('run/index.html')));
 if(site.engineeringHero===true){
  assert.ok(overview.includes('<h1>Explore the assumptions behind an energy offer.</h1>'));
  assert.ok(overview.includes('href="/run/">Open ZephyrTrade'));
@@ -41,7 +44,7 @@ if(site.engineeringHero===true){
   assert.ok(block.includes('\n  Content-Security-Policy: '+policy+'\n'));
   assert.ok(block.includes('\n  ! X-Frame-Options\n'));
  }
- const globalHeaders=headers.slice(0,headers.indexOf('/assets/engineering-hero/v1/index.html'));
+ const globalHeaders=headers.slice(0,headers.indexOf('/run/*'));
  assert.ok(globalHeaders.includes('X-Frame-Options: DENY'));
  assert.ok(!globalHeaders.includes('Content-Security-Policy:'));
 }else{
