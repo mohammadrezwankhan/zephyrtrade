@@ -357,7 +357,7 @@ test('Release gate: exact document, HTTPS security headers and both CSP script d
     expect(directives.has(name), `Duplicate CSP directive ${name}`).toBe(false);
     directives.set(name, tokens);
   }
-  const scripts = [...body.toString('utf8').matchAll(/<script\b([^>]*)>([\s\S]*?)<\/script\s*>/gi)];
+  const scripts = [...body.toString('utf8').matchAll(/<script(?=[\t\n\f\r />])([^>]*)>([\s\S]*?)<\/script(?=[\t\n\f\r />])[^>]*>/gi)];
   expect(scripts).toHaveLength(3);
   expect(scripts.every(match => !/\bsrc\s*=/i.test(match[1]))).toBe(true);
   for (const name of ['script-src', 'script-src-elem']) {

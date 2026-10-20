@@ -3,7 +3,7 @@ import {createHash} from 'node:crypto';
 
 export function runtimeSecurity(html) {
   const normalized = html.replace(/^\uFEFF/, '').replace(/\r\n?/g, '\n');
-  const scripts = [...normalized.matchAll(/<script\b([^>]*)>([\s\S]*?)<\/script\s*>/gi)];
+  const scripts = [...normalized.matchAll(/<script(?=[\t\n\f\r />])([^>]*)>([\s\S]*?)<\/script(?=[\t\n\f\r />])[^>]*>/gi)];
   if (scripts.length !== 3 || scripts.some(match => /\bsrc\s*=/i.test(match[1]))) {
     throw Error('Expected exactly three inline runtime scripts and no external script');
   }

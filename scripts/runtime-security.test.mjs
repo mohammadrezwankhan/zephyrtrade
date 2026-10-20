@@ -23,6 +23,14 @@ test('changed runtime architecture and external scripts fail closed', () => {
   assert.throws(()=>runtimeSecurity('<script>one</script><script>two</script><script src="https://example.com/beacon.js"></script>'),/external script/);
 });
 
+test('script inventory recognizes HTML case and closing-tag syntax', () => {
+  const canonical = '<script>one</script><script>two</script><script>three</script>';
+  const alternate = '<SCRIPT>one</SCRIPT\t\n ignored><script>two</script/><script>three</script>';
+  assert.deepEqual(runtimeSecurity(alternate).inline_script_hashes, runtimeSecurity(canonical).inline_script_hashes);
+  assert.throws(()=>runtimeSecurity(alternate+'<ScRiPt SRC="/unexpected.js"></ScRiPt>'),/exactly three/);
+  assert.throws(()=>runtimeSecurity('<SCRIPT SRC="/unexpected.js">one</SCRIPT\t ignored><script>two</script><script>three</script>'),/external script/);
+});
+
 test('standalone source carries no analytics script', () => {
   runtimeSecurity(fs.readFileSync(new URL('../ZephyrTrade-Champion.html',import.meta.url),'utf8'));
 });

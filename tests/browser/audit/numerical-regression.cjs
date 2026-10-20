@@ -8,7 +8,7 @@ const crypto = require('node:crypto');
 const file = process.argv[2];
 if (!file) throw new Error('Pass the HTML snapshot to test.');
 const html = fs.readFileSync(file, 'utf8');
-const scripts = [...html.matchAll(/<script\b([^>]*)>([\s\S]*?)<\/script>/g)].filter(x => !/\bsrc\s*=/.test(x[1]));
+const scripts = [...html.matchAll(/<script(?=[\t\n\f\r />])([^>]*)>([\s\S]*?)<\/script(?=[\t\n\f\r />])[^>]*>/gi)].filter(x => !/\bsrc\s*=/i.test(x[1]));
 const engine = scripts.find(x => x[2].includes('ZephyrTrade numerical browser engine'))[2];
 const context = vm.createContext({ module: { exports: {} } });
 vm.runInContext(engine, context, { timeout: 1000 });
