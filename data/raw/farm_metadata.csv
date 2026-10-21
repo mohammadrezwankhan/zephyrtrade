@@ -1,0 +1,5 @@
+farm_id,display_name,latitude,longitude,capacity_mw,site_type
+bornholm_ronne_coastal,Ronne Coastal Proxy,55.1,14.706,30.0,synthetic_proxy
+bornholm_hasle_ridge,Hasle Ridge Proxy,55.184,14.706,24.0,synthetic_proxy
+bornholm_nexo_east,Nexo East Proxy,55.06,15.13,36.0,synthetic_proxy
+bornholm_aakirkeby_inland,Aakirkeby Inland Proxy,55.07,14.92,18.0,synthetic_proxy

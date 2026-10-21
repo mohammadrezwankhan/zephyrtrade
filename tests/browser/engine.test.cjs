@@ -17,10 +17,12 @@ test('duration scales objective, not offer',()=>{
 });
 test('quantile endpoints and floating-point rows do not wrap',()=>{
  close(E.optimize({...base,da:600,probabilities:[.2,.3,.49999999]}).offer,20);
- close(E.optimize({...base,da:200}).offer,2);
+ // At the lower price boundary every offer below the first supported scenario ties.
+ close(E.optimize({...base,da:200}).offer,0);
 });
-test('zero-probability scenarios are not quantile support',()=>{
- close(E.optimize({...base,da:200,probabilities:[0,1,0]}).offer,8);
+test('zero weights do not change the objective and exact ties choose the lowest breakpoint',()=>{
+ const r=E.optimize({...base,da:200,probabilities:[0,1,0]});
+ close(r.offer,0);close(r.expected,E.revenue(8,8,200,600,200));
 });
 test('negative prices are supported under ordered assumptions',()=>{
  const r=E.optimize({...base,da:-100,up:0,down:-200});r.curve.forEach(p=>assert.ok(p.revenue<=r.expected+1e-7));
@@ -44,6 +46,20 @@ test('CSV quotes and formula-neutralises text, not negative numbers',()=>{
 test('scenario parser accepts documented separators and rejects bad input',()=>{
  assert.deepEqual(E.parseNumbers('1, 2;3\n4'),[1,2,3,4]);assert.deepEqual(E.parseNumbers(''),[]);
  assert.throws(()=>E.parseNumbers('1,NaN'));assert.throws(()=>E.parseNumbers('1,word'));
+});
+
+test('empty comma and semicolon fields are rejected instead of becoming zero or equal weights',()=>{
+ for(const text of [',2,5','2,5,',';2;5','2;5;','2,,5','2;;5','2, ;5',',0.2,0.8'])
+  assert.throws(()=>E.parseNumbers(text),/empty values/);
+ assert.deepEqual(E.parseNumbers(' \t\n '),[]);
+ assert.deepEqual(E.parseNumbers('0.2 0.8'),[.2,.8]);
+});
+
+test('near a CDF boundary the actual best objective wins',()=>{
+ const input={capacity:10000,hours:24,da:45000.000000055,up:100000,down:-10000,scenarios:[0,10000],probabilities:[.5,.5]};
+ const r=E.optimize(input);
+ assert.equal(r.offer,10000);
+ assert.ok(r.expected > r.curve.find(p=>p.offer===0).revenue);
 });
 test('statistics reject mismatched and nonfinite inputs',()=>{
  assert.throws(()=>E.statistics([],[],[],[],[]));assert.throws(()=>E.statistics([1],[NaN],[1],[2],[0]));
