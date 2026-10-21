@@ -1,0 +1,23 @@
+{
+  "@context": "https://w3id.org/codemeta/3.0",
+  "@type": "SoftwareSourceCode",
+  "name": "ZephyrTrade Champion: local research candidate",
+  "codeRepository": "https://github.com/mohammadrezwankhan/zephyrtrade",
+  "url": "https://github.com/mohammadrezwankhan/zephyrtrade",
+  "author": [
+    {
+      "@type": "Organization",
+      "name": "ZephyrTrade contributors"
+    }
+  ],
+  "readme": "https://github.com/mohammadrezwankhan/zephyrtrade/blob/HEAD/README.md",
+  "issueTracker": "https://github.com/mohammadrezwankhan/zephyrtrade/issues",
+  "continuousIntegration": "https://github.com/mohammadrezwankhan/zephyrtrade/actions",
+  "relatedLink": [
+    "https://rezwankhan.tech/",
+    "https://github.com/mohammadrezwankhan/zephyrtrade/blob/HEAD/CITATION.cff"
+  ],
+  "version": "preview-2026.09.30",
+  "datePublished": "2026-09-30",
+  "license": "https://spdx.org/licenses/MIT.html"
+}

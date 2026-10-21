@@ -1,0 +1,763 @@
+{
+  "schema_version": 1,
+  "repository": {
+    "name": "zephyrtrade",
+    "name_with_owner": "mohammadrezwankhan/zephyrtrade",
+    "url": "https://github.com/mohammadrezwankhan/zephyrtrade"
+  },
+  "native_source": {
+    "commit": "648480d5c2fcbfbbd94f4e606f3f896352b1f7b6",
+    "url": "https://github.com/mohammadrezwankhan/zephyrtrade/tree/648480d5c2fcbfbbd94f4e606f3f896352b1f7b6",
+    "source_path_override": null
+  },
+  "browser_lab_package_provenance": {
+    "commit": "090c28970f1a6c6f3032aaa4cf086e0d475a84da",
+    "url": "https://github.com/mohammadrezwankhan/zephyrtrade/tree/090c28970f1a6c6f3032aaa4cf086e0d475a84da",
+    "scope": "This browser lab is a standalone teaching approximation. Use the linked source for the project implementation.",
+    "calibration_status": "synthetic-analytical-fixtures",
+    "config_path": "docs/lesson-config.json"
+  },
+  "native_catalog_source": "Tracked Markdown in source lesson, example, study-case, concept, model, and documentation paths.",
+  "native_material_count": 29,
+  "reproduction_command_count": 5,
+  "materials": [
+    {
+      "id": "doc-c6606393c17a",
+      "title": "Cloudflare browser edition",
+      "path": "docs/CLOUDFLARE.md",
+      "line": 1,
+      "source_paths": [
+        "docs/CLOUDFLARE.md"
+      ],
+      "source_url": "https://github.com/mohammadrezwankhan/zephyrtrade/blob/648480d5c2fcbfbbd94f4e606f3f896352b1f7b6/docs/CLOUDFLARE.md#L1",
+      "source_revision": "648480d5c2fcbfbbd94f4e606f3f896352b1f7b6",
+      "source_kind": "audited-native-source",
+      "source_label": "Source at 648480d5c2fc",
+      "catalog_url": null,
+      "native_url": null,
+      "excerpt": "Public overview: <https://mktrade.co.business/>",
+      "type": "Native reading",
+      "section": "question",
+      "tags": [
+        "native-reading"
+      ],
+      "track": null,
+      "lesson_id": null
+    },
+    {
+      "id": "doc-0a3866ea42a4",
+      "title": "Internal readiness score: ZephyrTrade",
+      "path": "docs/CHAMPION_SCORE.md",
+      "line": 1,
+      "source_paths": [
+        "docs/CHAMPION_SCORE.md"
+      ],
+      "source_url": "https://github.com/mohammadrezwankhan/zephyrtrade/blob/648480d5c2fcbfbbd94f4e606f3f896352b1f7b6/docs/CHAMPION_SCORE.md#L1",
+      "source_revision": "648480d5c2fcbfbbd94f4e606f3f896352b1f7b6",
+      "source_kind": "audited-native-source",
+      "source_label": "Source at 648480d5c2fc",
+      "catalog_url": null,
+      "native_url": null,
+      "excerpt": "Assessed 2026-09-30 using the same seven weights for all 37 projects. This is an editorial QA prioritization rubric, not a calibrated metric, external rating or promise of adoption.",
+      "type": "Native reading",
+      "section": "question",
+      "tags": [
+        "native-reading"
+      ],
+      "track": null,
+      "lesson_id": null
+    },
+    {
+      "id": "doc-612ed9e8338e",
+      "title": "Useful contribution quests for ZephyrTrade",
+      "path": "docs/CHAMPION_QUESTS.md",
+      "line": 1,
+      "source_paths": [
+        "docs/CHAMPION_QUESTS.md"
+      ],
+      "source_url": "https://github.com/mohammadrezwankhan/zephyrtrade/blob/648480d5c2fcbfbbd94f4e606f3f896352b1f7b6/docs/CHAMPION_QUESTS.md#L1",
+      "source_revision": "648480d5c2fcbfbbd94f4e606f3f896352b1f7b6",
+      "source_kind": "audited-native-source",
+      "source_label": "Source at 648480d5c2fc",
+      "catalog_url": null,
+      "native_url": null,
+      "excerpt": "These are contribution proposals, not rewards for stars. Check existing issues before starting.",
+      "type": "Native reading",
+      "section": "question",
+      "tags": [
+        "native-reading"
+      ],
+      "track": null,
+      "lesson_id": null
+    },
+    {
+      "id": "doc-acd9717d01ad",
+      "title": "ZephyrTrade: awesome-list research",
+      "path": "docs/promotion/AWESOME_LIST_TARGETS.md",
+      "line": 1,
+      "source_paths": [
+        "docs/promotion/AWESOME_LIST_TARGETS.md"
+      ],
+      "source_url": "https://github.com/mohammadrezwankhan/zephyrtrade/blob/648480d5c2fcbfbbd94f4e606f3f896352b1f7b6/docs/promotion/AWESOME_LIST_TARGETS.md#L1",
+      "source_revision": "648480d5c2fcbfbbd94f4e606f3f896352b1f7b6",
+      "source_kind": "audited-native-source",
+      "source_label": "Source at 648480d5c2fc",
+      "catalog_url": null,
+      "native_url": null,
+      "excerpt": "Checked live GitHub metadata on 2026-09-30. Ten existing lists were investigated; this is a screening log, not ten claims of eligibility. No PR was submitted. Relevance and current contribution rules take priority over filling a quota.",
+      "type": "Native reading",
+      "section": "question",
+      "tags": [
+        "native-reading"
+      ],
+      "track": null,
+      "lesson_id": null
+    },
+    {
+      "id": "doc-1b569ae70194",
+      "title": "ZephyrTrade: community teaching draft",
+      "path": "docs/promotion/REDDIT_LAUNCH.md",
+      "line": 1,
+      "source_paths": [
+        "docs/promotion/REDDIT_LAUNCH.md"
+      ],
+      "source_url": "https://github.com/mohammadrezwankhan/zephyrtrade/blob/648480d5c2fcbfbbd94f4e606f3f896352b1f7b6/docs/promotion/REDDIT_LAUNCH.md#L1",
+      "source_revision": "648480d5c2fcbfbbd94f4e606f3f896352b1f7b6",
+      "source_kind": "audited-native-source",
+      "source_label": "Source at 648480d5c2fc",
+      "catalog_url": null,
+      "native_url": null,
+      "excerpt": "Candidate communities: r/webdev for implementation discussion; r/opensource for source review; r/Python for numerical Python methods.",
+      "type": "Native reading",
+      "section": "question",
+      "tags": [
+        "native-reading"
+      ],
+      "track": null,
+      "lesson_id": null
+    },
+    {
+      "id": "doc-ad6b17fcfd87",
+      "title": "ZephyrTrade: conditional launch calendar",
+      "path": "docs/promotion/LAUNCH_CALENDAR.md",
+      "line": 1,
+      "source_paths": [
+        "docs/promotion/LAUNCH_CALENDAR.md"
+      ],
+      "source_url": "https://github.com/mohammadrezwankhan/zephyrtrade/blob/648480d5c2fcbfbbd94f4e606f3f896352b1f7b6/docs/promotion/LAUNCH_CALENDAR.md#L1",
+      "source_revision": "648480d5c2fcbfbbd94f4e606f3f896352b1f7b6",
+      "source_kind": "audited-native-source",
+      "source_label": "Source at 648480d5c2fc",
+      "catalog_url": null,
+      "native_url": null,
+      "excerpt": "T−7: complete current checks and source/rights review; inspect first-run demo.",
+      "type": "Native reading",
+      "section": "question",
+      "tags": [
+        "native-reading"
+      ],
+      "track": null,
+      "lesson_id": null
+    },
+    {
+      "id": "doc-5d13833e68e6",
+      "title": "ZephyrTrade: growth experiments",
+      "path": "docs/promotion/GROWTH_EXPERIMENTS.md",
+      "line": 1,
+      "source_paths": [
+        "docs/promotion/GROWTH_EXPERIMENTS.md"
+      ],
+      "source_url": "https://github.com/mohammadrezwankhan/zephyrtrade/blob/648480d5c2fcbfbbd94f4e606f3f896352b1f7b6/docs/promotion/GROWTH_EXPERIMENTS.md#L1",
+      "source_revision": "648480d5c2fcbfbbd94f4e606f3f896352b1f7b6",
+      "source_kind": "audited-native-source",
+      "source_label": "Source at 648480d5c2fc",
+      "catalog_url": null,
+      "native_url": null,
+      "excerpt": "Stars are an aspiration, not a guaranteed outcome. No current metric is asserted here.",
+      "type": "Native reading",
+      "section": "question",
+      "tags": [
+        "native-reading"
+      ],
+      "track": null,
+      "lesson_id": null
+    },
+    {
+      "id": "doc-c07cca5325ea",
+      "title": "ZephyrTrade: LinkedIn drafts",
+      "path": "docs/promotion/LINKEDIN_LAUNCH.md",
+      "line": 1,
+      "source_paths": [
+        "docs/promotion/LINKEDIN_LAUNCH.md"
+      ],
+      "source_url": "https://github.com/mohammadrezwankhan/zephyrtrade/blob/648480d5c2fcbfbbd94f4e606f3f896352b1f7b6/docs/promotion/LINKEDIN_LAUNCH.md#L1",
+      "source_revision": "648480d5c2fcbfbbd94f4e606f3f896352b1f7b6",
+      "source_kind": "audited-native-source",
+      "source_label": "Source at 648480d5c2fc",
+      "catalog_url": null,
+      "native_url": null,
+      "excerpt": "Not posted.",
+      "type": "Native reading",
+      "section": "question",
+      "tags": [
+        "native-reading"
+      ],
+      "track": null,
+      "lesson_id": null
+    },
+    {
+      "id": "doc-95d81e0b4c20",
+      "title": "ZephyrTrade: newsletter and publisher pitch drafts",
+      "path": "docs/promotion/NEWSLETTER_OUTREACH.md",
+      "line": 1,
+      "source_paths": [
+        "docs/promotion/NEWSLETTER_OUTREACH.md"
+      ],
+      "source_url": "https://github.com/mohammadrezwankhan/zephyrtrade/blob/648480d5c2fcbfbbd94f4e606f3f896352b1f7b6/docs/promotion/NEWSLETTER_OUTREACH.md#L1",
+      "source_revision": "648480d5c2fcbfbbd94f4e606f3f896352b1f7b6",
+      "source_kind": "audited-native-source",
+      "source_label": "Source at 648480d5c2fc",
+      "catalog_url": null,
+      "native_url": null,
+      "excerpt": "Promotion hold: Current readiness score 85/100 is below the 90/100 gate. These drafts remain unsent. Confirm public access, current editorial rules and project-specific fit before any submission.",
+      "type": "Native reading",
+      "section": "question",
+      "tags": [
+        "native-reading"
+      ],
+      "track": null,
+      "lesson_id": null
+    },
+    {
+      "id": "doc-a7e76d59f314",
+      "title": "ZephyrTrade: press kit",
+      "path": "docs/promotion/PRESS_KIT.md",
+      "line": 1,
+      "source_paths": [
+        "docs/promotion/PRESS_KIT.md"
+      ],
+      "source_url": "https://github.com/mohammadrezwankhan/zephyrtrade/blob/648480d5c2fcbfbbd94f4e606f3f896352b1f7b6/docs/promotion/PRESS_KIT.md#L1",
+      "source_revision": "648480d5c2fcbfbbd94f4e606f3f896352b1f7b6",
+      "source_kind": "audited-native-source",
+      "source_label": "Source at 648480d5c2fc",
+      "catalog_url": null,
+      "native_url": null,
+      "excerpt": "Name: ZephyrTrade",
+      "type": "Native reading",
+      "section": "question",
+      "tags": [
+        "native-reading"
+      ],
+      "track": null,
+      "lesson_id": null
+    },
+    {
+      "id": "doc-a6ea76a8b130",
+      "title": "ZephyrTrade: shots",
+      "path": "docs/demo/SHOT_LIST.md",
+      "line": 1,
+      "source_paths": [
+        "docs/demo/SHOT_LIST.md"
+      ],
+      "source_url": "https://github.com/mohammadrezwankhan/zephyrtrade/blob/648480d5c2fcbfbbd94f4e606f3f896352b1f7b6/docs/demo/SHOT_LIST.md#L1",
+      "source_revision": "648480d5c2fcbfbbd94f4e606f3f896352b1f7b6",
+      "source_kind": "audited-native-source",
+      "source_label": "Source at 648480d5c2fc",
+      "catalog_url": null,
+      "native_url": null,
+      "excerpt": "1440×1000 overview with demo label.",
+      "type": "Native reading",
+      "section": "question",
+      "tags": [
+        "native-reading"
+      ],
+      "track": null,
+      "lesson_id": null
+    },
+    {
+      "id": "doc-180ab5997874",
+      "title": "ZephyrTrade: Show HN draft",
+      "path": "docs/promotion/HACKER_NEWS_LAUNCH.md",
+      "line": 1,
+      "source_paths": [
+        "docs/promotion/HACKER_NEWS_LAUNCH.md"
+      ],
+      "source_url": "https://github.com/mohammadrezwankhan/zephyrtrade/blob/648480d5c2fcbfbbd94f4e606f3f896352b1f7b6/docs/promotion/HACKER_NEWS_LAUNCH.md#L1",
+      "source_revision": "648480d5c2fcbfbbd94f4e606f3f896352b1f7b6",
+      "source_kind": "audited-native-source",
+      "source_label": "Source at 648480d5c2fc",
+      "catalog_url": null,
+      "native_url": null,
+      "excerpt": "Selected title: Show HN: ZephyrTrade — an inspectable local demo",
+      "type": "Native reading",
+      "section": "question",
+      "tags": [
+        "native-reading"
+      ],
+      "track": null,
+      "lesson_id": null
+    },
+    {
+      "id": "doc-91f505361fff",
+      "title": "ZephyrTrade: technical thread draft",
+      "path": "docs/promotion/X_LAUNCH.md",
+      "line": 1,
+      "source_paths": [
+        "docs/promotion/X_LAUNCH.md"
+      ],
+      "source_url": "https://github.com/mohammadrezwankhan/zephyrtrade/blob/648480d5c2fcbfbbd94f4e606f3f896352b1f7b6/docs/promotion/X_LAUNCH.md#L1",
+      "source_revision": "648480d5c2fcbfbbd94f4e606f3f896352b1f7b6",
+      "source_kind": "audited-native-source",
+      "source_label": "Source at 648480d5c2fc",
+      "catalog_url": null,
+      "native_url": null,
+      "excerpt": "Not posted.",
+      "type": "Native reading",
+      "section": "question",
+      "tags": [
+        "native-reading"
+      ],
+      "track": null,
+      "lesson_id": null
+    },
+    {
+      "id": "doc-1443d830da54",
+      "title": "ZephyrTrade: ML-Driven Wind Energy Market Optimizer",
+      "path": "docs/report.md",
+      "line": 1,
+      "source_paths": [
+        "docs/report.md"
+      ],
+      "source_url": "https://github.com/mohammadrezwankhan/zephyrtrade/blob/648480d5c2fcbfbbd94f4e606f3f896352b1f7b6/docs/report.md#L1",
+      "source_revision": "648480d5c2fcbfbbd94f4e606f3f896352b1f7b6",
+      "source_kind": "audited-native-source",
+      "source_label": "Source at 648480d5c2fc",
+      "catalog_url": null,
+      "native_url": null,
+      "excerpt": "Market area: Bornholm, DK2",
+      "type": "Native reading",
+      "section": "equations",
+      "tags": [
+        "model"
+      ],
+      "track": null,
+      "lesson_id": null
+    },
+    {
+      "id": "doc-46e39b542edd",
+      "title": "README CTA alternatives",
+      "path": "docs/promotion/README_CTA_OPTIONS.md",
+      "line": 1,
+      "source_paths": [
+        "docs/promotion/README_CTA_OPTIONS.md"
+      ],
+      "source_url": "https://github.com/mohammadrezwankhan/zephyrtrade/blob/648480d5c2fcbfbbd94f4e606f3f896352b1f7b6/docs/promotion/README_CTA_OPTIONS.md#L1",
+      "source_revision": "648480d5c2fcbfbbd94f4e606f3f896352b1f7b6",
+      "source_kind": "audited-native-source",
+      "source_label": "Source at 648480d5c2fc",
+      "catalog_url": null,
+      "native_url": null,
+      "excerpt": "If ZephyrTrade helps you study this workflow, a star helps other wind-market and numerical-method researchers find it.",
+      "type": "Native reading",
+      "section": "reproduce",
+      "tags": [
+        "reproduction"
+      ],
+      "track": null,
+      "lesson_id": null
+    },
+    {
+      "id": "doc-99990f5b4cbe",
+      "title": "ZephyrTrade: community outreach",
+      "path": "docs/promotion/COMMUNITY_OUTREACH.md",
+      "line": 1,
+      "source_paths": [
+        "docs/promotion/COMMUNITY_OUTREACH.md"
+      ],
+      "source_url": "https://github.com/mohammadrezwankhan/zephyrtrade/blob/648480d5c2fcbfbbd94f4e606f3f896352b1f7b6/docs/promotion/COMMUNITY_OUTREACH.md#L1",
+      "source_revision": "648480d5c2fcbfbbd94f4e606f3f896352b1f7b6",
+      "source_kind": "audited-native-source",
+      "source_label": "Source at 648480d5c2fc",
+      "catalog_url": null,
+      "native_url": null,
+      "excerpt": "Start with existing repository issues after public release. Discuss one concrete workflow with wind-market and numerical-method researchers. Use an existing authenticated account and follow the receiving community’s current rules. No Discord, Slack, research affiliation or domain partnership is invented.",
+      "type": "Native reading",
+      "section": "reproduce",
+      "tags": [
+        "reproduction"
+      ],
+      "track": null,
+      "lesson_id": null
+    },
+    {
+      "id": "doc-caf4c17f81e3",
+      "title": "45-second ZephyrTrade demo",
+      "path": "docs/demo/DEMO_SCRIPT.md",
+      "line": 1,
+      "source_paths": [
+        "docs/demo/DEMO_SCRIPT.md"
+      ],
+      "source_url": "https://github.com/mohammadrezwankhan/zephyrtrade/blob/648480d5c2fcbfbbd94f4e606f3f896352b1f7b6/docs/demo/DEMO_SCRIPT.md#L1",
+      "source_revision": "648480d5c2fcbfbbd94f4e606f3f896352b1f7b6",
+      "source_kind": "audited-native-source",
+      "source_label": "Source at 648480d5c2fc",
+      "catalog_url": null,
+      "native_url": null,
+      "excerpt": "0–8s: Show the title and synthetic-data label. Explain: Research application that generates synthetic wind/weather/price tables, compares wind-forecast and direct-offer strategies, backtests revenue and explores hypothetical offers without placing trades.",
+      "type": "Native reading",
+      "section": "verification",
+      "tags": [
+        "verification"
+      ],
+      "track": null,
+      "lesson_id": null
+    },
+    {
+      "id": "doc-c1d888f25e81",
+      "title": "Evidence log — ZephyrTrade Champion 1.1.0",
+      "path": "docs/champion/EVIDENCE_LOG.md",
+      "line": 1,
+      "source_paths": [
+        "docs/champion/EVIDENCE_LOG.md"
+      ],
+      "source_url": "https://github.com/mohammadrezwankhan/zephyrtrade/blob/648480d5c2fcbfbbd94f4e606f3f896352b1f7b6/docs/champion/EVIDENCE_LOG.md#L1",
+      "source_revision": "648480d5c2fcbfbbd94f4e606f3f896352b1f7b6",
+      "source_kind": "audited-native-source",
+      "source_label": "Source at 648480d5c2fc",
+      "catalog_url": null,
+      "native_url": null,
+      "excerpt": "All execution took place in the isolated Linux environment described in",
+      "type": "Native reading",
+      "section": "verification",
+      "tags": [
+        "verification"
+      ],
+      "track": null,
+      "lesson_id": null
+    },
+    {
+      "id": "doc-42b9ccf30334",
+      "title": "Normal-browser acceptance and controlled-release checklist",
+      "path": "docs/champion/UAT_AND_RELEASE_CHECKLIST.md",
+      "line": 1,
+      "source_paths": [
+        "docs/champion/UAT_AND_RELEASE_CHECKLIST.md"
+      ],
+      "source_url": "https://github.com/mohammadrezwankhan/zephyrtrade/blob/648480d5c2fcbfbbd94f4e606f3f896352b1f7b6/docs/champion/UAT_AND_RELEASE_CHECKLIST.md#L1",
+      "source_revision": "648480d5c2fcbfbbd94f4e606f3f896352b1f7b6",
+      "source_kind": "audited-native-source",
+      "source_label": "Source at 648480d5c2fc",
+      "catalog_url": null,
+      "native_url": null,
+      "excerpt": "Status: NOT RUN by human participants. This is a runnable acceptance script,",
+      "type": "Native reading",
+      "section": "verification",
+      "tags": [
+        "verification"
+      ],
+      "track": null,
+      "lesson_id": null
+    },
+    {
+      "id": "doc-a1a1a9c33ae5",
+      "title": "ZephyrTrade Champion — audit, verification and release handoff",
+      "path": "docs/champion/AUDIT_AND_RELEASE.md",
+      "line": 1,
+      "source_paths": [
+        "docs/champion/AUDIT_AND_RELEASE.md"
+      ],
+      "source_url": "https://github.com/mohammadrezwankhan/zephyrtrade/blob/648480d5c2fcbfbbd94f4e606f3f896352b1f7b6/docs/champion/AUDIT_AND_RELEASE.md#L1",
+      "source_revision": "648480d5c2fcbfbbd94f4e606f3f896352b1f7b6",
+      "source_kind": "audited-native-source",
+      "source_label": "Source at 648480d5c2fc",
+      "catalog_url": null,
+      "native_url": null,
+      "excerpt": "Candidate: 1.1.0, local research only. Prepared: 28 September 2026.",
+      "type": "Native reading",
+      "section": "verification",
+      "tags": [
+        "verification"
+      ],
+      "track": null,
+      "lesson_id": null
+    },
+    {
+      "id": "doc-fb33dc3289e2",
+      "title": "ZephyrTrade: launch strategy",
+      "path": "docs/promotion/LAUNCH_STRATEGY.md",
+      "line": 1,
+      "source_paths": [
+        "docs/promotion/LAUNCH_STRATEGY.md"
+      ],
+      "source_url": "https://github.com/mohammadrezwankhan/zephyrtrade/blob/648480d5c2fcbfbbd94f4e606f3f896352b1f7b6/docs/promotion/LAUNCH_STRATEGY.md#L1",
+      "source_revision": "648480d5c2fcbfbbd94f4e606f3f896352b1f7b6",
+      "source_kind": "audited-native-source",
+      "source_label": "Source at 648480d5c2fc",
+      "catalog_url": null,
+      "native_url": null,
+      "excerpt": "Audience: wind-market and numerical-method researchers. Positioning: Research application that generates synthetic wind/weather/price tables, compares wind-forecast and direct-offer strategies, backtests revenue and explores hypothetical offers without placing trades.",
+      "type": "Native reading",
+      "section": "verification",
+      "tags": [
+        "verification"
+      ],
+      "track": null,
+      "lesson_id": null
+    },
+    {
+      "id": "doc-1cc356cbc6ac",
+      "title": "ZephyrTrade: voiceover draft",
+      "path": "docs/demo/VOICEOVER.md",
+      "line": 1,
+      "source_paths": [
+        "docs/demo/VOICEOVER.md"
+      ],
+      "source_url": "https://github.com/mohammadrezwankhan/zephyrtrade/blob/648480d5c2fcbfbbd94f4e606f3f896352b1f7b6/docs/demo/VOICEOVER.md#L1",
+      "source_revision": "648480d5c2fcbfbbd94f4e606f3f896352b1f7b6",
+      "source_kind": "audited-native-source",
+      "source_label": "Source at 648480d5c2fc",
+      "catalog_url": null,
+      "native_url": null,
+      "excerpt": "Research application that generates synthetic wind/weather/price tables, compares wind-forecast and direct-offer strategies, backtests revenue and explores hypothetical offers without placing trades. The example runs locally. Start from the README, open a supplied record, and inspect what is known, what is synthetic, and what stays on the device. The source and tests let you inspect the…",
+      "type": "Native reading",
+      "section": "verification",
+      "tags": [
+        "native-lesson",
+        "verification"
+      ],
+      "track": null,
+      "lesson_id": null
+    },
+    {
+      "id": "doc-1e6caab9c889",
+      "title": "Alternatives and adjacent tools: ZephyrTrade",
+      "path": "docs/ALTERNATIVES.md",
+      "line": 1,
+      "source_paths": [
+        "docs/ALTERNATIVES.md"
+      ],
+      "source_url": "https://github.com/mohammadrezwankhan/zephyrtrade/blob/648480d5c2fcbfbbd94f4e606f3f896352b1f7b6/docs/ALTERNATIVES.md#L1",
+      "source_revision": "648480d5c2fcbfbbd94f4e606f3f896352b1f7b6",
+      "source_kind": "audited-native-source",
+      "source_label": "Source at 648480d5c2fc",
+      "catalog_url": null,
+      "native_url": null,
+      "excerpt": "ZephyrTrade generates synthetic wind, weather and price tables, compares forecast and direct-offer strategies, and reconciles hypothetical revenue. Its Python and browser engines expose the assumptions so a researcher can inspect numerical agreement instead of relying on a dashboard alone.",
+      "type": "Native reading",
+      "section": "scope",
+      "tags": [
+        "scope"
+      ],
+      "track": null,
+      "lesson_id": null
+    },
+    {
+      "id": "doc-b355ec748c90",
+      "title": "Checking forecast quality and offer revenue separately",
+      "path": "docs/engineering/CASE_STUDY.md",
+      "line": 1,
+      "source_paths": [
+        "docs/engineering/CASE_STUDY.md"
+      ],
+      "source_url": "https://github.com/mohammadrezwankhan/zephyrtrade/blob/648480d5c2fcbfbbd94f4e606f3f896352b1f7b6/docs/engineering/CASE_STUDY.md#L1",
+      "source_revision": "648480d5c2fcbfbbd94f4e606f3f896352b1f7b6",
+      "source_kind": "audited-native-source",
+      "source_label": "Source at 648480d5c2fc",
+      "catalog_url": null,
+      "native_url": null,
+      "excerpt": "ZephyrTrade generates synthetic wind, weather and price tables, compares forecast and direct-offer strategies, and reconciles hypothetical revenue. Its Python and browser engines expose the assumptions so a researcher can inspect numerical agreement instead of relying on a dashboard alone.",
+      "type": "Native reading",
+      "section": "scope",
+      "tags": [
+        "scope"
+      ],
+      "track": null,
+      "lesson_id": null
+    },
+    {
+      "id": "doc-eb44ea58f905",
+      "title": "Checking forecast quality and offer revenue separately",
+      "path": "docs/promotion/DEVTO_ARTICLE.md",
+      "line": 1,
+      "source_paths": [
+        "docs/promotion/DEVTO_ARTICLE.md"
+      ],
+      "source_url": "https://github.com/mohammadrezwankhan/zephyrtrade/blob/648480d5c2fcbfbbd94f4e606f3f896352b1f7b6/docs/promotion/DEVTO_ARTICLE.md#L1",
+      "source_revision": "648480d5c2fcbfbbd94f4e606f3f896352b1f7b6",
+      "source_kind": "audited-native-source",
+      "source_label": "Source at 648480d5c2fc",
+      "catalog_url": null,
+      "native_url": null,
+      "excerpt": "ZephyrTrade generates synthetic wind, weather and price tables, compares forecast and direct-offer strategies, and reconciles hypothetical revenue. Its Python and browser engines expose the assumptions so a researcher can inspect numerical agreement instead of relying on a dashboard alone.",
+      "type": "Native reading",
+      "section": "scope",
+      "tags": [
+        "scope"
+      ],
+      "track": null,
+      "lesson_id": null
+    },
+    {
+      "id": "doc-35ca5b5a2382",
+      "title": "Three boundaries in ZephyrTrade",
+      "path": "docs/promotion/HASHNODE_ARTICLE.md",
+      "line": 1,
+      "source_paths": [
+        "docs/promotion/HASHNODE_ARTICLE.md"
+      ],
+      "source_url": "https://github.com/mohammadrezwankhan/zephyrtrade/blob/648480d5c2fcbfbbd94f4e606f3f896352b1f7b6/docs/promotion/HASHNODE_ARTICLE.md#L1",
+      "source_revision": "648480d5c2fcbfbbd94f4e606f3f896352b1f7b6",
+      "source_kind": "audited-native-source",
+      "source_label": "Source at 648480d5c2fc",
+      "catalog_url": null,
+      "native_url": null,
+      "excerpt": "ZephyrTrade generates synthetic wind, weather and price tables, compares forecast and direct-offer strategies, and reconciles hypothetical revenue. Its Python and browser engines expose the assumptions so a researcher can inspect numerical agreement instead of relying on a dashboard alone.",
+      "type": "Native reading",
+      "section": "scope",
+      "tags": [
+        "scope"
+      ],
+      "track": null,
+      "lesson_id": null
+    },
+    {
+      "id": "doc-8ec9a00bfd09",
+      "title": "ZephyrTrade",
+      "path": "README.md",
+      "line": 1,
+      "source_paths": [
+        "README.md"
+      ],
+      "source_url": "https://github.com/mohammadrezwankhan/zephyrtrade/blob/090c28970f1a6c6f3032aaa4cf086e0d475a84da/README.md#L1",
+      "source_revision": "090c28970f1a6c6f3032aaa4cf086e0d475a84da",
+      "source_kind": "historical-reconciled-readme",
+      "source_label": "Historical README/source guide at 090c28970f1a",
+      "catalog_url": null,
+      "native_url": null,
+      "excerpt": "Open the public browser app · Purpose, usage and limits · Methodology · Build and deployment guide",
+      "type": "Native overview",
+      "section": "scope",
+      "tags": [
+        "scope"
+      ],
+      "track": null,
+      "lesson_id": null,
+      "source_blob_path": "README.md",
+      "source_blob_sha256": "e00b40da0ea753a54bb3fbd1f652a58df41b8294d7af2e4154b50a4ce3ea0639",
+      "source_blob_retrieval": "git-show",
+      "source_blob_cache": null
+    },
+    {
+      "id": "doc-278e4bb1f783",
+      "title": "ZephyrTrade visual identity",
+      "path": "docs/repository/VISUAL_IDENTITY.md",
+      "line": 1,
+      "source_paths": [
+        "docs/repository/VISUAL_IDENTITY.md"
+      ],
+      "source_url": "https://github.com/mohammadrezwankhan/zephyrtrade/blob/648480d5c2fcbfbbd94f4e606f3f896352b1f7b6/docs/repository/VISUAL_IDENTITY.md#L1",
+      "source_revision": "648480d5c2fcbfbbd94f4e606f3f896352b1f7b6",
+      "source_kind": "audited-native-source",
+      "source_label": "Source at 648480d5c2fc",
+      "catalog_url": null,
+      "native_url": null,
+      "excerpt": "Repository accent: #ffc078. Shared background: #0c1923; text: #f7fafc; secondary text: #c6d4dc. Keep the supplied application palette and functional status labels. Diagrams use labeled boxes and arrows, never color alone. Social assets identify the synthetic/demo scope; screenshots are actual rendered app states. Editable SVG sources accompany the PNG preview.",
+      "type": "Native reading",
+      "section": "scope",
+      "tags": [
+        "scope"
+      ],
+      "track": null,
+      "lesson_id": null
+    },
+    {
+      "id": "doc-04ed33387c7e",
+      "title": "ZephyrTrade: data and rule boundaries",
+      "path": "docs/architecture/system-overview.md",
+      "line": 1,
+      "source_paths": [
+        "docs/architecture/system-overview.md"
+      ],
+      "source_url": "https://github.com/mohammadrezwankhan/zephyrtrade/blob/648480d5c2fcbfbbd94f4e606f3f896352b1f7b6/docs/architecture/system-overview.md#L1",
+      "source_revision": "648480d5c2fcbfbbd94f4e606f3f896352b1f7b6",
+      "source_kind": "audited-native-source",
+      "source_label": "Source at 648480d5c2fc",
+      "catalog_url": null,
+      "native_url": null,
+      "excerpt": "ZephyrTrade generates synthetic wind, weather and price tables, compares forecast and direct-offer strategies, and reconciles hypothetical revenue. Its Python and browser engines expose the assumptions so a researcher can inspect numerical agreement instead of relying on a dashboard alone.",
+      "type": "Native reading",
+      "section": "scope",
+      "tags": [
+        "scope"
+      ],
+      "track": null,
+      "lesson_id": null
+    }
+  ],
+  "commands": [
+    {
+      "command": "python -m pip install -e \".[dev]\"",
+      "label": "Expected environment setup",
+      "path": ".github/workflows/ci.yml",
+      "line": 32,
+      "source_url": "https://github.com/mohammadrezwankhan/zephyrtrade/blob/648480d5c2fcbfbbd94f4e606f3f896352b1f7b6/.github/workflows/ci.yml#L32"
+    },
+    {
+      "command": "python -m ruff check src tests",
+      "label": "Source-defined validation command",
+      "path": ".github/workflows/ci.yml",
+      "line": 35,
+      "source_url": "https://github.com/mohammadrezwankhan/zephyrtrade/blob/648480d5c2fcbfbbd94f4e606f3f896352b1f7b6/.github/workflows/ci.yml#L35"
+    },
+    {
+      "command": "python -m ruff format --check src tests",
+      "label": "Source-defined validation command",
+      "path": ".github/workflows/ci.yml",
+      "line": 38,
+      "source_url": "https://github.com/mohammadrezwankhan/zephyrtrade/blob/648480d5c2fcbfbbd94f4e606f3f896352b1f7b6/.github/workflows/ci.yml#L38"
+    },
+    {
+      "command": "python -m pytest -W error",
+      "label": "Source-defined validation command",
+      "path": ".github/workflows/ci.yml",
+      "line": 41,
+      "source_url": "https://github.com/mohammadrezwankhan/zephyrtrade/blob/648480d5c2fcbfbbd94f4e606f3f896352b1f7b6/.github/workflows/ci.yml#L41"
+    },
+    {
+      "command": "python -m build",
+      "label": "Source-defined example command",
+      "path": ".github/workflows/ci.yml",
+      "line": 54,
+      "source_url": "https://github.com/mohammadrezwankhan/zephyrtrade/blob/648480d5c2fcbfbbd94f4e606f3f896352b1f7b6/.github/workflows/ci.yml#L54"
+    }
+  ],
+  "engineering_curriculum_exclusions": [],
+  "visuals": {
+    "mapped_diagrams": [],
+    "section_banners": [
+      "section-01-question.svg",
+      "section-02-equations.svg",
+      "section-03-reproduce.svg",
+      "section-04-verification.svg",
+      "section-05-scope.svg"
+    ]
+  },
+  "native_document_banner_insertions": [],
+  "native_document_banner_audit": {
+    "schema_version": 1,
+    "eligibility_rule": "Tracked indexed Markdown in an examples, tutorials, lessons, studies, study-cases, concepts or notes directory, or whose path/title explicitly names a lesson, tutorial, example, walkthrough, study case or study. Banners are based only on existing semantic heading text, never directory names.",
+    "eligible_document_count": 0,
+    "lesson_document_candidates": 0,
+    "modified_document_count": 0,
+    "banner_insertion_count": 0,
+    "audit_gap_count": 0,
+    "banners": [],
+    "audit_gaps": [],
+    "explicit_exclusions": []
+  },
+  "dashboard": {
+    "browser_lab_is_surrogate": true,
+    "native_execution_in_browser": false,
+    "localStorage_or_existing_dashboard_scripts_preserved": true
+  }
+}
