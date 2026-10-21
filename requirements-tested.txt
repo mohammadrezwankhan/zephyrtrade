@@ -1,8 +1,9 @@
-# Observed Linux / Python 3.13.5 runtime. Not a cross-platform lockfile.
-numpy==2.3.5
+# Linux / Python 3.13.5 reproducibility target. Not a cross-platform lockfile.
+# CI installs these pins with .[dev], prints actual versions, and tests the environment.
+numpy==2.4.6
 pandas==2.2.3
-scipy==1.17.0
-scikit-learn==1.8.0
-joblib==1.5.3
+scipy==1.17.1
+scikit-learn==1.9.1
+joblib==1.6.0
 matplotlib==3.10.8
 threadpoolctl==3.6.0
