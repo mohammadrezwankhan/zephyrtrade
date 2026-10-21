@@ -58,3 +58,5 @@ __pycache__/
 
 # Generated public browser export
 /.cloudflare/
+tests/browser/audit/test-results/
+tests/browser/audit/playwright-report/

@@ -12,9 +12,9 @@ concurrency:
 jobs:
   browser-export:
     runs-on: ubuntu-latest
-    timeout-minutes: 10
+    timeout-minutes: 25
     steps:
-      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
         with:
           persist-credentials: false
       - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1
@@ -24,3 +24,10 @@ jobs:
       - run: node scripts/check-cloudflare.mjs
       - run: node scripts/build-domain.mjs
       - run: node scripts/check-domain.mjs
+      - run: node --test tests/browser/engine.test.cjs scripts/runtime-security.test.mjs scripts/engineering-hero.test.mjs
+      - run: npm ci --prefix tests/browser/audit
+      - run: node tests/browser/audit/node_modules/playwright/cli.js install --with-deps chromium firefox webkit
+      - name: Verify final hosted bytes in three browsers
+        run: |
+          export AUDIT_EXPECTED_DOCUMENT_SHA256=$(node -p "require('./.cloudflare/runtime-security-headers.json').document_sha256")
+          node tests/browser/audit/node_modules/playwright/cli.js test --config tests/browser/audit/playwright.config.ts
