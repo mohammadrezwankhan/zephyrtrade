@@ -1,0 +1,33 @@
+name: Verify Cloudflare browser export
+on:
+  push:
+    branches: [main, astra/cloudflare-browser-apps]
+  pull_request:
+  workflow_dispatch:
+permissions:
+  contents: read
+concurrency:
+  group: cloudflare-export-${{ github.ref }}
+  cancel-in-progress: true
+jobs:
+  browser-export:
+    runs-on: ubuntu-latest
+    timeout-minutes: 25
+    steps:
+      - uses: actions/checkout@11d5960a326750d5838078e36cf38b85af677262
+        with:
+          persist-credentials: false
+      - uses: actions/setup-node@49933ea5288caeca8642d1e84afbd3f7d6820020
+        with:
+          node-version: '24'
+      - run: node scripts/build-cloudflare.mjs
+      - run: node scripts/check-cloudflare.mjs
+      - run: node scripts/build-domain.mjs
+      - run: node scripts/check-domain.mjs
+      - run: node --test tests/browser/engine.test.cjs scripts/runtime-security.test.mjs scripts/engineering-hero.test.mjs
+      - run: npm ci --prefix tests/browser/audit
+      - run: node tests/browser/audit/node_modules/playwright/cli.js install --with-deps chromium firefox webkit
+      - name: Verify final hosted bytes in three browsers
+        run: |
+          export AUDIT_EXPECTED_DOCUMENT_SHA256=$(node -p "require('./.cloudflare/runtime-security-headers.json').document_sha256")
+          node tests/browser/audit/node_modules/playwright/cli.js test --config tests/browser/audit/playwright.config.ts

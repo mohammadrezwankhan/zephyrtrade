@@ -1,4 +1,69 @@
+![ZephyrTrade Wind-Market Lab: original vector system illustration](assets/hero-25d.svg)
+
+ZephyrTrade links synthetic wind forecasts, offer optimization, backtests, and a local browser/Python research app. The companion begins with a generic gross-versus-net calculation before the source’s asymmetric settlement model.
+
+**[Native-source lesson guide](docs/portfolio/) · [Offline interactive lab](docs/index.html) · [Lesson configuration](docs/lesson-config.json) · [Configuration schema](docs/lesson-config.schema.json)**
+
+## Previous animations
+
+[Open the previous-animation gallery](https://mohammadrezwankhan.github.io/zephyrtrade/animations/) · [Local gallery](docs/animations/index.html)
+
+Earlier animated artwork, waveform demos, and original interactive experiences are linked alongside the current animations.
+
+## Your first interactive result
+
+1. Download or clone this repository and open `docs/index.html` in a modern browser.
+2. Select **Module 1**, apply its preset, and compare the declared checkpoint with the plotted result.
+3. Change one slider, inspect the model assumptions, then export the configuration or telemetry for your notes.
+
+The browser lab runs offline with no packages, accounts, or live data feeds. Its numbers are deterministic teaching simulations. Each checkpoint states its model time and tolerance; passing it demonstrates agreement with that model, not field calibration or production readiness.
+
+## Four-module learning path
+
+| Module | Investigation | Approximate time |
+|---|---|---:|
+| 1. Separate forecast quality from economic value | Identify the units and objective behind a reported wind-market result. | 12 min |
+| 2. Stress an economic assumption | Explain why a gross opportunity is sensitive to the cost model. | 15 min |
+| 3. Separate exposure size from strategy skill | Show that scaling exposure changes money at risk without improving per-unit economics. | 18 min |
+| 4. Create a source-backed offer-study record | Document scenario assumptions and distinguish numerical parity from performance validation. | 18 min |
+
+**Who this is for:** Wind-energy students, forecasting researchers, and developers comparing hypothetical offer strategies.
+
+### Continue into the implementation
+
+- [README.md](README.md)
+- [README_RESEARCH.md](README_RESEARCH.md)
+- [pyproject.toml](pyproject.toml)
+- [ZephyrTrade-Champion.html](ZephyrTrade-Champion.html)
+- [src/zephyrtrade/optimize.py](src/zephyrtrade/optimize.py)
+- [src/zephyrtrade/evaluate.py](src/zephyrtrade/evaluate.py)
+- [src/zephyrtrade/app.py](src/zephyrtrade/app.py)
+
+### Explore or run the source
+
+Node.js >=22 for the standalone preview and numerical browser tests; Python 3.11+ for the native research app and dev extra.
+
+```bash
+node scripts/preview-demo.mjs
+python -m pip install -e ".[dev]"
+python -m zephyrtrade.app --no-browser
+node --test tests/browser/engine.test.cjs
+```
+
+These commands come from the audited source revision. Runtime requirements and the project's own validation limits are documented below; the standalone browser lab does not execute these commands.
+
+The detailed project guide below remains the source for installation, supported features, licences, and scientific limits. The browser equations and laboratory settings do not change the original application or numerical engine.
+
+<details>
+<summary>Project documentation, installation, attribution, and existing validation</summary>
+
 # ZephyrTrade
+
+## Cloudflare browser edition
+
+[Open the public browser app](https://mktrade.co.business/run/) · [Purpose, usage and limits](https://mktrade.co.business/) · [Methodology](https://mktrade.co.business/methodology/) · [Build and deployment guide](docs/CLOUDFLARE.md)
+
+[![CI](https://github.com/mohammadrezwankhan/zephyrtrade/actions/workflows/ci.yml/badge.svg?branch=main)](https://github.com/mohammadrezwankhan/zephyrtrade/actions/workflows/ci.yml) · [MIT license](LICENSE) · [Verification and limits](QUALITY_REPORT.md)
 
 Research application that generates synthetic wind/weather/price tables, compares wind-forecast and direct-offer strategies, backtests revenue and explores hypothetical offers without placing trades.
 
@@ -8,6 +73,8 @@ If ZephyrTrade helps you study this workflow, a star helps other wind-market and
 
 ## Try the demo
 
+[Open the hosted synthetic demo](https://mohammadrezwankhan.github.io/zephyrtrade/) or run the identical standalone artifact locally:
+
 Prerequisite: Node.js 22 or later; tested here with Node.js 24. This runs locally with synthetic examples. It does not connect to a live provider or publish user input.
 
 ```sh
@@ -16,11 +83,13 @@ cd zephyrtrade
 node scripts/preview-demo.mjs
 ```
 
-Open **http://127.0.0.1:4173**. Stop the server with Ctrl+C. The first screen is a demonstration, not verified current information. Keep private or real-world records out of this evaluation.
+Open **<http://127.0.0.1:4173>**. Stop the server with Ctrl+C. The first screen is a demonstration, not verified current information. Keep private or real-world records out of this evaluation.
 
 ## Why inspect this project?
 
-It gives wind-market and numerical-method researchers a working example of a domain workflow with visible evidence and limitations. Start with the rendered demo, then follow the implementation map in [PROJECT_ANALYSIS.md](PROJECT_ANALYSIS.md). The supplied engineering guide below explains the actual product rules and tradeoffs.
+ZephyrTrade generates synthetic wind, weather and price tables, compares forecast and direct-offer strategies, and reconciles hypothetical revenue. Its Python and browser engines expose the assumptions so a researcher can inspect numerical agreement instead of relying on a dashboard alone.
+
+Read the [engineering walkthrough](docs/engineering/CASE_STUDY.md) and [adjacent-tool comparison](docs/ALTERNATIVES.md), or follow the [source map](PROJECT_ANALYSIS.md).
 
 - [Current verification and limits](QUALITY_REPORT.md)
 - [Architecture and source map](docs/architecture/system-overview.md)
@@ -29,7 +98,7 @@ It gives wind-market and numerical-method researchers a working example of a dom
 
 ## Develop and verify
 
-Install the Python project with its development extras in an isolated environment; follow the original guide below. HelioForge also has a separately locked web workspace.
+Install ZephyrTrade with its Python development extras in an isolated environment; follow the detailed guide below. The browser numerical tests use Node.js and the Python parity check uses the same installed package.
 
 ```sh
 python -m pytest
@@ -49,7 +118,8 @@ First-party source is available under [MIT](LICENSE). Bundled dependencies retai
 <summary>Supplied engineering guide, product boundaries, and detailed usage</summary>
 
 # ZephyrTrade Champion
-### A local wind-market research desk • candidate 1.1.0
+
+## A local wind-market research desk • candidate 1.1.0
 
 Explore the supplied synthetic backtest, compare nine strategies and calculate
 scenario-based offers. There are **no live prices, real orders, broker connections,
@@ -198,5 +268,6 @@ files, model-environment executables or third-party frontend bundles are include
 The root ZIP includes the original datasets and reports. The wheel is a Python app
 package with its precompiled web snapshot, not a standalone Windows executable.
 
+</details>
 
 </details>
