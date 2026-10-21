@@ -1,0 +1,14 @@
+<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1">
+<meta name="robots" content="noindex"><title>Engineering hero integration example</title><link rel="stylesheet" href="./example.css"><link rel="stylesheet" href="./host.css"><script type="module" src="./khan-grid-hero.js"></script></head>
+<body><main><h1>Engineering decisions, with evidence in view.</h1>
+<p>This integration example preserves the host page’s heading and keeps the film supplementary.</p>
+<!-- Relative paths preserve a complete dist/ tree at any same-origin base. -->
+<khan-grid-hero site="mrkhan" mode="video" hide-cta
+  video-src="../../hero-1080p60.mp4"
+  poster-src="../../poster.png"
+  scene-src="../../index.html">
+  <img src="../../poster.png" width="1920" height="1080" alt="Conceptual hybrid-energy workbench">
+  <p>From First Principles to Grid-Scale Reality — Dr. Mohammad Rezwan Khan. Physics, models, evidence, and energy systems.</p>
+</khan-grid-hero>
+<noscript><p>The animation is optional. Explore the existing engineering models and evidence on this site.</p></noscript>
+</main></body></html>

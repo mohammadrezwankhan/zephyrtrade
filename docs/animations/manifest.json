@@ -1,0 +1,89 @@
+{
+  "schema_version": 1,
+  "repository": "zephyrtrade",
+  "preserved_current_commit": "dfc10287744c5250384571c80f59c1c017e4842b",
+  "animations": [
+    {
+      "kind": "image",
+      "title": "Original floating-layer SVG",
+      "badge": "Earlier animated media",
+      "description": "Floating isometric tiers, pulsing circuits, and flowing dashed traces from the earlier repository hero.",
+      "format": "Animated SVG",
+      "preview": "media/hero-25d-4b95f8bed2bd.svg",
+      "preview_sha256": "2d3f9d6e2e4a202f99592e26f4065fab30909a50ee5024e4d3fe04b43517f3ca",
+      "motion_identity": "4b95f8bed2bdcbc3b7affb41d9381c87dd16bb5bf31add09b1a8f1ff0c9a032f",
+      "sources": [
+        {
+          "path": "assets/hero-25d.svg",
+          "commit": "648480d5c2fcbfbbd94f4e606f3f896352b1f7b6",
+          "sha256": "25d5bd7618a0ceebf8b73d205ce84b679f7a229890d9c1fed94c70dd7d7b5c48",
+          "blob": "5b6ef06a95dc72824637e0a9bc6b2b400d16ab91",
+          "url": "https://github.com/mohammadrezwankhan/zephyrtrade/blob/648480d5c2fcbfbbd94f4e606f3f896352b1f7b6/assets/hero-25d.svg"
+        },
+        {
+          "path": "assets/hero-25d.svg",
+          "commit": "aff0c95122f8116b3e5fe2c1adcf3665bc36d9cc",
+          "sha256": "ecd1b51c27c6ae71ac9304ba5950e6ac9595bb158acce6194e37533df93b3bec",
+          "blob": "2b0afcd43187627f9732b291ba1a38818dad75da",
+          "url": "https://github.com/mohammadrezwankhan/zephyrtrade/blob/aff0c95122f8116b3e5fe2c1adcf3665bc36d9cc/assets/hero-25d.svg"
+        }
+      ]
+    },
+    {
+      "kind": "video",
+      "title": "Original engineering film",
+      "badge": "Earlier animated media",
+      "description": "The original 15-second engineering film at 1080p/60 fps. Conceptual animation; no live telemetry or certified engineering evidence.",
+      "format": "video/mp4",
+      "preview": "media/hero-1080p60-f0aee6779c76.mp4",
+      "preview_sha256": "f0aee6779c762133aff0961248af8cef575b7ae9f1e158fab27af72976e3667a",
+      "motion_identity": "f0aee6779c762133aff0961248af8cef575b7ae9f1e158fab27af72976e3667a",
+      "sources": [
+        {
+          "path": "assets/engineering-hero/v1/hero-1080p60.mp4",
+          "commit": "91c46efa653ed57469ffe8fbdf7efbc9cb7fb653",
+          "sha256": "f0aee6779c762133aff0961248af8cef575b7ae9f1e158fab27af72976e3667a",
+          "blob": "13f05e744bb650b48aebfb97d638a8b09dad300a",
+          "url": "https://github.com/mohammadrezwankhan/zephyrtrade/blob/91c46efa653ed57469ffe8fbdf7efbc9cb7fb653/assets/engineering-hero/v1/hero-1080p60.mp4"
+        }
+      ]
+    },
+    {
+      "kind": "waveform",
+      "title": "Original interactive waveform",
+      "badge": "Previous dashboard animation",
+      "description": "The earlier 2.5D perspective card and its moving waveform, with the original visual formulas and sliders.",
+      "preview": "waveform.html",
+      "preview_sha256": "0a15c0ccdcb2137beaee2a28ab2f588f415280ecf3473493d1a49245b365d8dd",
+      "sources": [
+        {
+          "path": "docs/index.html",
+          "commit": "648480d5c2fcbfbbd94f4e606f3f896352b1f7b6",
+          "blob": "be317c5285f58035652b78b811419ec069a0c6ec",
+          "sha256": "91f47449d22b5958cdba25179d65ab88cab9e6c0d22a5c9f06296c2929596b67",
+          "url": "https://github.com/mohammadrezwankhan/zephyrtrade/blob/648480d5c2fcbfbbd94f4e606f3f896352b1f7b6/docs/index.html"
+        },
+        {
+          "path": "docs/index.html",
+          "commit": "aff0c95122f8116b3e5fe2c1adcf3665bc36d9cc",
+          "blob": "ece5f9c8c7ba543baa11eca604b45ad48c1238dd",
+          "sha256": "f53b60369362776bc3a979c266bbd4bfd61c1d46bb4c0d1d99bb84a3bf5b9f80",
+          "url": "https://github.com/mohammadrezwankhan/zephyrtrade/blob/aff0c95122f8116b3e5fe2c1adcf3665bc36d9cc/docs/index.html"
+        }
+      ]
+    }
+  ],
+  "native_links": [
+    {
+      "title": "Original interactive engineering scene",
+      "url": "https://mktrade.co.business/assets/engineering-hero/v1/index.html",
+      "description": "The preserved opt-in 3D scene: battery physics, models, evidence, and grid systems. Requires WebGL; the film remains available when WebGL is unavailable."
+    },
+    {
+      "title": "ZephyrTrade original wind-market workbench",
+      "url": "https://mktrade.co.business/run/",
+      "description": "Original browser preview with its native visualizations and synthetic example data."
+    }
+  ],
+  "historical_source_links": []
+}
