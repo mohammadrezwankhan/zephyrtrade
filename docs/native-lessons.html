@@ -1,0 +1,276 @@
+<!doctype html>
+<html lang="en">
+<head>
+<meta charset="utf-8"><meta name="viewport" content="width=device-width, initial-scale=1"><meta name="color-scheme" content="light dark">
+<meta name="description" content="Search source-backed native lessons, examples, commands, and scope notes for mohammadrezwankhan/zephyrtrade.">
+<title>Zephyrtrade · Native lesson catalog</title>
+<style>
+:root{color-scheme:light dark;--bg:#f7fafc;--panel:#fff;--ink:#142333;--muted:#526578;--line:#d8e1ea;--cyan:#007b8b;--green:#08734e;--amber:#8b5200;--violet:#6444a6;--rose:#a91d43;--focus:#005fcc;font:16px/1.6 system-ui,-apple-system,Segoe UI,sans-serif}@media(prefers-color-scheme:dark){:root{--bg:#0b111b;--panel:#121c29;--ink:#ecf3f9;--muted:#b2c0ce;--line:#293848;--cyan:#48d9e8;--green:#58d6a1;--amber:#ffc15a;--violet:#b99cff;--rose:#ff8ca4;--focus:#8cc8ff}}*{box-sizing:border-box}body{margin:0;background:var(--bg);color:var(--ink)}a{color:var(--cyan);text-underline-offset:.16em}a:hover{text-decoration-thickness:2px}button,input{font:inherit}button:focus-visible,a:focus-visible,input:focus-visible{outline:3px solid var(--focus);outline-offset:3px}.skip-link{position:absolute;top:-6rem;left:1rem;background:var(--panel);padding:.65rem 1rem;z-index:5}.skip-link:focus{top:1rem}.shell{width:min(1180px,calc(100% - 2rem));margin:auto}.surface-nav{display:flex;flex-wrap:wrap;gap:.8rem 1.2rem;align-items:center;padding:1rem 0;border-bottom:1px solid var(--line);font-size:.92rem}.surface-nav a[aria-current]{font-weight:700;color:var(--ink)}.hero{padding:2rem 0 1.4rem}h1{font-size:clamp(2rem,4vw,3.2rem);line-height:1.12;margin:.35rem 0 .75rem}h2{font-size:1.55rem;line-height:1.25;margin:1.4rem 0 .8rem}h3{font-size:1.1rem;line-height:1.3;margin:.2rem 0 .55rem}p{margin:.4rem 0}.eyebrow,.source-path,.command-source,.command-label,.revision{font-family:ui-monospace,SFMono-Regular,Consolas,monospace;font-size:.82rem}.eyebrow{letter-spacing:.1em;text-transform:uppercase;color:var(--muted)}.lede{max-width:78ch;color:var(--muted)}.revision{overflow-wrap:anywhere}.surface-note{margin:1rem 0;padding:1rem 1.1rem;border-left:5px solid var(--rose);background:var(--panel);border-radius:.35rem}.surface-note strong{color:var(--rose)}.model-figure{margin:1.2rem 0;padding:1rem;background:var(--panel);border:1px solid var(--line);border-radius:.65rem}.model-figure img{display:block;max-width:100%;height:auto;margin:auto}.model-figure figcaption{margin-top:.6rem;color:var(--muted);font-size:.9rem}.section-navigation{display:grid;grid-template-columns:repeat(auto-fit,minmax(180px,1fr));gap:.65rem;padding:1rem 0 1.4rem}.section-link{display:block;border-radius:.65rem;overflow:hidden}.section-link img,.section-banner img{display:block;width:100%;height:auto}.catalog-section{padding:1.4rem 0;border-top:1px solid var(--line);scroll-margin-top:1rem}.catalog-section h2{margin:.75rem 0 1rem}.lesson-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(min(100%,315px),1fr));gap:.8rem}.lesson-card,.command-card{background:var(--panel);border:1px solid var(--line);border-radius:.7rem;padding:1rem;min-width:0}.lesson-card[hidden]{display:none!important}.card-meta{display:flex;justify-content:space-between;gap:1rem;color:var(--muted);font-size:.78rem;margin-bottom:.5rem}.excerpt{color:var(--muted);font-size:.93rem}.source-path{overflow-wrap:anywhere;color:var(--muted)}.card-links{display:flex;flex-wrap:wrap;gap:.5rem 1rem;margin:.6rem 0}.tags{display:flex;flex-wrap:wrap;gap:.35rem}.tag,.filter-chip{border:1px solid var(--line);border-radius:999px;padding:.24rem .58rem;font-size:.78rem;color:var(--muted);background:transparent}.controls{padding:1rem;background:var(--panel);border:1px solid var(--line);border-radius:.7rem;margin:1.4rem 0}.controls label{display:block;font-weight:650;margin-bottom:.4rem}input[type=search]{width:min(100%,620px);padding:.65rem .75rem;background:var(--bg);border:1px solid var(--line);border-radius:.4rem;color:var(--ink)}.filter-list{display:flex;flex-wrap:wrap;gap:.4rem;margin-top:.7rem}.filter-chip[aria-pressed=true]{color:var(--ink);border-color:var(--cyan);box-shadow:inset 0 0 0 1px var(--cyan)}.results-count{color:var(--muted);font-size:.9rem}.reproduction{padding:1.25rem 0 1.6rem;border-top:1px solid var(--line)}.command-list{display:grid;gap:.7rem}.command-card{display:flex;align-items:flex-start;justify-content:space-between;gap:1rem}.command-card pre{margin:.2rem 0;white-space:pre-wrap;overflow-wrap:anywhere}.command-source,.command-label{color:var(--muted)}.copy-button{flex:none;border:1px solid var(--line);border-radius:.4rem;padding:.45rem .7rem;background:transparent;color:var(--ink);cursor:pointer}.copy-button:hover{border-color:var(--cyan)}.setup-note,.lab-provenance{color:var(--muted);font-size:.9rem;max-width:90ch}.footer{border-top:1px solid var(--line);padding:1.2rem 0 2rem;color:var(--muted);font-size:.88rem}@media(max-width:620px){.command-card{display:block}.copy-button{margin-top:.5rem}.surface-nav{gap:.55rem .85rem}}@media(prefers-reduced-motion:reduce){*,*::before,*::after{scroll-behavior:auto!important;animation:none!important;transition:none!important}}
+</style></head>
+<body><a class="skip-link" href="#catalog">Skip to native catalog</a><main class="shell">
+<nav class="surface-nav" aria-label="Learning surfaces">
+      <a href="index.html">Educational browser lab</a>
+      <a href="portfolio/index.html">Source-linked portfolio guide</a>
+      <a href="#catalog" aria-current="page">Native lesson catalog</a>
+    </nav>
+<section class="hero" aria-labelledby="page-title"><p class="eyebrow">Native source materials / 29 indexed</p><h1 id="page-title">Native lessons and source materials</h1>
+<p class="lede">This index links to repository-authored course records, examples, tutorials, and technical reading. The separate browser lab is an educational surrogate; its sliders and checkpoints do not execute this repository's native engine.</p>
+<p class="revision">Current audited native source: <a href="https://github.com/mohammadrezwankhan/zephyrtrade/tree/648480d5c2fcbfbbd94f4e606f3f896352b1f7b6" target="_blank" rel="noopener noreferrer">648480d5c2fcbfbbd94f4e606f3f896352b1f7b6</a></p>
+
+<aside class="surface-note"><strong>Two distinct surfaces.</strong> Use the <a href="index.html">browser teaching lab</a> for its clearly scoped surrogate model. Use the source links below to read the native lessons and implementation. This catalog does not run source code or claim native-engine results.</aside>
+<p class="lab-provenance">Browser-lab provenance from the reconciled package: <a href="https://github.com/mohammadrezwankhan/zephyrtrade/tree/090c28970f1a6c6f3032aaa4cf086e0d475a84da" target="_blank" rel="noopener noreferrer">package source revision 090c28970f1a6c6f3032aaa4cf086e0d475a84da</a>. This is separate from the current native source revision above.</p></section>
+<nav class="section-navigation" aria-label="Five-color learning sections"><a class="section-link section-question" href="#question"><img src="visuals/sections/section-01-question.svg" alt="Section 01: Question / topology"></a>
+<a class="section-link section-equations" href="#equations"><img src="visuals/sections/section-02-equations.svg" alt="Section 02: Equations / provenance"></a>
+<a class="section-link section-reproduce" href="#reproduce"><img src="visuals/sections/section-03-reproduce.svg" alt="Section 03: Reproduce / parameters"></a>
+<a class="section-link section-verification" href="#verification"><img src="visuals/sections/section-04-verification.svg" alt="Section 04: Verification / output"></a>
+<a class="section-link section-scope" href="#scope"><img src="visuals/sections/section-05-scope.svg" alt="Section 05: Scope / limitations"></a></nav>
+<section class="reproduction" id="reproduction" aria-labelledby="reproduction-title"><div class="section-banner"><img src="visuals/sections/section-03-reproduce.svg" alt="Section 03: Reproduce / parameters"></div>
+<h2 id="reproduction-title">Source-defined reproduction commands</h2>
+<p class="setup-note">These exact one-line commands were observed in the audited repository workflow records and link to their source location. Expected setup, tool licensing, data, and environment vary by repository; the dashboard does not execute these commands or promise a completion time.</p>
+<div class="command-list"><article class="command-card">
+          <div><p class="command-label">Expected environment setup</p><pre><code>python -m pip install -e &quot;.[dev]&quot;</code></pre>
+          <p class="command-source">Observed in <a href="https://github.com/mohammadrezwankhan/zephyrtrade/blob/648480d5c2fcbfbbd94f4e606f3f896352b1f7b6/.github/workflows/ci.yml#L32" target="_blank" rel="noopener noreferrer">.github/workflows/ci.yml:L32</a></p></div>
+          <button class="copy-button" type="button" data-copy="python -m pip install -e &quot;.[dev]&quot;" aria-label="Copy command 1">Copy command</button>
+        </article><article class="command-card">
+          <div><p class="command-label">Source-defined validation command</p><pre><code>python -m ruff check src tests</code></pre>
+          <p class="command-source">Observed in <a href="https://github.com/mohammadrezwankhan/zephyrtrade/blob/648480d5c2fcbfbbd94f4e606f3f896352b1f7b6/.github/workflows/ci.yml#L35" target="_blank" rel="noopener noreferrer">.github/workflows/ci.yml:L35</a></p></div>
+          <button class="copy-button" type="button" data-copy="python -m ruff check src tests" aria-label="Copy command 2">Copy command</button>
+        </article><article class="command-card">
+          <div><p class="command-label">Source-defined validation command</p><pre><code>python -m ruff format --check src tests</code></pre>
+          <p class="command-source">Observed in <a href="https://github.com/mohammadrezwankhan/zephyrtrade/blob/648480d5c2fcbfbbd94f4e606f3f896352b1f7b6/.github/workflows/ci.yml#L38" target="_blank" rel="noopener noreferrer">.github/workflows/ci.yml:L38</a></p></div>
+          <button class="copy-button" type="button" data-copy="python -m ruff format --check src tests" aria-label="Copy command 3">Copy command</button>
+        </article><article class="command-card">
+          <div><p class="command-label">Source-defined validation command</p><pre><code>python -m pytest -W error</code></pre>
+          <p class="command-source">Observed in <a href="https://github.com/mohammadrezwankhan/zephyrtrade/blob/648480d5c2fcbfbbd94f4e606f3f896352b1f7b6/.github/workflows/ci.yml#L41" target="_blank" rel="noopener noreferrer">.github/workflows/ci.yml:L41</a></p></div>
+          <button class="copy-button" type="button" data-copy="python -m pytest -W error" aria-label="Copy command 4">Copy command</button>
+        </article><article class="command-card">
+          <div><p class="command-label">Source-defined example command</p><pre><code>python -m build</code></pre>
+          <p class="command-source">Observed in <a href="https://github.com/mohammadrezwankhan/zephyrtrade/blob/648480d5c2fcbfbbd94f4e606f3f896352b1f7b6/.github/workflows/ci.yml#L54" target="_blank" rel="noopener noreferrer">.github/workflows/ci.yml:L54</a></p></div>
+          <button class="copy-button" type="button" data-copy="python -m build" aria-label="Copy command 5">Copy command</button>
+        </article></div></section>
+<section class="controls" id="catalog" aria-labelledby="catalog-title"><h2 id="catalog-title">Search the native catalog</h2><label for="lesson-search">Search titles, paths, descriptions, and tags</label><input id="lesson-search" type="search" autocomplete="off" placeholder="Try “validation”, “thermal”, or a filename">
+<div class="filter-list" role="group" aria-label="Filter native materials by smart tag"><button class="filter-chip" type="button" data-tag-filter="model" aria-pressed="false">model</button>
+<button class="filter-chip" type="button" data-tag-filter="native-lesson" aria-pressed="false">native lesson</button>
+<button class="filter-chip" type="button" data-tag-filter="native-reading" aria-pressed="false">native reading</button>
+<button class="filter-chip" type="button" data-tag-filter="reproduction" aria-pressed="false">reproduction</button>
+<button class="filter-chip" type="button" data-tag-filter="scope" aria-pressed="false">scope</button>
+<button class="filter-chip" type="button" data-tag-filter="verification" aria-pressed="false">verification</button></div><p class="results-count" id="result-count" role="status" aria-live="polite">29 materials</p>
+<p><a href="native-lessons.json">Read the machine-readable native catalog</a></p></section>
+<section class="catalog-section section-question" id="question" aria-labelledby="heading-question">
+          <div class="section-banner"><img src="visuals/sections/section-01-question.svg" alt="Section 01: Question / topology"></div>
+          <h2 id="heading-question">Question / topology</h2>
+          <div class="lesson-grid"><article class="lesson-card" data-search="cloudflare browser edition docs/cloudflare.md public overview: &lt;https://mktrade.co.business/&gt; native reading native-reading" data-tags="native-reading">
+              <div class="card-meta"><span>Native reading</span></div>
+              <h3>Cloudflare browser edition</h3><p class="excerpt">Public overview: &lt;https://mktrade.co.business/&gt;</p>
+              <p class="source-path"><code>docs/CLOUDFLARE.md</code></p>
+              <div class="card-links"><a class="source-link" href="https://github.com/mohammadrezwankhan/zephyrtrade/blob/648480d5c2fcbfbbd94f4e606f3f896352b1f7b6/docs/CLOUDFLARE.md#L1" target="_blank" rel="noopener noreferrer">Source at 648480d5c2fc</a></div><div class="tags"><span class="tag">native reading</span></div>
+            </article><article class="lesson-card" data-search="internal readiness score: zephyrtrade docs/champion_score.md assessed 2026-09-30 using the same seven weights for all 37 projects. this is an editorial qa prioritization rubric, not a calibrated metric, external rating or promise of adoption. native reading native-reading" data-tags="native-reading">
+              <div class="card-meta"><span>Native reading</span></div>
+              <h3>Internal readiness score: ZephyrTrade</h3><p class="excerpt">Assessed 2026-09-30 using the same seven weights for all 37 projects. This is an editorial QA prioritization rubric, not a calibrated metric, external rating or promise of adoption.</p>
+              <p class="source-path"><code>docs/CHAMPION_SCORE.md</code></p>
+              <div class="card-links"><a class="source-link" href="https://github.com/mohammadrezwankhan/zephyrtrade/blob/648480d5c2fcbfbbd94f4e606f3f896352b1f7b6/docs/CHAMPION_SCORE.md#L1" target="_blank" rel="noopener noreferrer">Source at 648480d5c2fc</a></div><div class="tags"><span class="tag">native reading</span></div>
+            </article><article class="lesson-card" data-search="useful contribution quests for zephyrtrade docs/champion_quests.md these are contribution proposals, not rewards for stars. check existing issues before starting. native reading native-reading" data-tags="native-reading">
+              <div class="card-meta"><span>Native reading</span></div>
+              <h3>Useful contribution quests for ZephyrTrade</h3><p class="excerpt">These are contribution proposals, not rewards for stars. Check existing issues before starting.</p>
+              <p class="source-path"><code>docs/CHAMPION_QUESTS.md</code></p>
+              <div class="card-links"><a class="source-link" href="https://github.com/mohammadrezwankhan/zephyrtrade/blob/648480d5c2fcbfbbd94f4e606f3f896352b1f7b6/docs/CHAMPION_QUESTS.md#L1" target="_blank" rel="noopener noreferrer">Source at 648480d5c2fc</a></div><div class="tags"><span class="tag">native reading</span></div>
+            </article><article class="lesson-card" data-search="zephyrtrade: awesome-list research docs/promotion/awesome_list_targets.md checked live github metadata on 2026-09-30. ten existing lists were investigated; this is a screening log, not ten claims of eligibility. no pr was submitted. relevance and current contribution rules take priority over filling a quota. native reading native-reading" data-tags="native-reading">
+              <div class="card-meta"><span>Native reading</span></div>
+              <h3>ZephyrTrade: awesome-list research</h3><p class="excerpt">Checked live GitHub metadata on 2026-09-30. Ten existing lists were investigated; this is a screening log, not ten claims of eligibility. No PR was submitted. Relevance and current contribution rules take priority over filling a quota.</p>
+              <p class="source-path"><code>docs/promotion/AWESOME_LIST_TARGETS.md</code></p>
+              <div class="card-links"><a class="source-link" href="https://github.com/mohammadrezwankhan/zephyrtrade/blob/648480d5c2fcbfbbd94f4e606f3f896352b1f7b6/docs/promotion/AWESOME_LIST_TARGETS.md#L1" target="_blank" rel="noopener noreferrer">Source at 648480d5c2fc</a></div><div class="tags"><span class="tag">native reading</span></div>
+            </article><article class="lesson-card" data-search="zephyrtrade: community teaching draft docs/promotion/reddit_launch.md candidate communities: r/webdev for implementation discussion; r/opensource for source review; r/python for numerical python methods. native reading native-reading" data-tags="native-reading">
+              <div class="card-meta"><span>Native reading</span></div>
+              <h3>ZephyrTrade: community teaching draft</h3><p class="excerpt">Candidate communities: r/webdev for implementation discussion; r/opensource for source review; r/Python for numerical Python methods.</p>
+              <p class="source-path"><code>docs/promotion/REDDIT_LAUNCH.md</code></p>
+              <div class="card-links"><a class="source-link" href="https://github.com/mohammadrezwankhan/zephyrtrade/blob/648480d5c2fcbfbbd94f4e606f3f896352b1f7b6/docs/promotion/REDDIT_LAUNCH.md#L1" target="_blank" rel="noopener noreferrer">Source at 648480d5c2fc</a></div><div class="tags"><span class="tag">native reading</span></div>
+            </article><article class="lesson-card" data-search="zephyrtrade: conditional launch calendar docs/promotion/launch_calendar.md t−7: complete current checks and source/rights review; inspect first-run demo. native reading native-reading" data-tags="native-reading">
+              <div class="card-meta"><span>Native reading</span></div>
+              <h3>ZephyrTrade: conditional launch calendar</h3><p class="excerpt">T−7: complete current checks and source/rights review; inspect first-run demo.</p>
+              <p class="source-path"><code>docs/promotion/LAUNCH_CALENDAR.md</code></p>
+              <div class="card-links"><a class="source-link" href="https://github.com/mohammadrezwankhan/zephyrtrade/blob/648480d5c2fcbfbbd94f4e606f3f896352b1f7b6/docs/promotion/LAUNCH_CALENDAR.md#L1" target="_blank" rel="noopener noreferrer">Source at 648480d5c2fc</a></div><div class="tags"><span class="tag">native reading</span></div>
+            </article><article class="lesson-card" data-search="zephyrtrade: growth experiments docs/promotion/growth_experiments.md stars are an aspiration, not a guaranteed outcome. no current metric is asserted here. native reading native-reading" data-tags="native-reading">
+              <div class="card-meta"><span>Native reading</span></div>
+              <h3>ZephyrTrade: growth experiments</h3><p class="excerpt">Stars are an aspiration, not a guaranteed outcome. No current metric is asserted here.</p>
+              <p class="source-path"><code>docs/promotion/GROWTH_EXPERIMENTS.md</code></p>
+              <div class="card-links"><a class="source-link" href="https://github.com/mohammadrezwankhan/zephyrtrade/blob/648480d5c2fcbfbbd94f4e606f3f896352b1f7b6/docs/promotion/GROWTH_EXPERIMENTS.md#L1" target="_blank" rel="noopener noreferrer">Source at 648480d5c2fc</a></div><div class="tags"><span class="tag">native reading</span></div>
+            </article><article class="lesson-card" data-search="zephyrtrade: linkedin drafts docs/promotion/linkedin_launch.md not posted. native reading native-reading" data-tags="native-reading">
+              <div class="card-meta"><span>Native reading</span></div>
+              <h3>ZephyrTrade: LinkedIn drafts</h3><p class="excerpt">Not posted.</p>
+              <p class="source-path"><code>docs/promotion/LINKEDIN_LAUNCH.md</code></p>
+              <div class="card-links"><a class="source-link" href="https://github.com/mohammadrezwankhan/zephyrtrade/blob/648480d5c2fcbfbbd94f4e606f3f896352b1f7b6/docs/promotion/LINKEDIN_LAUNCH.md#L1" target="_blank" rel="noopener noreferrer">Source at 648480d5c2fc</a></div><div class="tags"><span class="tag">native reading</span></div>
+            </article><article class="lesson-card" data-search="zephyrtrade: newsletter and publisher pitch drafts docs/promotion/newsletter_outreach.md promotion hold: current readiness score 85/100 is below the 90/100 gate. these drafts remain unsent. confirm public access, current editorial rules and project-specific fit before any submission. native reading native-reading" data-tags="native-reading">
+              <div class="card-meta"><span>Native reading</span></div>
+              <h3>ZephyrTrade: newsletter and publisher pitch drafts</h3><p class="excerpt">Promotion hold: Current readiness score 85/100 is below the 90/100 gate. These drafts remain unsent. Confirm public access, current editorial rules and project-specific fit before any submission.</p>
+              <p class="source-path"><code>docs/promotion/NEWSLETTER_OUTREACH.md</code></p>
+              <div class="card-links"><a class="source-link" href="https://github.com/mohammadrezwankhan/zephyrtrade/blob/648480d5c2fcbfbbd94f4e606f3f896352b1f7b6/docs/promotion/NEWSLETTER_OUTREACH.md#L1" target="_blank" rel="noopener noreferrer">Source at 648480d5c2fc</a></div><div class="tags"><span class="tag">native reading</span></div>
+            </article><article class="lesson-card" data-search="zephyrtrade: press kit docs/promotion/press_kit.md name: zephyrtrade native reading native-reading" data-tags="native-reading">
+              <div class="card-meta"><span>Native reading</span></div>
+              <h3>ZephyrTrade: press kit</h3><p class="excerpt">Name: ZephyrTrade</p>
+              <p class="source-path"><code>docs/promotion/PRESS_KIT.md</code></p>
+              <div class="card-links"><a class="source-link" href="https://github.com/mohammadrezwankhan/zephyrtrade/blob/648480d5c2fcbfbbd94f4e606f3f896352b1f7b6/docs/promotion/PRESS_KIT.md#L1" target="_blank" rel="noopener noreferrer">Source at 648480d5c2fc</a></div><div class="tags"><span class="tag">native reading</span></div>
+            </article><article class="lesson-card" data-search="zephyrtrade: shots docs/demo/shot_list.md 1440×1000 overview with demo label. native reading native-reading" data-tags="native-reading">
+              <div class="card-meta"><span>Native reading</span></div>
+              <h3>ZephyrTrade: shots</h3><p class="excerpt">1440×1000 overview with demo label.</p>
+              <p class="source-path"><code>docs/demo/SHOT_LIST.md</code></p>
+              <div class="card-links"><a class="source-link" href="https://github.com/mohammadrezwankhan/zephyrtrade/blob/648480d5c2fcbfbbd94f4e606f3f896352b1f7b6/docs/demo/SHOT_LIST.md#L1" target="_blank" rel="noopener noreferrer">Source at 648480d5c2fc</a></div><div class="tags"><span class="tag">native reading</span></div>
+            </article><article class="lesson-card" data-search="zephyrtrade: show hn draft docs/promotion/hacker_news_launch.md selected title: show hn: zephyrtrade — an inspectable local demo native reading native-reading" data-tags="native-reading">
+              <div class="card-meta"><span>Native reading</span></div>
+              <h3>ZephyrTrade: Show HN draft</h3><p class="excerpt">Selected title: Show HN: ZephyrTrade — an inspectable local demo</p>
+              <p class="source-path"><code>docs/promotion/HACKER_NEWS_LAUNCH.md</code></p>
+              <div class="card-links"><a class="source-link" href="https://github.com/mohammadrezwankhan/zephyrtrade/blob/648480d5c2fcbfbbd94f4e606f3f896352b1f7b6/docs/promotion/HACKER_NEWS_LAUNCH.md#L1" target="_blank" rel="noopener noreferrer">Source at 648480d5c2fc</a></div><div class="tags"><span class="tag">native reading</span></div>
+            </article><article class="lesson-card" data-search="zephyrtrade: technical thread draft docs/promotion/x_launch.md not posted. native reading native-reading" data-tags="native-reading">
+              <div class="card-meta"><span>Native reading</span></div>
+              <h3>ZephyrTrade: technical thread draft</h3><p class="excerpt">Not posted.</p>
+              <p class="source-path"><code>docs/promotion/X_LAUNCH.md</code></p>
+              <div class="card-links"><a class="source-link" href="https://github.com/mohammadrezwankhan/zephyrtrade/blob/648480d5c2fcbfbbd94f4e606f3f896352b1f7b6/docs/promotion/X_LAUNCH.md#L1" target="_blank" rel="noopener noreferrer">Source at 648480d5c2fc</a></div><div class="tags"><span class="tag">native reading</span></div>
+            </article></div>
+        </section><section class="catalog-section section-equations" id="equations" aria-labelledby="heading-equations">
+          <div class="section-banner"><img src="visuals/sections/section-02-equations.svg" alt="Section 02: Equations / provenance"></div>
+          <h2 id="heading-equations">Equations / provenance</h2>
+          <div class="lesson-grid"><article class="lesson-card" data-search="zephyrtrade: ml-driven wind energy market optimizer docs/report.md market area: bornholm, dk2 native reading model" data-tags="model">
+              <div class="card-meta"><span>Native reading</span></div>
+              <h3>ZephyrTrade: ML-Driven Wind Energy Market Optimizer</h3><p class="excerpt">Market area: Bornholm, DK2</p>
+              <p class="source-path"><code>docs/report.md</code></p>
+              <div class="card-links"><a class="source-link" href="https://github.com/mohammadrezwankhan/zephyrtrade/blob/648480d5c2fcbfbbd94f4e606f3f896352b1f7b6/docs/report.md#L1" target="_blank" rel="noopener noreferrer">Source at 648480d5c2fc</a></div><div class="tags"><span class="tag">model</span></div>
+            </article></div>
+        </section><section class="catalog-section section-reproduce" id="reproduce" aria-labelledby="heading-reproduce">
+          <div class="section-banner"><img src="visuals/sections/section-03-reproduce.svg" alt="Section 03: Reproduce / parameters"></div>
+          <h2 id="heading-reproduce">Reproduce / parameters</h2>
+          <div class="lesson-grid"><article class="lesson-card" data-search="readme cta alternatives docs/promotion/readme_cta_options.md if zephyrtrade helps you study this workflow, a star helps other wind-market and numerical-method researchers find it. native reading reproduction" data-tags="reproduction">
+              <div class="card-meta"><span>Native reading</span></div>
+              <h3>README CTA alternatives</h3><p class="excerpt">If ZephyrTrade helps you study this workflow, a star helps other wind-market and numerical-method researchers find it.</p>
+              <p class="source-path"><code>docs/promotion/README_CTA_OPTIONS.md</code></p>
+              <div class="card-links"><a class="source-link" href="https://github.com/mohammadrezwankhan/zephyrtrade/blob/648480d5c2fcbfbbd94f4e606f3f896352b1f7b6/docs/promotion/README_CTA_OPTIONS.md#L1" target="_blank" rel="noopener noreferrer">Source at 648480d5c2fc</a></div><div class="tags"><span class="tag">reproduction</span></div>
+            </article><article class="lesson-card" data-search="zephyrtrade: community outreach docs/promotion/community_outreach.md start with existing repository issues after public release. discuss one concrete workflow with wind-market and numerical-method researchers. use an existing authenticated account and follow the receiving community’s current rules. no discord, slack, research affiliation or domain partnership is invented. native reading reproduction" data-tags="reproduction">
+              <div class="card-meta"><span>Native reading</span></div>
+              <h3>ZephyrTrade: community outreach</h3><p class="excerpt">Start with existing repository issues after public release. Discuss one concrete workflow with wind-market and numerical-method researchers. Use an existing authenticated account and follow the receiving community’s current rules. No Discord, Slack, research affiliation or domain partnership is invented.</p>
+              <p class="source-path"><code>docs/promotion/COMMUNITY_OUTREACH.md</code></p>
+              <div class="card-links"><a class="source-link" href="https://github.com/mohammadrezwankhan/zephyrtrade/blob/648480d5c2fcbfbbd94f4e606f3f896352b1f7b6/docs/promotion/COMMUNITY_OUTREACH.md#L1" target="_blank" rel="noopener noreferrer">Source at 648480d5c2fc</a></div><div class="tags"><span class="tag">reproduction</span></div>
+            </article></div>
+        </section><section class="catalog-section section-verification" id="verification" aria-labelledby="heading-verification">
+          <div class="section-banner"><img src="visuals/sections/section-04-verification.svg" alt="Section 04: Verification / output"></div>
+          <h2 id="heading-verification">Verification / output</h2>
+          <div class="lesson-grid"><article class="lesson-card" data-search="45-second zephyrtrade demo docs/demo/demo_script.md 0–8s: show the title and synthetic-data label. explain: research application that generates synthetic wind/weather/price tables, compares wind-forecast and direct-offer strategies, backtests revenue and explores hypothetical offers without placing trades. native reading verification" data-tags="verification">
+              <div class="card-meta"><span>Native reading</span></div>
+              <h3>45-second ZephyrTrade demo</h3><p class="excerpt">0–8s: Show the title and synthetic-data label. Explain: Research application that generates synthetic wind/weather/price tables, compares wind-forecast and direct-offer strategies, backtests revenue and explores hypothetical offers without placing trades.</p>
+              <p class="source-path"><code>docs/demo/DEMO_SCRIPT.md</code></p>
+              <div class="card-links"><a class="source-link" href="https://github.com/mohammadrezwankhan/zephyrtrade/blob/648480d5c2fcbfbbd94f4e606f3f896352b1f7b6/docs/demo/DEMO_SCRIPT.md#L1" target="_blank" rel="noopener noreferrer">Source at 648480d5c2fc</a></div><div class="tags"><span class="tag">verification</span></div>
+            </article><article class="lesson-card" data-search="evidence log — zephyrtrade champion 1.1.0 docs/champion/evidence_log.md all execution took place in the isolated linux environment described in native reading verification" data-tags="verification">
+              <div class="card-meta"><span>Native reading</span></div>
+              <h3>Evidence log — ZephyrTrade Champion 1.1.0</h3><p class="excerpt">All execution took place in the isolated Linux environment described in</p>
+              <p class="source-path"><code>docs/champion/EVIDENCE_LOG.md</code></p>
+              <div class="card-links"><a class="source-link" href="https://github.com/mohammadrezwankhan/zephyrtrade/blob/648480d5c2fcbfbbd94f4e606f3f896352b1f7b6/docs/champion/EVIDENCE_LOG.md#L1" target="_blank" rel="noopener noreferrer">Source at 648480d5c2fc</a></div><div class="tags"><span class="tag">verification</span></div>
+            </article><article class="lesson-card" data-search="normal-browser acceptance and controlled-release checklist docs/champion/uat_and_release_checklist.md status: not run by human participants. this is a runnable acceptance script, native reading verification" data-tags="verification">
+              <div class="card-meta"><span>Native reading</span></div>
+              <h3>Normal-browser acceptance and controlled-release checklist</h3><p class="excerpt">Status: NOT RUN by human participants. This is a runnable acceptance script,</p>
+              <p class="source-path"><code>docs/champion/UAT_AND_RELEASE_CHECKLIST.md</code></p>
+              <div class="card-links"><a class="source-link" href="https://github.com/mohammadrezwankhan/zephyrtrade/blob/648480d5c2fcbfbbd94f4e606f3f896352b1f7b6/docs/champion/UAT_AND_RELEASE_CHECKLIST.md#L1" target="_blank" rel="noopener noreferrer">Source at 648480d5c2fc</a></div><div class="tags"><span class="tag">verification</span></div>
+            </article><article class="lesson-card" data-search="zephyrtrade champion — audit, verification and release handoff docs/champion/audit_and_release.md candidate: 1.1.0, local research only. prepared: 28 september 2026. native reading verification" data-tags="verification">
+              <div class="card-meta"><span>Native reading</span></div>
+              <h3>ZephyrTrade Champion — audit, verification and release handoff</h3><p class="excerpt">Candidate: 1.1.0, local research only. Prepared: 28 September 2026.</p>
+              <p class="source-path"><code>docs/champion/AUDIT_AND_RELEASE.md</code></p>
+              <div class="card-links"><a class="source-link" href="https://github.com/mohammadrezwankhan/zephyrtrade/blob/648480d5c2fcbfbbd94f4e606f3f896352b1f7b6/docs/champion/AUDIT_AND_RELEASE.md#L1" target="_blank" rel="noopener noreferrer">Source at 648480d5c2fc</a></div><div class="tags"><span class="tag">verification</span></div>
+            </article><article class="lesson-card" data-search="zephyrtrade: launch strategy docs/promotion/launch_strategy.md audience: wind-market and numerical-method researchers. positioning: research application that generates synthetic wind/weather/price tables, compares wind-forecast and direct-offer strategies, backtests revenue and explores hypothetical offers without placing trades. native reading verification" data-tags="verification">
+              <div class="card-meta"><span>Native reading</span></div>
+              <h3>ZephyrTrade: launch strategy</h3><p class="excerpt">Audience: wind-market and numerical-method researchers. Positioning: Research application that generates synthetic wind/weather/price tables, compares wind-forecast and direct-offer strategies, backtests revenue and explores hypothetical offers without placing trades.</p>
+              <p class="source-path"><code>docs/promotion/LAUNCH_STRATEGY.md</code></p>
+              <div class="card-links"><a class="source-link" href="https://github.com/mohammadrezwankhan/zephyrtrade/blob/648480d5c2fcbfbbd94f4e606f3f896352b1f7b6/docs/promotion/LAUNCH_STRATEGY.md#L1" target="_blank" rel="noopener noreferrer">Source at 648480d5c2fc</a></div><div class="tags"><span class="tag">verification</span></div>
+            </article><article class="lesson-card" data-search="zephyrtrade: voiceover draft docs/demo/voiceover.md research application that generates synthetic wind/weather/price tables, compares wind-forecast and direct-offer strategies, backtests revenue and explores hypothetical offers without placing trades. the example runs locally. start from the readme, open a supplied record, and inspect what is known, what is synthetic, and what stays on the device. the source and tests let you inspect the… native reading native-lesson verification" data-tags="native-lesson verification">
+              <div class="card-meta"><span>Native reading</span></div>
+              <h3>ZephyrTrade: voiceover draft</h3><p class="excerpt">Research application that generates synthetic wind/weather/price tables, compares wind-forecast and direct-offer strategies, backtests revenue and explores hypothetical offers without placing trades. The example runs locally. Start from the README, open a supplied record, and inspect what is known, what is synthetic, and what stays on the device. The source and tests let you inspect the…</p>
+              <p class="source-path"><code>docs/demo/VOICEOVER.md</code></p>
+              <div class="card-links"><a class="source-link" href="https://github.com/mohammadrezwankhan/zephyrtrade/blob/648480d5c2fcbfbbd94f4e606f3f896352b1f7b6/docs/demo/VOICEOVER.md#L1" target="_blank" rel="noopener noreferrer">Source at 648480d5c2fc</a></div><div class="tags"><span class="tag">native lesson</span> <span class="tag">verification</span></div>
+            </article></div>
+        </section><section class="catalog-section section-scope" id="scope" aria-labelledby="heading-scope">
+          <div class="section-banner"><img src="visuals/sections/section-05-scope.svg" alt="Section 05: Scope / limitations"></div>
+          <h2 id="heading-scope">Scope / limitations</h2>
+          <div class="lesson-grid"><article class="lesson-card" data-search="alternatives and adjacent tools: zephyrtrade docs/alternatives.md zephyrtrade generates synthetic wind, weather and price tables, compares forecast and direct-offer strategies, and reconciles hypothetical revenue. its python and browser engines expose the assumptions so a researcher can inspect numerical agreement instead of relying on a dashboard alone. native reading scope" data-tags="scope">
+              <div class="card-meta"><span>Native reading</span></div>
+              <h3>Alternatives and adjacent tools: ZephyrTrade</h3><p class="excerpt">ZephyrTrade generates synthetic wind, weather and price tables, compares forecast and direct-offer strategies, and reconciles hypothetical revenue. Its Python and browser engines expose the assumptions so a researcher can inspect numerical agreement instead of relying on a dashboard alone.</p>
+              <p class="source-path"><code>docs/ALTERNATIVES.md</code></p>
+              <div class="card-links"><a class="source-link" href="https://github.com/mohammadrezwankhan/zephyrtrade/blob/648480d5c2fcbfbbd94f4e606f3f896352b1f7b6/docs/ALTERNATIVES.md#L1" target="_blank" rel="noopener noreferrer">Source at 648480d5c2fc</a></div><div class="tags"><span class="tag">scope</span></div>
+            </article><article class="lesson-card" data-search="checking forecast quality and offer revenue separately docs/engineering/case_study.md zephyrtrade generates synthetic wind, weather and price tables, compares forecast and direct-offer strategies, and reconciles hypothetical revenue. its python and browser engines expose the assumptions so a researcher can inspect numerical agreement instead of relying on a dashboard alone. native reading scope" data-tags="scope">
+              <div class="card-meta"><span>Native reading</span></div>
+              <h3>Checking forecast quality and offer revenue separately</h3><p class="excerpt">ZephyrTrade generates synthetic wind, weather and price tables, compares forecast and direct-offer strategies, and reconciles hypothetical revenue. Its Python and browser engines expose the assumptions so a researcher can inspect numerical agreement instead of relying on a dashboard alone.</p>
+              <p class="source-path"><code>docs/engineering/CASE_STUDY.md</code></p>
+              <div class="card-links"><a class="source-link" href="https://github.com/mohammadrezwankhan/zephyrtrade/blob/648480d5c2fcbfbbd94f4e606f3f896352b1f7b6/docs/engineering/CASE_STUDY.md#L1" target="_blank" rel="noopener noreferrer">Source at 648480d5c2fc</a></div><div class="tags"><span class="tag">scope</span></div>
+            </article><article class="lesson-card" data-search="checking forecast quality and offer revenue separately docs/promotion/devto_article.md zephyrtrade generates synthetic wind, weather and price tables, compares forecast and direct-offer strategies, and reconciles hypothetical revenue. its python and browser engines expose the assumptions so a researcher can inspect numerical agreement instead of relying on a dashboard alone. native reading scope" data-tags="scope">
+              <div class="card-meta"><span>Native reading</span></div>
+              <h3>Checking forecast quality and offer revenue separately</h3><p class="excerpt">ZephyrTrade generates synthetic wind, weather and price tables, compares forecast and direct-offer strategies, and reconciles hypothetical revenue. Its Python and browser engines expose the assumptions so a researcher can inspect numerical agreement instead of relying on a dashboard alone.</p>
+              <p class="source-path"><code>docs/promotion/DEVTO_ARTICLE.md</code></p>
+              <div class="card-links"><a class="source-link" href="https://github.com/mohammadrezwankhan/zephyrtrade/blob/648480d5c2fcbfbbd94f4e606f3f896352b1f7b6/docs/promotion/DEVTO_ARTICLE.md#L1" target="_blank" rel="noopener noreferrer">Source at 648480d5c2fc</a></div><div class="tags"><span class="tag">scope</span></div>
+            </article><article class="lesson-card" data-search="three boundaries in zephyrtrade docs/promotion/hashnode_article.md zephyrtrade generates synthetic wind, weather and price tables, compares forecast and direct-offer strategies, and reconciles hypothetical revenue. its python and browser engines expose the assumptions so a researcher can inspect numerical agreement instead of relying on a dashboard alone. native reading scope" data-tags="scope">
+              <div class="card-meta"><span>Native reading</span></div>
+              <h3>Three boundaries in ZephyrTrade</h3><p class="excerpt">ZephyrTrade generates synthetic wind, weather and price tables, compares forecast and direct-offer strategies, and reconciles hypothetical revenue. Its Python and browser engines expose the assumptions so a researcher can inspect numerical agreement instead of relying on a dashboard alone.</p>
+              <p class="source-path"><code>docs/promotion/HASHNODE_ARTICLE.md</code></p>
+              <div class="card-links"><a class="source-link" href="https://github.com/mohammadrezwankhan/zephyrtrade/blob/648480d5c2fcbfbbd94f4e606f3f896352b1f7b6/docs/promotion/HASHNODE_ARTICLE.md#L1" target="_blank" rel="noopener noreferrer">Source at 648480d5c2fc</a></div><div class="tags"><span class="tag">scope</span></div>
+            </article><article class="lesson-card" data-search="zephyrtrade readme.md open the public browser app · purpose, usage and limits · methodology · build and deployment guide native overview scope" data-tags="scope">
+              <div class="card-meta"><span>Native overview</span></div>
+              <h3>ZephyrTrade</h3><p class="excerpt">Open the public browser app · Purpose, usage and limits · Methodology · Build and deployment guide</p>
+              <p class="source-path"><code>README.md</code></p>
+              <div class="card-links"><a class="source-link" href="https://github.com/mohammadrezwankhan/zephyrtrade/blob/090c28970f1a6c6f3032aaa4cf086e0d475a84da/README.md#L1" target="_blank" rel="noopener noreferrer">Historical README/source guide at 090c28970f1a</a></div><div class="tags"><span class="tag">scope</span></div>
+            </article><article class="lesson-card" data-search="zephyrtrade visual identity docs/repository/visual_identity.md repository accent: #ffc078. shared background: #0c1923; text: #f7fafc; secondary text: #c6d4dc. keep the supplied application palette and functional status labels. diagrams use labeled boxes and arrows, never color alone. social assets identify the synthetic/demo scope; screenshots are actual rendered app states. editable svg sources accompany the png preview. native reading scope" data-tags="scope">
+              <div class="card-meta"><span>Native reading</span></div>
+              <h3>ZephyrTrade visual identity</h3><p class="excerpt">Repository accent: #ffc078. Shared background: #0c1923; text: #f7fafc; secondary text: #c6d4dc. Keep the supplied application palette and functional status labels. Diagrams use labeled boxes and arrows, never color alone. Social assets identify the synthetic/demo scope; screenshots are actual rendered app states. Editable SVG sources accompany the PNG preview.</p>
+              <p class="source-path"><code>docs/repository/VISUAL_IDENTITY.md</code></p>
+              <div class="card-links"><a class="source-link" href="https://github.com/mohammadrezwankhan/zephyrtrade/blob/648480d5c2fcbfbbd94f4e606f3f896352b1f7b6/docs/repository/VISUAL_IDENTITY.md#L1" target="_blank" rel="noopener noreferrer">Source at 648480d5c2fc</a></div><div class="tags"><span class="tag">scope</span></div>
+            </article><article class="lesson-card" data-search="zephyrtrade: data and rule boundaries docs/architecture/system-overview.md zephyrtrade generates synthetic wind, weather and price tables, compares forecast and direct-offer strategies, and reconciles hypothetical revenue. its python and browser engines expose the assumptions so a researcher can inspect numerical agreement instead of relying on a dashboard alone. native reading scope" data-tags="scope">
+              <div class="card-meta"><span>Native reading</span></div>
+              <h3>ZephyrTrade: data and rule boundaries</h3><p class="excerpt">ZephyrTrade generates synthetic wind, weather and price tables, compares forecast and direct-offer strategies, and reconciles hypothetical revenue. Its Python and browser engines expose the assumptions so a researcher can inspect numerical agreement instead of relying on a dashboard alone.</p>
+              <p class="source-path"><code>docs/architecture/system-overview.md</code></p>
+              <div class="card-links"><a class="source-link" href="https://github.com/mohammadrezwankhan/zephyrtrade/blob/648480d5c2fcbfbbd94f4e606f3f896352b1f7b6/docs/architecture/system-overview.md#L1" target="_blank" rel="noopener noreferrer">Source at 648480d5c2fc</a></div><div class="tags"><span class="tag">scope</span></div>
+            </article></div>
+        </section>
+<footer class="footer"><p>Repository: <a href="https://github.com/mohammadrezwankhan/zephyrtrade" target="_blank" rel="noopener noreferrer">mohammadrezwankhan/zephyrtrade</a> · audited source revision 648480d5c2fcbfbbd94f4e606f3f896352b1f7b6.</p><p>The page is a source navigator. It is not a native runtime, verification result, peer review, or physical-fidelity claim.</p></footer>
+</main><script>
+(() => {
+  const search = document.getElementById('lesson-search');
+  const cards = [...document.querySelectorAll('.lesson-card')];
+  const filters = new Set();
+  const count = document.getElementById('result-count');
+  const filterButtons = [...document.querySelectorAll('[data-tag-filter]')];
+  function applyFilters() {
+    const query = (search.value || '').trim().toLocaleLowerCase();
+    let shown = 0;
+    for (const card of cards) {
+      const matchesText = !query || card.dataset.search.includes(query);
+      const cardTags = new Set((card.dataset.tags || '').split(/\s+/).filter(Boolean));
+      const matchesTags = filters.size === 0 || [...filters].every(tag => cardTags.has(tag));
+      card.hidden = !(matchesText && matchesTags);
+      if (!card.hidden) shown += 1;
+    }
+    count.textContent = `${shown} of ${cards.length} materials`;
+  }
+  search.addEventListener('input', applyFilters);
+  for (const button of filterButtons) button.addEventListener('click', () => {
+    const tag = button.dataset.tagFilter;
+    if (filters.has(tag)) filters.delete(tag); else filters.add(tag);
+    button.setAttribute('aria-pressed', filters.has(tag) ? 'true' : 'false');
+    applyFilters();
+  });
+  async function copyText(text) {
+    try { if (navigator.clipboard && navigator.clipboard.writeText) { await navigator.clipboard.writeText(text); return true; } } catch (_) {}
+    const field = document.createElement('textarea');
+    field.value = text; field.setAttribute('readonly', '');
+    field.style.position = 'fixed'; field.style.opacity = '0';
+    document.body.append(field); field.select();
+    let copied = false;
+    try { copied = document.execCommand('copy'); } catch (_) { copied = false; }
+    field.remove(); return copied;
+  }
+  for (const button of document.querySelectorAll('[data-copy]')) button.addEventListener('click', async () => {
+    const original = button.textContent;
+    const copied = await copyText(button.dataset.copy || '');
+    button.textContent = copied ? 'Copied' : 'Select command';
+    if (!copied) {
+      const code = button.closest('.command-card').querySelector('code');
+      const range = document.createRange(); range.selectNodeContents(code);
+      const selection = window.getSelection(); selection.removeAllRanges(); selection.addRange(range);
+      code.setAttribute('tabindex', '-1'); code.focus();
+    }
+    window.setTimeout(() => { button.textContent = original; }, 1800);
+  });
+  applyFilters();
+})();
+</script></body></html>

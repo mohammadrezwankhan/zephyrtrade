@@ -1,0 +1,14 @@
+{
+  "name": "zephyrtrade-release-verification",
+  "version": "1.0.0",
+  "private": true,
+  "description": "Executable release gates for the audited ZephyrTrade synthetic research application",
+  "engines": { "node": ">=20" },
+  "scripts": {
+    "test": "playwright test",
+    "test:chromium": "playwright test --project=chromium",
+    "test:list": "playwright test --list",
+    "report": "playwright show-report"
+  },
+  "devDependencies": { "playwright": "1.62.1" }
+}
