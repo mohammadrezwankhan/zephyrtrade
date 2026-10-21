@@ -46,14 +46,14 @@
     const sum = probs.reduce((a,b)=>a+b,0);
     if (Math.abs(sum-1)>1e-7) throw new Error('Scenario probabilities must sum to 1 (within 0.0000001).');
     probs = probs.map(p => p/sum);
-    const pairs = scenarios.map((x,i) => [x,probs[i]]).filter(p => p[1]>0).sort((a,b) => a[0]-b[0]);
     const quantile = (da-down)/(up-down);
-    let cumulative = 0, offer = pairs[pairs.length-1][0];
-    for (const [x,p] of pairs) { cumulative += p; if (cumulative+1e-12 >= quantile) {offer=x; break;} }
     const expected = q => scenarios.reduce((s,x,i) => s+probs[i]*revenue(q,x,da,up,down,hours),0);
     const candidates = [...new Set([0, capacity, ...scenarios])].sort((a,b)=>a-b);
     const curve = candidates.map(x=>({offer:x, revenue:expected(x)}));
-    return {offer, quantile, expected:expected(offer), probabilities:probs,
+    // Compare every piecewise-linear breakpoint; do not move a CDF boundary by a fixed epsilon.
+    const optimum = curve.reduce((best, point) => point.revenue > best.revenue ? point : best, curve[0]);
+    const offer = optimum.offer;
+    return {offer, quantile, expected:optimum.revenue, probabilities:probs,
       mean:scenarios.reduce((s,x,i)=>s+x*probs[i],0),
       meanOfferRevenue:expected(scenarios.reduce((s,x,i)=>s+x*probs[i],0)), curve,
       scenarioRevenues:scenarios.map(x=>revenue(offer,x,da,up,down,hours))};
@@ -67,9 +67,14 @@
     return true;
   }
   function parseNumbers(text) {
-    const parts = String(text).trim().split(/[\s,;]+/);
-    if (!parts[0]) return [];
-    return parts.map(x=>{const value=Number(x); finite(value,'Entry'); return value;});
+    const raw = String(text).trim();
+    if (!raw) return [];
+    const fields = raw.split(/[;,]/);
+    if (fields.some(field => !field.trim()))
+      throw new Error('Remove empty values before, between, or after commas and semicolons.');
+    return fields.flatMap(field => field.trim().split(/\s+/)).map(token => {
+      const value = Number(token); finite(value, 'Entry'); return value;
+    });
   }
   function csvCell(value) {
     let s = value == null ? '' : String(value);

@@ -1,0 +1,20 @@
+{
+  "title": "ZephyrTrade",
+  "description": "Research application that generates synthetic wind/weather/price tables, compares wind-forecast and direct-offer strategies, backtests revenue and explores hypothetical offers without placing trades.",
+  "repository": "https://github.com/mohammadrezwankhan/zephyrtrade",
+  "topics": [
+    "demo",
+    "local-first",
+    "open-source",
+    "wind-energy",
+    "machine-learning",
+    "forecasting",
+    "research",
+    "simulation",
+    "backtesting",
+    "python"
+  ],
+  "tagline": "Revenue and parity evidence",
+  "social_preview": "docs/repository/social-preview.png",
+  "social_preview_setting": "Current upload state is visible in repository settings; this file identifies the prepared asset."
+}

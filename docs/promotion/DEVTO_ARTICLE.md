@@ -1,27 +1,25 @@
-# What ZephyrTrade makes inspectable
+# Checking forecast quality and offer revenue separately
 
-Research application that generates synthetic wind/weather/price tables, compares wind-forecast and direct-offer strategies, backtests revenue and explores hypothetical offers without placing trades.
+ZephyrTrade generates synthetic wind, weather and price tables, compares forecast and direct-offer strategies, and reconciles hypothetical revenue. Its Python and browser engines expose the assumptions so a researcher can inspect numerical agreement instead of relying on a dashboard alone.
 
-## The engineering problem
+## Trace the implementation
 
-For wind-market and numerical-method researchers, a screen is useful only when its displayed result can be traced to a rule and a source. In this project the supplied records and examples are synthetic. That choice makes exploration possible without pretending a provider is connected or a current fact is verified.
+Start with `src/zephyrtrade/app.py`. The input side is **synthetic weather and prices**; the rule boundary is **forecast and offer strategies**; the displayed result is **revenue and parity evidence**. Keep these three concerns distinct when changing a screen or fixture. Follow [the source map](../../PROJECT_ANALYSIS.md) for the remaining modules.
 
-## Follow the implementation
+The following are actual test names in the supplied source, selected as starting points for review rather than a coverage claim:
 
-- `src/zephyrtrade/app.py`
-- `src/zephyrtrade/optimize.py`
-- `src/zephyrtrade/web/engine.js`
-- `scripts/verify_engines.py`
-- `tests/test_app.py`
-- `artifacts/reproduction/results/run_manifest.json`
+- `surplus, shortfall and interval settlement are explicit` — [`tests/browser/engine.test.cjs`](../../tests/browser/engine.test.cjs).
+- `weighted quantile agrees with every piecewise breakpoint` — [`tests/browser/engine.test.cjs`](../../tests/browser/engine.test.cjs).
+- `test health and loopback binding` — [`tests/test_app.py`](../../tests/test_app.py).
+- `test packaged assets` — [`tests/test_app.py`](../../tests/test_app.py).
 
-Begin at the first source entry, identify one visible output, then follow the calculation or state transition to its fixture. Change one synthetic input and rerun the smallest relevant check. The architecture document shows the delivered demo path rather than an imagined production stack.
+## A useful first investigation
 
-## A deliberate boundary
+Run the README demo with fictional inputs. Choose one displayed record or calculation and locate its source. Trace the rule that decides the visible state, then follow any local save or export. Record the actual value before and after a single input change. If the interface cannot explain that transition, submit a small reproduction linked to the responsible rule.
 
-Local state is useful for trying a workflow; it is not proof of remote receipt, clinical safety, official guidance or multi-user synchronization. The interface's demo language is part of the contract. Preserve unknown/stale states rather than filling them with a plausible answer.
+Use [QUALITY_REPORT.md](../../QUALITY_REPORT.md) for executed checks and limits. A green unit suite, a responsive initial screen and a validated domain service are different kinds of evidence; only the first two are within this repository-factory evaluation.
 
-## Reproduce it
+## Try the local workflow
 
 ```sh
 git clone https://github.com/mohammadrezwankhan/zephyrtrade.git
@@ -29,10 +27,4 @@ cd zephyrtrade
 node scripts/preview-demo.mjs
 ```
 
-The current quality report separates executed checks from historical reports and unavailable environments. It also identifies remaining release blockers; no performance improvement is inferred from a new screenshot.
-
-## What would improve it
-
-Review one native-origin persistence journey, one keyboard interaction, or one bilingual explanation using the contribution guide. Bring a small reproduction and a specific invariant. Repository: https://github.com/mohammadrezwankhan/zephyrtrade.
-
-Draft article, not published. Technical evidence must be refreshed at the release commit before external publication.
+Draft for technical publication. Verify the cited release checks before posting. [Repository](https://github.com/mohammadrezwankhan/zephyrtrade).

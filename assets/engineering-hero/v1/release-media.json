@@ -1,0 +1,196 @@
+{
+  "status": "verified",
+  "frames": 900,
+  "width": 1920,
+  "height": 1080,
+  "fps": 60,
+  "duration": 15,
+  "site": "mrkhan",
+  "files": [
+    {
+      "path": "build-info.json",
+      "bytes": 74,
+      "sha256": "086471b0c7f2b309adc54b5cb606b3712e718a5ca572dfa1adccad56bc342620"
+    },
+    {
+      "path": "csp.json",
+      "bytes": 381,
+      "sha256": "95ad4deaf77e6b70dc54ac50a5eac1131e8cce20b87329fc4bd0a2c05c9d4aa6"
+    },
+    {
+      "path": "hero-1080p60.mp4",
+      "bytes": 9767577,
+      "sha256": "f0aee6779c762133aff0961248af8cef575b7ae9f1e158fab27af72976e3667a"
+    },
+    {
+      "path": "index.html",
+      "bytes": 1574,
+      "sha256": "59f088e5fe88d71b3caa4aa77ee3311097923b36931acb805a7a54a83eddcb25"
+    },
+    {
+      "path": "integration/vanilla/embed.css",
+      "bytes": 2131,
+      "sha256": "7453f33724ba66b5a9bdb5e0e9d575ab5c258011cc0e7ea61eafb6272aa220a8"
+    },
+    {
+      "path": "integration/vanilla/example.css",
+      "bytes": 313,
+      "sha256": "d8a74bc922f32ee4d4c73e05229135064362bb625e4ef67334fd89923e5d4d82"
+    },
+    {
+      "path": "integration/vanilla/example.html",
+      "bytes": 1159,
+      "sha256": "4f448ec4e33f54ef6f29157ec7982d05ef61e9459eed9f0131a8a0f76f7bf6e3"
+    },
+    {
+      "path": "integration/vanilla/host.css",
+      "bytes": 559,
+      "sha256": "768209f54d3b4e37b210541872245182fa17e05de79009fc6d973e8f319366be"
+    },
+    {
+      "path": "integration/vanilla/khan-grid-hero.js",
+      "bytes": 8956,
+      "sha256": "8a8f94696c29be49aab46a6136f2e1ebc4b0907bd0666758b3b099d3e70ed2ed"
+    },
+    {
+      "path": "poster.png",
+      "bytes": 335097,
+      "sha256": "e456136dcd661929485597148f8900c3e8b6f9d5276c550e0f7a15278cabb1a8"
+    },
+    {
+      "path": "public/README.md",
+      "bytes": 406,
+      "sha256": "4c1631c60c5041d4a19d0a56c8a21d361ed848e1c0aacb9a187f41219d026ed5"
+    },
+    {
+      "path": "src/config.js",
+      "bytes": 3477,
+      "sha256": "14d0be1c56eb71580c9f39da65edc9a72fd55a84fde6cb51ceb5c6767da0a2fa"
+    },
+    {
+      "path": "src/font-assets.js",
+      "bytes": 1417,
+      "sha256": "88e9bd360a8489fb073f4ff928b814ed656e3909d03e29f9fe15f1594e41611d"
+    },
+    {
+      "path": "src/kinematics.js",
+      "bytes": 5268,
+      "sha256": "3271c1b5d6f042ae03842e40419729298eabebcd739f0743060938b8ed160307"
+    },
+    {
+      "path": "src/main.js",
+      "bytes": 5179,
+      "sha256": "156c01925d79e2b7c5d6ddd50205fe1bd13043b5e5e7541bed96727920b206d9"
+    },
+    {
+      "path": "src/scene/conduit.js",
+      "bytes": 1649,
+      "sha256": "6a400c63b7df4651d984e23d3b264a2cc8d9d47ed3de23cfc801bcf3656a3a30"
+    },
+    {
+      "path": "src/scene/environment.js",
+      "bytes": 3723,
+      "sha256": "ff1dbe422b90d26b018b5d79e2449d392f2d0b033cd8a5f330323aa25abe9f78"
+    },
+    {
+      "path": "src/scene/index.js",
+      "bytes": 11973,
+      "sha256": "51ed883b0b7a905088255857d5c5fe3dc2cc2de6586d75a6ad8d2141ad73aa31"
+    },
+    {
+      "path": "src/scene/materials.js",
+      "bytes": 2903,
+      "sha256": "3824a39eb2f0ce67bacd7a00041cc0f8b6370ddb60eae6564c69db7612c03be0"
+    },
+    {
+      "path": "src/scene/objects.js",
+      "bytes": 6801,
+      "sha256": "0b444a2fa60442c6857bef0955259dd23cf031c558d05ca9a5447b63bda17443"
+    },
+    {
+      "path": "src/styles/hero.css",
+      "bytes": 2142,
+      "sha256": "cb02beb4dc0d1bfb0455f495acff34977313c3d06871d1a99365ee1205c9f2a9"
+    },
+    {
+      "path": "src/ui/draw.js",
+      "bytes": 2625,
+      "sha256": "38dc15ca7da25f248d26b27498ad48f24d4d313e34f85067808396a7547f5673"
+    },
+    {
+      "path": "src/ui/panels.js",
+      "bytes": 9178,
+      "sha256": "25ee98a7c1add3201b6838fad446a556c2f99599de84325376efd494622516be"
+    },
+    {
+      "path": "vendor/manifest.json",
+      "bytes": 1424,
+      "sha256": "7b91fa0a1fd43e444c5e97506c371a1a18b0d6fcf978296e56f771db2794e0df"
+    },
+    {
+      "path": "vendor/three/LICENSE",
+      "bytes": 1081,
+      "sha256": "bfe119ea4fd413f5f7ca3fcd63adb0c4a073ed39daa2fe7d3e6b769e21272601"
+    },
+    {
+      "path": "vendor/three/build/three.core.js",
+      "bytes": 1403455,
+      "sha256": "eb077d2417f61d3e6d9264c317cabc4ea35769ed6b0ab533067292a550784c20"
+    },
+    {
+      "path": "vendor/three/build/three.module.js",
+      "bytes": 603113,
+      "sha256": "c8211c69345d2e9949dc7a8ac969380497aa0600a5a8ac6a459c8cd02dd9cb8a"
+    },
+    {
+      "path": "vendor/three/examples/jsm/postprocessing/EffectComposer.js",
+      "bytes": 8477,
+      "sha256": "4b8c855f28eed2570bed898adc0ab89c585a8a281ecb6d905c09d00697f9f50a"
+    },
+    {
+      "path": "vendor/three/examples/jsm/postprocessing/MaskPass.js",
+      "bytes": 4694,
+      "sha256": "7cd08eee9d5d6f5578beaddbdcbe9c384f6873810af27f22ab7db3ceeb127aa3"
+    },
+    {
+      "path": "vendor/three/examples/jsm/postprocessing/OutputPass.js",
+      "bytes": 4029,
+      "sha256": "f5b81c96e76b6b28b4b3ba8c41c4aeb982b1e03f3d82883242d951b2ab082fa2"
+    },
+    {
+      "path": "vendor/three/examples/jsm/postprocessing/Pass.js",
+      "bytes": 4218,
+      "sha256": "444b409c235ead986893c472e720da1b779a56985c7d10b279c7944b52bd61c5"
+    },
+    {
+      "path": "vendor/three/examples/jsm/postprocessing/RenderPass.js",
+      "bytes": 4112,
+      "sha256": "fd91229aacc5830e3984b0f2bdefcf566163ea028f4c1f1ab233fa6665a133ac"
+    },
+    {
+      "path": "vendor/three/examples/jsm/postprocessing/ShaderPass.js",
+      "bytes": 3228,
+      "sha256": "e2500a5913b26bbf5148ceaae644c6edcff06a18b01494ee37bf856353d2ab9d"
+    },
+    {
+      "path": "vendor/three/examples/jsm/postprocessing/UnrealBloomPass.js",
+      "bytes": 14388,
+      "sha256": "d92742959879b461f25348b2abddc7ca0d48527e7718340bcfa29fa771e2799a"
+    },
+    {
+      "path": "vendor/three/examples/jsm/shaders/CopyShader.js",
+      "bytes": 729,
+      "sha256": "a33057d5ac91c43304c186ac0e8816e62bb2ed471d3a00ff3018dfd5c0389718"
+    },
+    {
+      "path": "vendor/three/examples/jsm/shaders/LuminosityHighPassShader.js",
+      "bytes": 1291,
+      "sha256": "5044f780b6e6cf863947f64c36fe1587132f7fbe395ada863cd1e5f0388dcf1e"
+    },
+    {
+      "path": "vendor/three/examples/jsm/shaders/OutputShader.js",
+      "bytes": 1876,
+      "sha256": "353479f77a8d7e2629d49ccac9fc2f5dbfdda5442e0adf867b00377a2fcb0cb2"
+    }
+  ]
+}
