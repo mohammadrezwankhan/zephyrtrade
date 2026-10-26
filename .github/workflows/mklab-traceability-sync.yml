@@ -31,6 +31,7 @@ jobs:
     name: Publish source observation
     needs: traceability-links
     if: >-
+      vars.MKLAB_TRACEABILITY_ACTIVE == 'true' &&
       github.event_name != 'pull_request' &&
       (github.event_name != 'push' || github.ref == 'refs/heads/main') &&
       (github.event_name != 'workflow_dispatch' || github.ref == 'refs/heads/main')
