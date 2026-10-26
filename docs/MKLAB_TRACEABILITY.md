@@ -1,0 +1,9 @@
+# MKLab traceability
+
+This repository carries one reviewed, code-pinned mapping in traceability.json. The standalone standard-library checker verifies exact visible README links locally. Its live mode fetches the portal, this app's overview and runtime, the existing app.json metadata, and the public repository page for public mappings, or scans public endpoints for private-source URL leaks; it also reads this repository's GitHub API metadata and requires the exact repository name, main default branch, visibility matching the pinned source_visibility, and configured homepage. It rejects redirects away from the configured host and hidden/commented/code-only links.
+
+After successful non-pull-request checks on main, a published release, or a manual run on main, the workflow uses the dedicated MKLAB_REGISTRY_SSH_KEY deploy key to push a uniquely named source-observation branch to the private MKLab registry repository. Pull requests never receive that key. The narrow SSH bridge avoids granting a broad personal access token to public-repository workflow runs. A missing deploy key fails that eligible run; it is not silently skipped.
+
+The event contains only this app ID, this mapped source repository, and the full GitHub source revision whose links passed the live checks. The central receiver must independently verify that the SHA is in the mapped repository's main-branch ancestry and that the repository exactly matches the mapping before updating published-source traceability. This event records observed source, not the commit deployed to the public runtime; app.json's sourceRevision and runtime bytes remain separate deployment evidence.
+
+Run local checks with python3 scripts/check-traceability.py and live checks with GH_TOKEN set to a read-only GitHub token using python3 scripts/check-traceability.py --live.
