@@ -1,0 +1,131 @@
+name: MKLab traceability sync
+
+on:
+  push:
+    branches: [main]
+  pull_request:
+  release:
+    types: [published]
+  workflow_dispatch:
+
+permissions:
+  contents: read
+
+jobs:
+  traceability-links:
+    name: traceability-links
+    runs-on: ubuntu-latest
+    timeout-minutes: 10
+    steps:
+      - name: Check out the repository
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          persist-credentials: false
+
+      - name: Check local and live traceability
+        env:
+          GH_TOKEN: ${{ github.token }}
+        run: python3 scripts/check-traceability.py --live
+
+  traceability-event:
+    name: Publish source observation
+    needs: traceability-links
+    if: >-
+      vars.MKLAB_TRACEABILITY_ACTIVE == 'true' &&
+      github.event_name != 'pull_request' &&
+      (github.event_name != 'push' || github.ref == 'refs/heads/main') &&
+      (github.event_name != 'workflow_dispatch' || github.ref == 'refs/heads/main')
+    runs-on: ubuntu-latest
+    timeout-minutes: 5
+    permissions:
+      contents: read
+    steps:
+      - name: Check out only the pinned mapping
+        uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
+        with:
+          ref: ${{ github.sha }}
+          path: source-mapping
+          sparse-checkout: traceability.json
+          sparse-checkout-cone-mode: false
+          persist-credentials: false
+
+      - name: Publish a source-observation event to MKLab
+        env:
+          MKLAB_REGISTRY_SSH_KEY: ${{ secrets.MKLAB_REGISTRY_SSH_KEY }}
+          APP_ID: '37'
+          SOURCE_REPOSITORY: ${{ github.repository }}
+          SOURCE_REVISION: ${{ github.sha }}
+          TRACEABILITY_CONFIG: ${{ github.workspace }}/source-mapping/traceability.json
+        run: |
+          set -euo pipefail
+          if [[ -z "${MKLAB_REGISTRY_SSH_KEY:-}" ]]; then
+            echo "::error title=Missing MKLab bridge key::MKLAB_REGISTRY_SSH_KEY is required for a non-PR traceability event."
+            exit 1
+          fi
+          if [[ ! "$SOURCE_REVISION" =~ ^[0-9a-f]{40}$ ]]; then
+            echo "::error title=Invalid source revision::Expected a full 40-character GitHub SHA."
+            exit 1
+          fi
+          key_path="$RUNNER_TEMP/mklab_registry_key"
+          printf '%s\n' "$MKLAB_REGISTRY_SSH_KEY" > "$key_path"
+          chmod 600 "$key_path"
+          trap 'rm -f "$key_path"' EXIT
+
+          # Trust only keys returned by GitHub's HTTPS-authenticated official API.
+          python3 - <<'PY'
+          import json
+          import os
+          import subprocess
+          import urllib.request
+          request = urllib.request.Request(
+              "https://api.github.com/meta",
+              headers={"Accept": "application/vnd.github+json", "User-Agent": "mklab-traceability-sync"},
+          )
+          with urllib.request.urlopen(request, timeout=15) as response:
+              official = set(json.load(response).get("ssh_keys", []))
+          scan = subprocess.run(
+              ["ssh-keyscan", "-T", "10", "github.com"],
+              check=False, capture_output=True, text=True, timeout=20,
+          )
+          accepted = set()
+          for line in scan.stdout.splitlines():
+              fields = line.split()
+              if len(fields) >= 3 and f"{fields[1]} {fields[2]}" in official:
+                  accepted.add(f"github.com {fields[1]} {fields[2]}")
+          if not accepted:
+              raise SystemExit("ssh-keyscan returned no key matching GitHub's official HTTPS metadata")
+          with open(os.environ["RUNNER_TEMP"] + "/github_known_hosts", "w", encoding="utf-8") as known_hosts:
+              known_hosts.write("\n".join(sorted(accepted)) + "\n")
+          PY
+
+          export GIT_SSH_COMMAND="ssh -i $key_path -o IdentitiesOnly=yes -o BatchMode=yes -o StrictHostKeyChecking=yes -o UserKnownHostsFile=$RUNNER_TEMP/github_known_hosts"
+          registry="$RUNNER_TEMP/mklab-apps"
+          git clone --branch main --single-branch git@github.com:mohammadrezwankhan/mklab-apps.git "$registry"
+          python3 - "$registry/traceability-event.json" <<'PY'
+          import json
+          import os
+          import re
+          import sys
+          from pathlib import Path
+          config = json.loads(Path(os.environ["TRACEABILITY_CONFIG"]).read_text(encoding="utf-8"))
+          if config.get("app_id") != os.environ["APP_ID"]:
+              raise SystemExit("workflow app ID disagrees with the repository's pinned traceability mapping")
+          if config.get("repository") != os.environ["SOURCE_REPOSITORY"]:
+              raise SystemExit("GitHub repository identity disagrees with the repository's pinned traceability mapping")
+          revision = os.environ["SOURCE_REVISION"]
+          if not re.fullmatch(r"[0-9a-f]{40}", revision):
+              raise SystemExit("source revision is not a full commit SHA")
+          event = {
+              "app_id": config["app_id"],
+              "source_repo": config["repository"],
+              "source_revision": revision,
+          }
+          Path(sys.argv[1]).write_text(json.dumps(event, sort_keys=True, indent=2) + "\n", encoding="utf-8")
+          PY
+          cd "$registry"
+          git config user.name "github-actions[bot]"
+          git config user.email "41898282+github-actions[bot]@users.noreply.github.com"
+          git add -- traceability-event.json
+          git commit -m "Record source observation for app 37"
+          branch="traceability-events/37-${GITHUB_RUN_ID}-${GITHUB_RUN_ATTEMPT}"
+          git push origin "HEAD:refs/heads/$branch"

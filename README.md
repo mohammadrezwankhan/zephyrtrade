@@ -275,4 +275,5 @@ package with its precompiled web snapshot, not a standalone Windows executable.
 <!-- mklab-traceability:start -->
 [![MKLab app directory](https://img.shields.io/badge/MKLab-app%20directory-1769aa)](https://mklab.co.technology/)
 [Open ZephyrTrade in MKLab](https://mktrade.co.business/)
+[Traceability checks and source-observation scope](docs/MKLAB_TRACEABILITY.md)
 <!-- mklab-traceability:end -->
