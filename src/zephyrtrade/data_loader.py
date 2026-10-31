@@ -147,7 +147,7 @@ def _generate_weather_drivers(
 ) -> dict[str, np.ndarray]:
     """Generate correlated regional weather drivers for Bornholm."""
     local_time = timestamps.tz_convert(timezone_name)
-    day_of_year = np.asarray(local_time.dayofyear, dtype=float)
+    day_of_year = np.asarray(local_time.day_of_year, dtype=float)
     hour = np.asarray(local_time.hour, dtype=float)
     length = len(timestamps)
 
@@ -302,7 +302,7 @@ def _generate_market_prices(
     """Generate source-aligned hourly DK2 day-ahead and balancing prices."""
     local_time = timestamps.tz_convert(config.timezone_name)
     hour = np.asarray(local_time.hour, dtype=float)
-    day_of_year = np.asarray(local_time.dayofyear, dtype=float)
+    day_of_year = np.asarray(local_time.day_of_year, dtype=float)
     length = len(timestamps)
 
     morning_peak = np.exp(-0.5 * ((hour - 8.0) / 2.2) ** 2)
