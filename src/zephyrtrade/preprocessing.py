@@ -181,7 +181,7 @@ def engineer_features(
 
     local_time = model_frame["timestamp_utc"].dt.tz_convert(config.timezone_name)
     local_hour = local_time.dt.hour + local_time.dt.minute / 60.0
-    day_of_year = local_time.dt.dayofyear
+    day_of_year = local_time.dt.day_of_year
     model_frame["hour_sin"] = np.sin(2.0 * np.pi * local_hour / 24.0)
     model_frame["hour_cos"] = np.cos(2.0 * np.pi * local_hour / 24.0)
     model_frame["day_of_year_sin"] = np.sin(2.0 * np.pi * (day_of_year - 1.0) / 365.25)
