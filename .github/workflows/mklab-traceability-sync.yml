@@ -67,7 +67,7 @@ jobs:
             exit 1
           fi
           key_path="$RUNNER_TEMP/mklab_registry_key"
-          printf '%s\n' "$MKLAB_REGISTRY_SSH_KEY" > "$key_path"
+          printf '%s\n' "$MKLAB_REGISTRY_SSH_KEY" | tr -d '\r' > "$key_path"
           chmod 600 "$key_path"
           trap 'rm -f "$key_path"' EXIT
 
