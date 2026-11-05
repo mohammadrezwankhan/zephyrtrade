@@ -41,5 +41,6 @@ jobs:
       - run: node tests/browser/audit/node_modules/playwright/cli.js install --with-deps chromium firefox webkit
       - name: Verify final hosted bytes in three browsers
         run: |
-          export AUDIT_EXPECTED_DOCUMENT_SHA256=$(node -p "require('./.cloudflare/runtime-security-headers.json').document_sha256")
+          AUDIT_EXPECTED_DOCUMENT_SHA256=$(node -p "require('./.cloudflare/runtime-security-headers.json').document_sha256")
+          export AUDIT_EXPECTED_DOCUMENT_SHA256
           node tests/browser/audit/node_modules/playwright/cli.js test --config tests/browser/audit/playwright.config.ts
