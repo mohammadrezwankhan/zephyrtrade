@@ -1,0 +1,22 @@
+title = "Rezwan default secret detection"
+# Keep the complete upstream rule set and full history/working-tree scope.
+# The exact public IndexNow verification declaration is reviewed in
+# docs/security/secret-scan-adjudications.md; all other matches remain scanned.
+[extend]
+useDefault = true
+
+[[allowlists]]
+description = "Exact public IndexNow verification declaration used by the static export"
+targetRules = ["generic-api-key"]
+condition = "AND"
+paths = ['''^(?:/tmp/rezwan-secret-source-[^/]+/)?scripts/(?:build-domain|check-domain)\.mjs$''']
+regexTarget = "match"
+regexes = ['''^indexNowKey='242a5dcf79d9b1321ecc7abbcc603171'$''']
+
+[[allowlists]]
+description = "Exact public Ubuntu Archive 2018 signing fingerprint in the native source lock"
+targetRules = ["generic-api-key"]
+condition = "AND"
+paths = ['''^(?:/tmp/rezwan-secret-source-[^/]+/)?\.github/security/native-scanner\.json$''']
+regexTarget = "match"
+regexes = ['''^distribution_signature_key": "F6ECB3762474EDA9D21B7022871920D1991BC93C"$''']

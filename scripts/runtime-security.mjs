@@ -1,13 +1,18 @@
 // Generate CSP from final hosted HTML, after all runtime transforms.
 import {createHash} from 'node:crypto';
 
+/** @param {string} html */
 export function runtimeSecurity(html) {
   const normalized = html.replace(/^\uFEFF/, '').replace(/\r\n?/g, '\n');
-  const scripts = [...normalized.matchAll(/<script(?=[\t\n\f\r />])([^>]*)>([\s\S]*?)<\/script(?=[\t\n\f\r />])[^>]*>/gi)];
-  if (scripts.length !== 3 || scripts.some(match => /\bsrc\s*=/i.test(match[1]))) {
+  const scripts = [...normalized.matchAll(/<script(?=[\t\n\f\r />])([^>]*)>([\s\S]*?)<\/script(?=[\t\n\f\r />])[^>]*>/gi)].map(match => {
+    const attributes = match[1], body = match[2];
+    if (attributes === undefined || body === undefined) throw new Error('Invalid script inventory capture');
+    return { attributes, body };
+  });
+  if (scripts.length !== 3 || scripts.some(script => /\bsrc\s*=/i.test(script.attributes))) {
     throw Error('Expected exactly three inline runtime scripts and no external script');
   }
-  const hashes = scripts.map(match => "'sha256-" + createHash('sha256').update(match[2]).digest('base64') + "'");
+  const hashes = scripts.map(script => "'sha256-" + createHash('sha256').update(script.body).digest('base64') + "'");
   const scriptPolicy = "'self' " + [...new Set(hashes)].join(' ');
   const headers = {
     'Content-Security-Policy': [
@@ -25,6 +30,7 @@ export function runtimeSecurity(html) {
   return {document_sha256: createHash('sha256').update(html).digest('hex'), inline_script_hashes: hashes, external_script_sources: [], headers};
 }
 
+/** @param {string} html */
 export function runtimeHeaderBlock(html) {
   return '/run/*\n' + Object.entries(runtimeSecurity(html).headers)
     // Shared framing/referrer/permissions headers already apply through /*.

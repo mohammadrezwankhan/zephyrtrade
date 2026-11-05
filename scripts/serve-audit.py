@@ -9,16 +9,24 @@ from __future__ import annotations
 import argparse
 import hashlib
 import json
+import sys
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
 from urllib.parse import urlsplit
 
 
 def main() -> None:
+    """Serve the exact audited runtime and matching header artifact on loopback."""
     root = Path(__file__).resolve().parents[1]
     parser = argparse.ArgumentParser(description=__doc__)
-    parser.add_argument("--html", type=Path, default=root / ".cloudflare/site/run/index.html")
-    parser.add_argument("--headers", type=Path, default=root / ".cloudflare/runtime-security-headers.json")
+    parser.add_argument(
+        "--html", type=Path, default=root / ".cloudflare/site/run/index.html"
+    )
+    parser.add_argument(
+        "--headers",
+        type=Path,
+        default=root / ".cloudflare/runtime-security-headers.json",
+    )
     parser.add_argument("--port", type=int, default=4173)
     args = parser.parse_args()
     if not 1 <= args.port <= 65535:
@@ -27,12 +35,19 @@ def main() -> None:
     artifact = json.loads(args.headers.read_text(encoding="utf-8"))
     digest = hashlib.sha256(body).hexdigest()
     if artifact.get("document_sha256") != digest:
-        parser.error("HTML and CSP artifact hashes differ. Regenerate headers from the final HTML.")
+        parser.error(
+            "HTML and CSP artifact hashes differ. Regenerate headers from"
+            " the final HTML."
+        )
     headers = artifact.get("headers")
     if not isinstance(headers, dict) or not headers.get("Content-Security-Policy"):
         parser.error("The header artifact must contain a Content-Security-Policy.")
     for name, value in headers.items():
-        if not isinstance(name, str) or not isinstance(value, str) or any(c in name + value for c in "\r\n"):
+        if (
+            not isinstance(name, str)
+            or not isinstance(value, str)
+            or any(c in name + value for c in "\r\n")
+        ):
             parser.error("Header names and values must be strings without line breaks.")
 
     class Handler(BaseHTTPRequestHandler):
@@ -66,7 +81,11 @@ def main() -> None:
             self.respond(False)
 
     server = ThreadingHTTPServer(("127.0.0.1", args.port), Handler)
-    print(json.dumps({"url": f"http://127.0.0.1:{args.port}/run/", "sha256": digest}), flush=True)
+    sys.stdout.write(
+        str(json.dumps({"url": f"http://127.0.0.1:{args.port}/run/", "sha256": digest}))
+        + "\n"
+    )
+    sys.stdout.flush()
     try:
         server.serve_forever()
     except KeyboardInterrupt:

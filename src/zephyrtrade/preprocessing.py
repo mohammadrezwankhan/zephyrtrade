@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import sys
 from dataclasses import dataclass
 from pathlib import Path
 from typing import Any
@@ -296,6 +297,9 @@ def prepare_dataset(config: PreprocessingConfig) -> dict[str, Path]:
         )
     joblib.dump(scaler, paths["scaler"])
 
+    if scaler.mean_ is None or scaler.scale_ is None:
+        raise RuntimeError("Training scaler must expose fitted means and scales.")
+    scaler_parameters = scaler.get_params()
     schema = {
         "farm_id": config.farm_id,
         "target_column": TARGET_COLUMN,
@@ -304,8 +308,8 @@ def prepare_dataset(config: PreprocessingConfig) -> dict[str, Path]:
         "retained_evaluation_columns": PRICE_COLUMNS,
         "scaling": {
             "method": "training-only standard score",
-            "with_mean": scaler.with_mean,
-            "with_std": scaler.with_std,
+            "with_mean": scaler_parameters["with_mean"],
+            "with_std": scaler_parameters["with_std"],
             "training_feature_means": dict(
                 zip(FEATURE_COLUMNS, scaler.mean_, strict=True)
             ),
@@ -361,9 +365,11 @@ def main(argv: list[str] | None = None) -> int:
         validation_fraction=args.validation_fraction,
     )
     paths = prepare_dataset(config)
-    print(f"Prepared chronological features for {config.farm_id}.")
+    sys.stdout.write(
+        str(f"Prepared chronological features for {config.farm_id}.") + "\n"
+    )
     for name, path in paths.items():
-        print(f"{name}: {path}")
+        sys.stdout.write(str(f"{name}: {path}") + "\n")
     return 0
 
 

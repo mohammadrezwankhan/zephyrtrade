@@ -21,10 +21,13 @@ export const SITES = Object.freeze({
   mklab: { domain: 'mklab.co.technology', label: 'MKLab browser laboratories', cta: 'Explore the browser labs', href: 'https://mklab.co.technology/' },
   mktrade: { domain: 'mktrade.co.business', label: 'ZephyrTrade research', cta: 'Explore synthetic market scenarios', href: 'https://mktrade.co.business/' },
 });
+/** @param {string} key @returns {key is keyof typeof SITES} */
+function isSiteKey(key) { return Object.hasOwn(SITES, key); }
 export function getSite(key = 'mrkhan') {
-  return Object.hasOwn(SITES, key) ? SITES[key] : SITES.mrkhan;
+  return isSiteKey(key) ? SITES[key] : SITES.mrkhan;
 }
 // These are proposed motion-graphics chapters, not quotations or project outcome claims.
+/** @type {readonly import('./contracts.js').Chapter[]} */
 export const CHAPTERS = Object.freeze([
   { id: 'physics', eyebrow: '01 / THE RESEARCH WORKBENCH', title: 'First principles.',
     subtitle: 'Define the system. Make the assumptions visible.',
@@ -43,11 +46,17 @@ export const CHAPTERS = Object.freeze([
     panelTitle: 'Hybrid-energy scenario', panelCode: 'SYSTEM / 004',
     objectLabel: 'CELL → SYSTEM → GRID', nav: 'Grid scale', anchor: [63, 2, -42], yaw: 0.06 },
 ]);
+/** @type {readonly import('./contracts.js').Vec2[]} */
 export const TRANSITIONS = Object.freeze([[2.65, 3.35], [6.4, 7.1], [10.0, 10.8]]);
+/** @type {import('./contracts.js').Vec3} */
+const cameraOffset = [0, 0.78, 17.7];
+/** @type {import('./contracts.js').Vec3} */
+const cameraTarget = [0, 0.32, 0];
+/** @type {Readonly<{panel:import('./contracts.js').Rect,header:import('./contracts.js').Rect,object:{x:number,y:number,z:number},label:import('./contracts.js').Rect,cameraOffset:import('./contracts.js').Vec3,cameraTarget:import('./contracts.js').Vec3,fov:number}>} */
 export const LAYOUT = Object.freeze({
   panel: { x: -2.75, y: -0.10, z: 0, width: 8.20, height: 4.87 },
   header: { x: 0, y: 3.44, z: 0.10, width: 15.8, height: 1.54 },
   object: { x: 4.70, y: -0.15, z: -0.35 },
   label: { x: 4.65, y: -2.94, z: 0.12, width: 5.4, height: 0.54 },
-  cameraOffset: [0, 0.78, 17.7], cameraTarget: [0, 0.32, 0], fov: 38,
+  cameraOffset, cameraTarget, fov: 38,
 });

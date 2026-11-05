@@ -22,6 +22,10 @@ const releaseFiles = {
   'src/config.js': Buffer.from('export const getSite=()=>({});'),
 };
 
+/**
+ * @param {string} name
+ * @param {{status?:string,omit?:string[],omitPayload?:string[],omitManifest?:boolean,badHash?:boolean}} [options]
+ */
 function fixture(name, { status = 'verified', omit = [], omitPayload = [], omitManifest = false, badHash = false } = {}) {
   const sourceRoot = path.join(testRoot, name, 'source');
   fs.mkdirSync(sourceRoot, { recursive: true });
@@ -40,7 +44,10 @@ function fixture(name, { status = 'verified', omit = [], omitPayload = [], omitM
     });
   }
   fs.writeFileSync(path.join(sourceRoot, 'unlisted.txt'), 'must not be copied');
-  if (badHash) files[0].sha256 = '0'.repeat(64);
+  if (badHash) {
+    assert.ok(files[0], 'Bad-hash fixture requires at least one listed file');
+    files[0].sha256 = '0'.repeat(64);
+  }
   if (!omitManifest) {
     fs.writeFileSync(path.join(sourceRoot, 'release-media.json'), JSON.stringify({
       status, frames: 900, width: 1920, height: 1080, fps: 60, duration: 15,
@@ -50,6 +57,7 @@ function fixture(name, { status = 'verified', omit = [], omitPayload = [], omitM
   return sourceRoot;
 }
 
+/** @param {string} sourceRoot @param {string} name @param {string} [siteId] */
 function prepare(sourceRoot, name, siteId = 'mkgrid') {
   return prepareEngineeringHero({
     enabled: true,
@@ -102,6 +110,7 @@ test('enabled output preserves the overview CTA and screenshot, inserts the hero
 });
 
 test('missing, unverified, incomplete, or tampered media releases fail before copying', () => {
+  /** @type {[string,string,RegExp][]} */
   const invalid = [
     ['missing-config', fixture('missing-config', { omit: ['src/config.js'] }), /missing verified media: src\/config\.js/],
     ['missing-css', fixture('missing-css', { omit: ['integration/vanilla/embed.css'] }), /missing verified media: integration\/vanilla\/embed\.css/],

@@ -10,13 +10,15 @@ if (localTLS && !['localhost', '127.0.0.1', '[::1]'].includes(new URL(baseURL).h
 }
 
 export default defineConfig({
-  webServer: process.env.AUDIT_BASE_URL ? undefined : {
-    command: 'python scripts/serve-audit.py --html .cloudflare/site/run/index.html --headers .cloudflare/runtime-security-headers.json',
-    cwd: root,
-    url: baseURL,
-    reuseExistingServer: false,
-    timeout: 15_000,
-  },
+  ...(process.env.AUDIT_BASE_URL ? {} : {
+    webServer: {
+      command: 'python scripts/serve-audit.py --html .cloudflare/site/run/index.html --headers .cloudflare/runtime-security-headers.json',
+      cwd: root,
+      url: baseURL,
+      reuseExistingServer: false,
+      timeout: 15_000,
+    },
+  }),
   testDir: '.',
   testMatch: 'audit-verify.spec.ts',
   timeout: 45_000,
@@ -33,7 +35,7 @@ export default defineConfig({
     viewport: { width: 1440, height: 900 },
     locale: 'en-GB',
     timezoneId: 'UTC',
-    reducedMotion: 'reduce',
+    contextOptions: { reducedMotion: 'reduce' },
     storageState: { cookies: [], origins: [] },
     acceptDownloads: true,
     ignoreHTTPSErrors: localTLS,

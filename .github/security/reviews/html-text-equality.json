@@ -1,0 +1,43 @@
+{
+  "schema_version": 1,
+  "review_date": "2026-11-05",
+  "rule_id": "javascript.lang.security.audit.unknown-value-with-script-tag.unknown-value-with-script-tag",
+  "disposition": "false_positive",
+  "path": "tests/browser/html-document.test.mjs",
+  "expression": "assert.equal(exported,expected)",
+  "file_sha256": "c78b334e0d1753d5c9cf549fcf40501614b7992dc1cb01b701c58c564c35ed4d",
+  "rationale": "The statically imported node:assert/strict equality compares the plain-text extractor result with a fixed expected string containing a literal <script> token. Neither argument is rendered or executed. The exact literal fixture and full equality assertion are retained.",
+  "scope": "One rule-specific nosemgrep annotation immediately before this equality only. No path, rule configuration, production sink, or additional test is exempted.",
+  "scanner": {
+    "semgrep_version": "1.183.0",
+    "configs": [
+      "p/security-audit",
+      ".semgrep.yml"
+    ],
+    "local_config_sha256": "0326e03ffc5d51aea72419b5d5ebcbe021b454ff4aa9895310fac840bd6ee88e",
+    "strict": true,
+    "error_on_findings": true
+  },
+  "controls": [
+    {
+      "file": "unannotated-equality.mjs",
+      "result": "The exact original test produces the reported audit finding."
+    },
+    {
+      "file": "annotated-equality.mjs",
+      "result": "The one-node annotated test produces zero findings and zero scanner errors."
+    },
+    {
+      "file": "rendering-sink-after-annotation.mjs",
+      "result": "A real document.write(exported, expected) immediately after the annotated equality still produces both the same audit finding and rezwan.javascript.html-insertion; zero scanner errors."
+    }
+  ],
+  "evidence_sha256": {
+    "unannotated-equality.mjs": "f91e7755b8dfdf2dfd977a374fc73080d684377748b0efd1b8386518b0323839",
+    "annotated-equality.mjs": "d7ebc1d55d10ec2506668798cd5303896ee29fdce16f3b9f05136db09733da17",
+    "rendering-sink-after-annotation.mjs": "b48a1f2dde7efe7797cbbc6cb4f0583a8a7aa1c3177bbc7ce02484f6c00f751c",
+    "primary-controls.json": "a97f6c7e04ebe927e83374c7a2293a0d2f659a17ba5d7bf6d7ebc6acbaa7f45f",
+    "annotated-only.json": "7dda6b45a1322c5a284e607ad94ebfafe2230da6527a56379d3f4a1e1210a26a"
+  },
+  "revalidate_when": "Change or remove this disposition if the import, expression, fixture, data flow, or rendering behavior changes. A complete source-bound SAST scan remains required for the candidate."
+}

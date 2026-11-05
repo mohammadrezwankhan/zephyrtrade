@@ -6,9 +6,66 @@ import { createHash } from 'node:crypto';
 import { execFileSync } from 'node:child_process';
 import { createServer } from 'node:http';
 import { runtimeSecurity, runtimeHeaderBlock } from './runtime-security.mjs';
+import { withBrowserPolicy } from './browser-csp.mjs';
+
+/** @typedef {{question:string, answer:string}} FAQ */
+/** @typedef {{from:string, to:string, occurrences:number, reason?:string}} RuntimePatch */
+/**
+ * @typedef {object} CloudflareConfig
+ * @property {string} canonical
+ * @property {string} slug
+ * @property {string} title
+ * @property {string} shortDescription
+ * @property {string} summary
+ * @property {string} category
+ * @property {string} updated
+ * @property {string[]} features
+ * @property {string[]} steps
+ * @property {string[]} limitations
+ * @property {FAQ[]} faqs
+ * @property {string|null} [publicSource]
+ * @property {string|null} [demoArtifact]
+ * @property {string|null} [runtimeDirectory]
+ * @property {string|null} [prepareScript]
+ * @property {string|null} [previewArtifact]
+ * @property {string[]|null} [noticeFiles]
+ * @property {RuntimePatch[]|null} [runtimePatches]
+ */
+
+/** @param {unknown} value @returns {value is Record<string,unknown>} */
+function isRecord(value) {
+  return value !== null && typeof value === 'object' && !Array.isArray(value);
+}
+
+/** @param {unknown} value @returns {value is string[]} */
+function isStringArray(value) {
+  return Array.isArray(value) && value.every(item => typeof item === 'string');
+}
+
+/** @param {unknown} value @returns {value is CloudflareConfig} */
+function isConfig(value) {
+  if (!isRecord(value)) return false;
+  if (!['canonical', 'slug', 'title', 'shortDescription', 'summary', 'category', 'updated']
+    .every(key => typeof value[key] === 'string')) return false;
+  if (!isStringArray(value.features) || !isStringArray(value.steps) ||
+    !isStringArray(value.limitations)) return false;
+  if (!Array.isArray(value.faqs) || !value.faqs.every(item =>
+    isRecord(item) && typeof item.question === 'string' && typeof item.answer === 'string')) return false;
+  if (!['publicSource', 'demoArtifact', 'runtimeDirectory', 'prepareScript', 'previewArtifact']
+    .every(key => value[key] == null || typeof value[key] === 'string')) return false;
+  if (value.noticeFiles != null && !isStringArray(value.noticeFiles)) return false;
+  if (value.runtimePatches != null && (!Array.isArray(value.runtimePatches) ||
+    !value.runtimePatches.every(item => isRecord(item) && typeof item.from === 'string' &&
+      typeof item.to === 'string' && typeof item.occurrences === 'number' &&
+      Number.isSafeInteger(item.occurrences) && item.occurrences >= 0 &&
+      (item.reason === undefined || typeof item.reason === 'string')))) return false;
+  return true;
+}
 
 const root = path.resolve(path.dirname(fileURLToPath(import.meta.url)), '..');
+/** @type {unknown} */
 const config = JSON.parse(fs.readFileSync(path.join(root, 'cloudflare.json'), 'utf8'));
+if (!isConfig(config)) throw Error('Invalid browser export configuration');
 const publicSourceRevision = process.env.PUBLIC_SOURCE_REVISION;
 if (publicSourceRevision !== undefined && !/^[a-f0-9]{40}$/i.test(publicSourceRevision)) {
   throw Error('PUBLIC_SOURCE_REVISION must be a 40-character hexadecimal commit SHA');
@@ -23,14 +80,32 @@ if (outputRelative === '..' || outputRelative.startsWith('..' + path.sep) || pat
   throw Error('CLOUDFLARE_OUTPUT_ROOT must stay beneath .cloudflare');
 }
 const out = path.join(outputRoot, 'app');
-const escape = value => String(value).replace(/[&<>"']/g, c => ({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-const json = value => JSON.stringify(value).replace(/</g, '\\u003c');
+/** @param {unknown} value */
+const escape = value => String(value).replace(/[&<>"']/g, c => {
+  switch (c) {
+    case '&': return '&amp;';
+    case '<': return '&lt;';
+    case '>': return '&gt;';
+    case '"': return '&quot;';
+    case "'": return '&#39;';
+    default: throw Error('Unexpected HTML escape character');
+  }
+});
+/** @param {unknown} value */
+const json = value => {
+  const encoded = JSON.stringify(value);
+  if (encoded === undefined) throw Error('Structured data must be JSON serializable');
+  return encoded.replace(/</g, '\\u003c');
+};
+/** @param {import('node:crypto').BinaryLike} buffer */
 const sha = buffer => createHash('sha256').update(buffer).digest('hex');
 const canonical = new URL(config.canonical).href;
 const siteOrigin = new URL(canonical).origin;
 if (!canonical.startsWith('https://') || !canonical.endsWith('/')) throw Error('Canonical must be an HTTPS directory URL');
 if (!/^[a-z0-9-]+$/.test(config.slug)) throw Error('Invalid app slug');
+/** @param {unknown} relative */
 function local(relative) {
+  if (typeof relative !== 'string') throw Error('Repository input path must be text');
   const file = path.resolve(root, relative);
   if (!file.startsWith(root + path.sep)) throw Error('Input outside repository');
   let current = file;
@@ -57,6 +132,7 @@ if (freshOutput) {
 fs.mkdirSync(path.join(out, 'run'), {recursive:true});
 const runtimeRoot = config.runtimeDirectory ? local(config.runtimeDirectory) : null;
 if (runtimeRoot) {
+  /** @param {string} dir @param {string} target */
   const copy = (dir, target) => {
     for (const entry of fs.readdirSync(dir,{withFileTypes:true})) {
       if (entry.isSymbolicLink() || entry.name.startsWith('.') || /(?:\.map|\.sqlite3?|\.env)$/i.test(entry.name)) throw Error('Unsafe runtime export: '+entry.name);
@@ -79,7 +155,9 @@ for (const patch of config.runtimePatches ?? []) {
 // Index the factual introduction; do not surface fictional records as real search results.
 runtime = runtime.replace(/<meta\b[^>]*\bname\s*=\s*["']robots["'][^>]*>/gi, '')
   .replace(/<link\b[^>]*\brel\s*=\s*["']canonical["'][^>]*>/gi, '')
-  .replace(/<head\b[^>]*>/i, match => match + `\n<meta name="robots" content="noindex,follow"><link rel="canonical" href="${escape(canonical)}">\n`);
+  .replace(/<\/head\s*>/i, match => `\n<meta name="robots" content="noindex,follow"><link rel="canonical" href="${escape(canonical)}">\n` + match);
+// Runtime patches change executable bytes; bind the document policy to the final payload.
+runtime = withBrowserPolicy(runtime);
 fs.writeFileSync(path.join(out,'run','index.html'),runtime);
 fs.writeFileSync(path.join(out,'_headers'), `/*\n  X-Content-Type-Options: nosniff\n  Referrer-Policy: strict-origin-when-cross-origin\n  X-Frame-Options: DENY\n  Permissions-Policy: camera=(), microphone=(), geolocation=()\n${runtimeHeaderBlock(runtime)}`);
 fs.writeFileSync(path.join(outputRoot,'app-security-headers.json'), JSON.stringify(runtimeSecurity(runtime),null,2)+'\n');
@@ -94,6 +172,7 @@ if (!publicSourceRevision) {
 const copyright = (config.noticeFiles ?? []).map(name => `===== ${name} =====\n\n${fs.readFileSync(local(name),'utf8')}\n`).join('\n');
 fs.writeFileSync(path.join(out,'NOTICES.txt'),`Browser release: ${config.title}\n\nBundled third-party notices remain applicable. Public browser access does not grant a new license over private source or third-party material.\n\n${copyright}`);
 if(!fs.existsSync(path.join(out,'run','THIRD-PARTY-NOTICES.txt')))fs.copyFileSync(path.join(out,'NOTICES.txt'),path.join(out,'run','THIRD-PARTY-NOTICES.txt'));
+/** @param {string[]} items */
 const list = items => items.map(text => `<li>${escape(text)}</li>`).join('');
 const author = {'@type':'Person',name:'Mohammad Rezwan Khan',url:siteOrigin+'/about/'};
 const structured = {'@context':'https://schema.org','@graph':[
@@ -114,10 +193,12 @@ console.log(JSON.stringify({app:config.slug,output:out,canonical,runtimeSha256:f
 if (process.argv.includes('--serve')) {
   const port=Number(process.env.PORT||4179);
   if(!Number.isInteger(port)||port<1||port>65535)throw Error('Invalid PORT');
+  /** @type {Record<string,string>} */
   const types={'.html':'text/html; charset=utf-8','.js':'text/javascript; charset=utf-8','.mjs':'text/javascript; charset=utf-8','.css':'text/css; charset=utf-8','.json':'application/json','.webmanifest':'application/manifest+json','.svg':'image/svg+xml','.png':'image/png','.webp':'image/webp','.txt':'text/plain; charset=utf-8','.mp3':'audio/mpeg'};
   const server=createServer((req,res)=>{
-    if(!['GET','HEAD'].includes(req.method)){res.writeHead(405,{Allow:'GET, HEAD'});res.end();return;}
+    if(req.method!=='GET'&&req.method!=='HEAD'){res.writeHead(405,{Allow:'GET, HEAD'});res.end();return;}
     try{
+      if(req.url===undefined)throw Error('Missing request URL');
       const pathname=decodeURIComponent(new URL(req.url,'http://127.0.0.1').pathname);
       if(pathname.includes('\\')||pathname.includes('\0'))throw Error('Invalid path');
       let file=path.resolve(out,'.'+pathname);

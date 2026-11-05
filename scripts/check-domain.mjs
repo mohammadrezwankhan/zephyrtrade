@@ -4,21 +4,39 @@ import assert from 'node:assert/strict';
 import {fileURLToPath} from 'node:url';
 import {createHash} from 'node:crypto';
 import {runtimeSecurity, runtimeHeaderBlock} from './runtime-security.mjs';
+/** @param {unknown} value @returns {value is Record<string,unknown>} */
+function isRecord(value){return value!==null&&typeof value==='object'&&!Array.isArray(value);}
+/** @param {unknown} value @param {string} label @returns {Record<string,unknown>} */
+function record(value,label){assert.ok(isRecord(value),label+' must be an object');return value;}
+/** @param {unknown} value @param {string} label @returns {Record<string,unknown>[]} */
+function records(value,label){assert.ok(Array.isArray(value),label+' must be an array');return value.map(item=>record(item,label+' entry'));}
+/** @param {RegExpMatchArray|null} match @param {string} label */
+function capture(match,label){const text=match?.[1];assert.ok(typeof text==='string','Missing '+label);return text;}
 const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..'),outputRoot=process.env.CLOUDFLARE_OUTPUT_ROOT===undefined?path.join(root,'.cloudflare'):path.resolve(root,process.env.CLOUDFLARE_OUTPUT_ROOT),out=path.join(outputRoot,'site');
-const site=JSON.parse(fs.readFileSync(path.join(root,'cloudflare-domain.json'),'utf8'));
-const origin=new URL(site.canonical).origin,read=p=>fs.readFileSync(path.join(out,p),'utf8');
+const site=record(JSON.parse(fs.readFileSync(path.join(root,'cloudflare-domain.json'),'utf8')),'Domain configuration');
+assert.ok(typeof site.canonical==='string'&&typeof site.project==='string');
+const origin=new URL(site.canonical).origin;
+/** @param {string} p */
+const read=p=>fs.readFileSync(path.join(out,p),'utf8');
 const maintainerUrl='https://mrkhan.co.technology/',maintainerId=maintainerUrl+'#person';
-function findAll(value,predicate,found=[]){if(Array.isArray(value)){for(const item of value)findAll(item,predicate,found);}else if(value&&typeof value==='object'){if(predicate(value))found.push(value);for(const item of Object.values(value))findAll(item,predicate,found);}return found;}
-const files=[];function scan(dir){for(const ent of fs.readdirSync(dir,{withFileTypes:true})){assert.equal(ent.isSymbolicLink(),false);const file=path.join(dir,ent.name);if(ent.isDirectory())scan(file);else{const rel=path.relative(out,file).replaceAll('\\','/');assert.ok(!/(^|\/)(\.git|\.env|node_modules|server|package(?:-lock)?\.json)(\/|$)/.test(rel),rel);assert.ok(!/\.(?:map|sqlite|db)$/.test(rel),rel);assert.ok(fs.statSync(file).size<=25*1024*1024);files.push(rel);}}}scan(out);
-for(const [file,url] of [['index.html',site.canonical],['methodology/index.html',origin+'/methodology/'],['about/index.html',origin+'/about/']]){
+/** @param {unknown} value @param {(value:Record<string,unknown>)=>boolean} predicate @param {Record<string,unknown>[]} [found] @returns {Record<string,unknown>[]} */
+function findAll(value,predicate,found=[]){if(Array.isArray(value)){for(const item of value)findAll(item,predicate,found);}else if(isRecord(value)){if(predicate(value))found.push(value);for(const item of Object.values(value))findAll(item,predicate,found);}return found;}
+/** @type {string[]} */
+const files=[];
+/** @param {string} dir */
+function scan(dir){for(const ent of fs.readdirSync(dir,{withFileTypes:true})){assert.equal(ent.isSymbolicLink(),false);const file=path.join(dir,ent.name);if(ent.isDirectory())scan(file);else{const rel=path.relative(out,file).replaceAll('\\','/');assert.ok(!/(^|\/)(\.git|\.env|node_modules|server|package(?:-lock)?\.json)(\/|$)/.test(rel),rel);assert.ok(!/\.(?:map|sqlite|db)$/.test(rel),rel);assert.ok(fs.statSync(file).size<=25*1024*1024);files.push(rel);}}}scan(out);
+/** @type {Array<[string,string]>} */
+const pages=[['index.html',site.canonical],['methodology/index.html',origin+'/methodology/'],['about/index.html',origin+'/about/']];
+for(const [file,url] of pages){
  const html=read(file);assert.equal((html.match(/<h1>/g)||[]).length,1);assert.equal((html.match(/rel="canonical"/g)||[]).length,1);assert.ok(html.includes(`rel="canonical" href="${url}"`));assert.ok(html.includes('name="robots" content="index,follow'));assert.ok(html.includes('property="og:url" content="'+url+'"'));
- const description=html.match(/name="description" content="([^"]+)"/)[1];assert.ok(description.length>=70&&description.length<=170);
- const graph=JSON.parse(html.match(/<script type="application\/ld\+json">(.*?)<\/script>/s)[1])['@graph'];assert.ok(graph.some(x=>x['@type']==='WebPage'&&x.url===url));
+ const description=capture(html.match(/name="description" content="([^"]+)"/),'page description');assert.ok(description.length>=70&&description.length<=170);
+ const structured=record(JSON.parse(capture(html.match(/<script type="application\/ld\+json">(.*?)<\/script>/s),'structured data')),'Structured data');
+ const graph=records(structured['@graph'],'Structured data graph');assert.ok(graph.some(x=>x['@type']==='WebPage'&&x.url===url));
  const persons=findAll(graph,item=>item['@type']==='Person');assert.ok(persons.length>0);for(const person of persons){assert.equal(person['@id'],maintainerId);assert.equal(person.url,maintainerUrl);}
  const types=findAll(graph,item=>typeof item['@type']==='string').map(item=>item['@type']);assert.ok(!types.includes('Dataset'));assert.ok(!types.includes('FinancialProduct'));
  if(file==='about/index.html')assert.ok(html.includes(`href="${maintainerUrl}"`));
- if(file==='methodology/index.html'){const links=[...html.matchAll(/<a\b[^>]*href="([^"]+)"/g)].map(m=>new URL(m[1],origin).href);assert.ok(links.some(link=>link==='https://mkgrid.co.technology/'));assert.ok(html.includes('separate hybrid model'));}
- for(const m of html.matchAll(/(?:href|src)="(\/[^"#?]*)"/g)){const ref=m[1].endsWith('/')?m[1]+'index.html':m[1];assert.ok(fs.existsSync(path.join(out,ref)),`${file}: missing ${ref}`);}
+ if(file==='methodology/index.html'){const links=[...html.matchAll(/<a\b[^>]*href="([^"]+)"/g)].map(m=>new URL(capture(m,'methodology link'),origin).href);assert.ok(links.some(link=>link==='https://mkgrid.co.technology/'));assert.ok(html.includes('separate hybrid model'));}
+ for(const m of html.matchAll(/(?:href|src)="(\/[^"#?]*)"/g)){const link=capture(m,'local asset URL');const ref=link.endsWith('/')?link+'index.html':link;assert.ok(fs.existsSync(path.join(out,ref)),`${file}: missing ${ref}`);}
 }
 const overview=read('index.html'),headers=read('_headers'),heroDirectory='assets/engineering-hero/v1';
 assert.ok(headers.includes(runtimeHeaderBlock(read('run/index.html'))));
@@ -34,7 +52,8 @@ if(site.engineeringHero===true){
  assert.ok(overview.includes('/assets/engineering-hero/v1/integration/vanilla/khan-grid-hero.js'));
  assert.ok(read('domain.css').includes('.engineering-hero{display:grid;'));
  for(const file of ['index.html','release-media.json','hero-1080p60.mp4','poster.png','csp.json','integration/vanilla/host.css','integration/vanilla/khan-grid-hero.js'])assert.ok(files.includes(heroDirectory+'/'+file),`missing published engineering media ${file}`);
- const policy=JSON.parse(read(heroDirectory+'/csp.json')).suggestedContentSecurityPolicy;
+ const policy=record(JSON.parse(read(heroDirectory+'/csp.json')),'Engineering media CSP').suggestedContentSecurityPolicy;
+ assert.ok(typeof policy==='string','Engineering media CSP must be text');
  for(const route of ['/assets/engineering-hero/v1/index.html','/assets/engineering-hero/v1/']){
   const start=headers.indexOf(route+'\n');
   assert.notEqual(start,-1,`missing scoped frame route ${route}`);
@@ -55,7 +74,7 @@ if(site.engineeringHero===true){
  assert.ok(!files.some(file=>file.startsWith(heroDirectory+'/')));
 }
 const googleVerification='xZhKdS0U-QfuZ7T0-Rz75ERIZu732Mh0sa85UiwUcgs',home=read('index.html');assert.equal((home.match(/<meta name="google-site-verification"/g)||[]).length,1);assert.ok(home.includes(`<meta name="google-site-verification" content="${googleVerification}">`));
-const facts=JSON.parse(read('app.json')),runtime=read('run/index.html');assert.equal(facts.url,site.canonical);assert.equal(facts.applicationUrl,origin+'/run/');assert.equal(facts.authorUrl,maintainerUrl);assert.equal(facts.runtimeSha256,createHash('sha256').update(runtime).digest('hex'));assert.match(runtime,/name="robots" content="noindex,follow"/);assert.ok(runtime.includes(`rel="canonical" href="${site.canonical}"`));assert.ok(!runtime.includes("location.protocol==='http:'&&['127.0.0.1','localhost'].includes(location.hostname)"));
+const facts=record(JSON.parse(read('app.json')),'App facts'),runtime=read('run/index.html');assert.equal(facts.url,site.canonical);assert.equal(facts.applicationUrl,origin+'/run/');assert.equal(facts.authorUrl,maintainerUrl);assert.equal(facts.runtimeSha256,createHash('sha256').update(runtime).digest('hex'));assert.match(runtime,/name="robots" content="noindex,follow"/);assert.ok(runtime.includes(`rel="canonical" href="${site.canonical}"`));assert.ok(!runtime.includes("location.protocol==='http:'&&['127.0.0.1','localhost'].includes(location.hostname)"));
 assert.equal((read('sitemap.xml').match(/<loc>/g)||[]).length,3);assert.ok(!read('sitemap.xml').includes('/run/'));assert.ok(read('robots.txt').includes(origin+'/sitemap.xml'));for(const bot of ['*','Googlebot','Bingbot','OAI-SearchBot','GPTBot','PerplexityBot','Claude-SearchBot'])assert.ok(read('robots.txt').includes(`User-agent: ${bot}\nAllow: /`));
 assert.ok(read('llms.txt').includes('3,888'));assert.ok(read('llms.txt').includes(maintainerId));assert.ok(read('llms.txt').includes('Separate MKGrid hybrid-energy research preview'));
 const fullText=read('llms-full.txt');for(const value of ['3,888 retained hourly','nine strategies','30 MW','53 absent hours','319 negative-price hours','Mohammad Rezwan Khan','separate hybrid model'])assert.ok(fullText.includes(value),`llms-full.txt missing ${value}`);assert.ok(fullText.includes('Source: '+site.canonical));assert.ok(fullText.includes('Source: '+origin+'/about/'));assert.ok(fullText.includes('Source: '+origin+'/methodology/'));

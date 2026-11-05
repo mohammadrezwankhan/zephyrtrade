@@ -2,6 +2,8 @@
 
 from __future__ import annotations
 
+from pathlib import Path
+
 import pandas as pd
 
 from zephyrtrade.data_loader import (
@@ -37,7 +39,7 @@ def test_generator_is_deterministic_and_respects_physical_bounds() -> None:
     assert first.price_filter_summary["negative_price_rows_removed"] > 0
 
 
-def test_writer_emits_complete_source_contract(tmp_path) -> None:
+def test_writer_emits_complete_source_contract(tmp_path: Path) -> None:
     """Writing a bundle should create every documented Phase 1 source artifact."""
     config = SyntheticDataConfig(
         start="2024-01-01",

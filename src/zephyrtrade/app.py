@@ -9,6 +9,7 @@ from __future__ import annotations
 import argparse
 import json
 import math
+import sys
 import threading
 import webbrowser
 from http import HTTPStatus
@@ -143,7 +144,7 @@ class Handler(BaseHTTPRequestHandler):
     sys_version = ""
     timeout = 10
 
-    def log_message(self, format: str, *args: Any) -> None:
+    def log_message(self, message: str, *args: Any) -> None:
         """Avoid logging user scenario values, raw URLs or request headers."""
 
     def _reply(self, code: int, data: bytes, content_type: str) -> None:
@@ -326,11 +327,14 @@ def main() -> None:
     except OSError as exc:
         parser.exit(1, f"Could not start the local server: {exc}. Try --port 8766.\n")
     url = f"http://127.0.0.1:{server.server_port}"
-    print(
-        f"ZephyrTrade Champion {__version__}\n{url}\n"
-        "Synthetic research only. Press Ctrl+C to stop.",
-        flush=True,
+    sys.stdout.write(
+        str(
+            f"ZephyrTrade Champion {__version__}\n{url}\n"
+            "Synthetic research only. Press Ctrl+C to stop."
+        )
+        + "\n"
     )
+    sys.stdout.flush()
     if not args.no_browser:
         threading.Timer(0.5, webbrowser.open, args=(url,)).start()
     try:

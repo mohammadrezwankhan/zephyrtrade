@@ -1,0 +1,24 @@
+{
+  "compilerOptions": {
+    "target": "ES2022",
+    "lib": ["ES2023", "DOM", "DOM.Iterable"],
+    "module": "NodeNext",
+    "moduleResolution": "NodeNext",
+    "strict": true,
+    "noUncheckedIndexedAccess": true,
+    "exactOptionalPropertyTypes": true,
+    "allowJs": true,
+    "checkJs": true,
+    "noEmit": true,
+    "moduleDetection": "force",
+    "types": ["node", "@webgpu/types"]
+  },
+  "include": [
+    "scripts/**/*.mjs",
+    "assets/**/*.js",
+    "src/**/web/*.js",
+    "src/**/web/*.d.ts",
+    "assets/**/*.d.ts"
+  ],
+  "exclude": ["node_modules", "**/vendor/**", "hardening-artifacts"]
+}

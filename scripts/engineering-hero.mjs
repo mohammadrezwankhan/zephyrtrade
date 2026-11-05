@@ -14,6 +14,7 @@ const REQUIRED_FILES = [
   'src/config.js',
 ];
 
+/** @param {string} sourceRoot @param {unknown} relativePath */
 function checkedSourceFile(sourceRoot, relativePath) {
   if (typeof relativePath !== 'string' || !relativePath || relativePath.includes('\\') ||
       relativePath.startsWith('/') || /^[a-z]:/i.test(relativePath) ||
@@ -31,6 +32,7 @@ function checkedSourceFile(sourceRoot, relativePath) {
   return current;
 }
 
+/** @param {string} target */
 function assertNoSymlinkComponents(target) {
   const absolute = path.resolve(target);
   const root = path.parse(absolute).root;
@@ -41,19 +43,25 @@ function assertNoSymlinkComponents(target) {
   }
 }
 
+/** @param {string} sourceRoot */
 function readVerifiedRelease(sourceRoot) {
   const manifestPath = checkedSourceFile(sourceRoot, 'release-media.json');
+  /** @type {unknown} */
   const manifest = JSON.parse(fs.readFileSync(manifestPath, 'utf8'));
-  if (manifest.status !== 'verified') throw Error('Engineering hero release-media.json must have status "verified"');
-  if (!Array.isArray(manifest.files) || manifest.files.length === 0) throw Error('Engineering hero release-media.json must list verified files');
+  if (!manifest || typeof manifest !== 'object' || !('status' in manifest) || manifest.status !== 'verified') throw Error('Engineering hero release-media.json must have status "verified"');
+  if (!('files' in manifest) || !Array.isArray(manifest.files) || manifest.files.length === 0) throw Error('Engineering hero release-media.json must list verified files');
 
+  /** @type {Map<string,string>} */
   const files = new Map();
-  for (const entry of manifest.files) {
+  /** @type {unknown[]} */
+  const entries = manifest.files;
+  for (const entry of entries) {
     if (!entry || typeof entry !== 'object' || Array.isArray(entry) ||
-        !Number.isSafeInteger(entry.bytes) || entry.bytes < 1 ||
-        typeof entry.sha256 !== 'string' || !/^[a-f0-9]{64}$/i.test(entry.sha256)) {
+        !('bytes' in entry) || typeof entry.bytes !== 'number' || !Number.isSafeInteger(entry.bytes) || entry.bytes < 1 ||
+        !('sha256' in entry) || typeof entry.sha256 !== 'string' || !/^[a-f0-9]{64}$/i.test(entry.sha256)) {
       throw Error('Invalid engineering hero release file record');
     }
+    if (!('path' in entry) || typeof entry.path !== 'string') throw Error('Unsafe engineering hero manifest path');
     if (entry.path === 'release-media.json') throw Error('release-media.json must not list itself');
     if (files.has(entry.path)) throw Error(`Duplicate engineering hero manifest path: ${entry.path}`);
     const file = checkedSourceFile(sourceRoot, entry.path);
@@ -67,8 +75,11 @@ function readVerifiedRelease(sourceRoot) {
   for (const required of REQUIRED_FILES) {
     if (!files.has(required)) throw Error(`Engineering hero release is missing verified media: ${required}`);
   }
-  const csp = JSON.parse(fs.readFileSync(files.get('csp.json'), 'utf8'));
-  const policy = csp.suggestedContentSecurityPolicy;
+  const cspPath = files.get('csp.json');
+  if (!cspPath) throw Error('Engineering hero release is missing verified media: csp.json');
+  /** @type {unknown} */
+  const csp = JSON.parse(fs.readFileSync(cspPath, 'utf8'));
+  const policy = csp && typeof csp === 'object' && 'suggestedContentSecurityPolicy' in csp ? csp.suggestedContentSecurityPolicy : undefined;
   if (typeof policy !== 'string' || !policy.trim() || /[\r\n]/.test(policy) ||
       policy.length > 1900 || !/\bframe-ancestors\b/i.test(policy)) {
     throw Error('Engineering hero csp.json needs a single-line suggestedContentSecurityPolicy with frame-ancestors');
@@ -76,7 +87,8 @@ function readVerifiedRelease(sourceRoot) {
   return { manifestPath, files, policy: policy.trim() };
 }
 
-function copyVerifiedFiles({ sourceRoot, siteOutput, manifestPath, files }) {
+/** @param {{siteOutput:string,manifestPath:string,files:Map<string,string>}} options */
+function copyVerifiedFiles({ siteOutput, manifestPath, files }) {
   const destinationRoot = path.resolve(siteOutput, RELEASE_DIRECTORY);
   const rel = path.relative(path.resolve(siteOutput), destinationRoot);
   if (rel !== path.join('assets', 'engineering-hero', 'v1')) throw Error('Invalid engineering hero output path');
@@ -95,12 +107,14 @@ function copyVerifiedFiles({ sourceRoot, siteOutput, manifestPath, files }) {
   fs.copyFileSync(manifestPath, path.join(destinationRoot, 'release-media.json'));
 }
 
+/** @param {string} siteId */
 export function engineeringHeroSection(siteId) {
   if (!['mkgrid', 'mktrade'].includes(siteId)) throw Error('engineeringHeroSite must be "mkgrid" or "mktrade"');
   const base = '/assets/engineering-hero/v1';
   return `<section class="engineering-hero" aria-labelledby="engineering-hero-heading"><div><p class="eyebrow">ENGINEERING / FIELD NOTES</p><h2 id="engineering-hero-heading">See the system behind the study</h2><p class="lead">A short visual introduction to the engineering context sits alongside this overview. The hosted preview remains synthetic and the film does not validate a design or model.</p></div><khan-grid-hero site="${siteId}" mode="video" video-src="${base}/hero-1080p60.mp4" poster-src="${base}/poster.png" hide-cta><img slot="poster" src="${base}/poster.png" alt="Poster for the engineering film introducing system context" width="1920" height="1080" loading="lazy" decoding="async"></khan-grid-hero></section>`;
 }
 
+/** @param {string} overviewHtml @param {string} section */
 export function insertEngineeringHeroSection(overviewHtml, section) {
   if (!section) return overviewHtml;
   const opening = '<section class="app-hero">';
@@ -112,6 +126,7 @@ export function insertEngineeringHeroSection(overviewHtml, section) {
   return overviewHtml.slice(0, after) + section + overviewHtml.slice(after);
 }
 
+/** @param {{enabled:unknown,sourceRoot:string,siteOutput:string,siteId:string}} options */
 export function prepareEngineeringHero({ enabled, sourceRoot, siteOutput, siteId }) {
   if (enabled !== true) return { enabled: false, section: '', headMarkup: '', contentSecurityPolicy: '' };
   assertNoSymlinkComponents(sourceRoot);
@@ -120,7 +135,7 @@ export function prepareEngineeringHero({ enabled, sourceRoot, siteOutput, siteId
   }
   const section = engineeringHeroSection(siteId);
   const verified = readVerifiedRelease(sourceRoot);
-  copyVerifiedFiles({ sourceRoot, siteOutput, ...verified });
+  copyVerifiedFiles({ siteOutput, ...verified });
   return {
     enabled: true,
     section,
@@ -129,6 +144,7 @@ export function prepareEngineeringHero({ enabled, sourceRoot, siteOutput, siteId
   };
 }
 
+/** @param {string} headers @param {string} contentSecurityPolicy */
 export function addEngineeringHeroFramePolicy(headers, contentSecurityPolicy) {
   if (!contentSecurityPolicy) return headers;
   return headers.trimEnd()+'\n'+['/assets/engineering-hero/v1/index.html','/assets/engineering-hero/v1/'].map(url=>`${url}\n  ! Content-Security-Policy\n  Content-Security-Policy: ${contentSecurityPolicy}\n  ! X-Frame-Options\n`).join('\n');

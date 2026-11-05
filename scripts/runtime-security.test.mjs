@@ -10,11 +10,19 @@ test('runtime CSP follows actual inline script bytes and normalizes HTML newline
   const hash = "'sha256-" + createHash('sha256').update('first\nline').digest('base64') + "'";
   for (const directive of ['script-src', 'script-src-elem']) {
     const policy = result.headers['Content-Security-Policy'].split('; ').find(s => s.startsWith(directive+' '));
+    assert.ok(policy, `Missing ${directive} policy`);
     assert.ok(policy.includes(hash));
     assert.ok(!policy.includes('unsafe-inline'));
   }
-  assert.notEqual(runtimeSecurity(html.replace('second','changed')).inline_script_hashes[1],result.inline_script_hashes[1]);
-  assert.equal(result.document_sha256,createHash('sha256').update(html).digest('hex'));
+  const expectedHashes = ['first\nline', 'second', 'third'].map(
+    body => "'sha256-" + createHash('sha256').update(body).digest('base64') + "'"
+  );
+  const changedHash = "'sha256-" + createHash('sha256').update('changed').digest('base64') + "'";
+  const changed = runtimeSecurity(html.replace('second', 'changed'));
+  assert.deepEqual(result.inline_script_hashes, expectedHashes);
+  assert.deepEqual(changed.inline_script_hashes, [expectedHashes[0], changedHash, expectedHashes[2]]);
+  const documentHash = createHash('sha256').update(html).digest('hex');
+  assert.equal(result.document_sha256, documentHash);
   assert.match(runtimeHeaderBlock(html), /^\/run\/\*\n/);
 });
 

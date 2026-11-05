@@ -14,12 +14,18 @@ jobs:
     runs-on: ubuntu-latest
     timeout-minutes: 25
     steps:
-      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1
+      - name: Audit runner network activity
+        uses: step-security/harden-runner@46b06cea07f9e64621fdf066ba77ac6915163d43 # v2.22.3
+        with:
+          egress-policy: audit
+      - uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
           persist-credentials: false
-      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1
+      - uses: actions/setup-node@949feb2413d6458794dcd2491c4babbbce0c15c1 # v7.1.0
         with:
           node-version: '24'
+      - name: Install locked build and validation dependencies
+        run: npm ci --ignore-scripts
       - run: node scripts/build-cloudflare.mjs
       - run: node scripts/check-cloudflare.mjs
       - run: node scripts/build-domain.mjs
@@ -37,5 +43,6 @@ jobs:
       - run: node tests/browser/audit/node_modules/playwright/cli.js install --with-deps chromium firefox webkit
       - name: Verify final hosted bytes in three browsers
         run: |
-          export AUDIT_EXPECTED_DOCUMENT_SHA256=$(node -p "require('./.cloudflare/runtime-security-headers.json').document_sha256")
+          AUDIT_EXPECTED_DOCUMENT_SHA256=$(node -p "require('./.cloudflare/runtime-security-headers.json').document_sha256")
+          export AUDIT_EXPECTED_DOCUMENT_SHA256
           node tests/browser/audit/node_modules/playwright/cli.js test --config tests/browser/audit/playwright.config.ts

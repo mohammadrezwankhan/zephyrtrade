@@ -3,10 +3,11 @@
 from __future__ import annotations
 
 import numpy as np
+from numpy.typing import ArrayLike, NDArray
 from scipy.optimize import linprog
 
 
-def _as_finite_vector(values: np.ndarray, name: str) -> np.ndarray:
+def _as_finite_vector(values: ArrayLike, name: str) -> NDArray[np.float64]:
     """Convert values to a finite one-dimensional float array."""
     vector = np.asarray(values, dtype=float)
     if vector.ndim != 1 or vector.size == 0:
@@ -17,10 +18,10 @@ def _as_finite_vector(values: np.ndarray, name: str) -> np.ndarray:
 
 
 def validate_price_order(
-    day_ahead_price: np.ndarray,
-    up_regulation_price: np.ndarray,
-    down_regulation_price: np.ndarray,
-) -> tuple[np.ndarray, np.ndarray, np.ndarray]:
+    day_ahead_price: ArrayLike,
+    up_regulation_price: ArrayLike,
+    down_regulation_price: ArrayLike,
+) -> tuple[NDArray[np.float64], NDArray[np.float64], NDArray[np.float64]]:
     """Validate the no-arbitrage ordering used by the trading formulation."""
     day_ahead = np.asarray(day_ahead_price, dtype=float)
     up_regulation = np.asarray(up_regulation_price, dtype=float)
@@ -46,10 +47,10 @@ def validate_price_order(
 
 
 def critical_fractile(
-    day_ahead_price: np.ndarray,
-    up_regulation_price: np.ndarray,
-    down_regulation_price: np.ndarray,
-) -> np.ndarray:
+    day_ahead_price: ArrayLike,
+    up_regulation_price: ArrayLike,
+    down_regulation_price: ArrayLike,
+) -> NDArray[np.float64]:
     """Return the LP's optimal production-distribution quantile at each interval."""
     day_ahead, up_regulation, down_regulation = validate_price_order(
         day_ahead_price,
@@ -61,12 +62,12 @@ def critical_fractile(
 
 
 def perfect_foresight_offers(
-    actual_power_mw: np.ndarray,
-    day_ahead_price_dkk_mwh: np.ndarray,
-    up_regulation_price_dkk_mwh: np.ndarray,
-    down_regulation_price_dkk_mwh: np.ndarray,
-    capacity_mw: float | np.ndarray,
-) -> np.ndarray:
+    actual_power_mw: ArrayLike,
+    day_ahead_price_dkk_mwh: ArrayLike,
+    up_regulation_price_dkk_mwh: ArrayLike,
+    down_regulation_price_dkk_mwh: ArrayLike,
+    capacity_mw: float | ArrayLike,
+) -> NDArray[np.float64]:
     """Return exact deterministic-LP offers for known production.
 
     With one production scenario and the no-arbitrage ordering
@@ -94,13 +95,13 @@ def perfect_foresight_offers(
 
 
 def solve_single_period_offer_lp(
-    production_scenarios_mw: np.ndarray,
-    scenario_probabilities: np.ndarray,
+    production_scenarios_mw: ArrayLike,
+    scenario_probabilities: ArrayLike,
     day_ahead_price_dkk_mwh: float,
     up_regulation_price_dkk_mwh: float,
     down_regulation_price_dkk_mwh: float,
     capacity_mw: float,
-) -> dict[str, float | np.ndarray]:
+) -> dict[str, float | NDArray[np.float64]]:
     """Solve one stochastic day-ahead offering problem as an explicit LP.
 
     Variables are the day-ahead offer and nonnegative surplus and shortfall
@@ -154,7 +155,7 @@ def solve_single_period_offer_lp(
         bounds=bounds,
         method="highs",
     )
-    if not result.success:
+    if not result.success or result.x is None or result.fun is None:
         raise RuntimeError(f"Trading LP failed: {result.message}")
 
     surplus = result.x[1 : 1 + scenario_count]
@@ -168,13 +169,13 @@ def solve_single_period_offer_lp(
 
 
 def optimize_offers_from_residuals(
-    point_forecasts_mw: np.ndarray,
-    calibration_residuals_mw: np.ndarray,
-    day_ahead_price_dkk_mwh: np.ndarray,
-    up_regulation_price_dkk_mwh: np.ndarray,
-    down_regulation_price_dkk_mwh: np.ndarray,
-    capacity_mw: float | np.ndarray,
-) -> np.ndarray:
+    point_forecasts_mw: ArrayLike,
+    calibration_residuals_mw: ArrayLike,
+    day_ahead_price_dkk_mwh: ArrayLike,
+    up_regulation_price_dkk_mwh: ArrayLike,
+    down_regulation_price_dkk_mwh: ArrayLike,
+    capacity_mw: float | ArrayLike,
+) -> NDArray[np.float64]:
     """Apply the exact LP quantile solution using empirical residual scenarios.
 
     Calibration residuals are treated as equiprobable errors around every point
@@ -212,8 +213,8 @@ def optimize_offers_from_residuals(
 
 def expected_scenario_revenue(
     offer_mw: float,
-    production_scenarios_mw: np.ndarray,
-    scenario_probabilities: np.ndarray,
+    production_scenarios_mw: ArrayLike,
+    scenario_probabilities: ArrayLike,
     day_ahead_price_dkk_mwh: float,
     up_regulation_price_dkk_mwh: float,
     down_regulation_price_dkk_mwh: float,

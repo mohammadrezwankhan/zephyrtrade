@@ -5,10 +5,38 @@ import {fileURLToPath} from 'node:url';
 import {execFileSync} from 'node:child_process';
 import {createHash} from 'node:crypto';
 import {runtimeSecurity, runtimeHeaderBlock} from './runtime-security.mjs';
+import {extractStaticPageText} from './html-document.mjs';
 import {addEngineeringHeroFramePolicy, insertEngineeringHeroSection, prepareEngineeringHero} from './engineering-hero.mjs';
+/** @typedef {{question:string, answer:string}} FAQ */
+/** @typedef {{canonical:string, summary:string, updated:string, publicSource:string, features:string[], steps:string[], limitations:string[], faqs:FAQ[]}} AppConfig */
+/** @typedef {{canonical:string, project:string, title:string, description:string, engineeringHero?:boolean, engineeringHeroSite?:string}} SiteConfig */
+/** @param {unknown} value @returns {value is Record<string,unknown>} */
+function isRecord(value) {
+ return value!==null&&typeof value==='object'&&!Array.isArray(value);
+}
+/** @param {unknown} value @returns {value is string[]} */
+function isStringArray(value) {
+ return Array.isArray(value)&&value.every(item=>typeof item==='string');
+}
+/** @param {unknown} value @returns {value is AppConfig} */
+function isAppConfig(value) {
+ return isRecord(value)&&['canonical','summary','updated','publicSource'].every(key=>typeof value[key]==='string')&&
+  isStringArray(value.features)&&isStringArray(value.steps)&&isStringArray(value.limitations)&&
+  Array.isArray(value.faqs)&&value.faqs.every(item=>isRecord(item)&&typeof item.question==='string'&&typeof item.answer==='string');
+}
+/** @param {unknown} value @returns {value is SiteConfig} */
+function isSiteConfig(value) {
+ return isRecord(value)&&['canonical','project','title','description'].every(key=>typeof value[key]==='string')&&
+  (value.engineeringHero===undefined||typeof value.engineeringHero==='boolean')&&
+  (value.engineeringHeroSite===undefined||typeof value.engineeringHeroSite==='string');
+}
 const root=path.resolve(path.dirname(fileURLToPath(import.meta.url)),'..');
+/** @type {unknown} */
 const config=JSON.parse(fs.readFileSync(path.join(root,'cloudflare.json'),'utf8'));
+/** @type {unknown} */
 const site=JSON.parse(fs.readFileSync(path.join(root,'cloudflare-domain.json'),'utf8'));
+if(!isAppConfig(config))throw Error('Invalid app configuration');
+if(!isSiteConfig(site))throw Error('Invalid domain configuration');
 const origin=new URL(site.canonical).origin;
 if(site.canonical!==origin+'/'||!site.canonical.startsWith('https://'))throw Error('Expected an HTTPS apex canonical');
 if(!/^[a-z0-9-]+$/.test(site.project))throw Error('Invalid Pages project');
@@ -29,34 +57,56 @@ const engineeringHero=prepareEngineeringHero({
  enabled:site.engineeringHero===true,
  sourceRoot:path.join(root,'assets','engineering-hero','v1'),
  siteOutput:out,
- siteId:site.engineeringHeroSite
+ siteId:site.engineeringHeroSite??''
 });
-const esc=v=>String(v).replace(/[&<>"']/g,c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c]));
-const json=v=>JSON.stringify(v).replace(/</g,'\\u003c');
+/** @param {unknown} value */
+const esc=value=>String(value).replace(/[&<>"']/g,c=>{
+ switch(c){
+  case '&':return '&amp;';
+  case '<':return '&lt;';
+  case '>':return '&gt;';
+  case '"':return '&quot;';
+  case "'":return '&#39;';
+  default:throw Error('Unexpected HTML escape character');
+ }
+});
+/** @param {unknown} value */
+const json=value=>{
+ const encoded=JSON.stringify(value);
+ if(encoded===undefined)throw Error('Structured data must be JSON serializable');
+ return encoded.replace(/</g,'\\u003c');
+};
+/** @param {import('node:crypto').BinaryLike} v */
 const sha=v=>createHash('sha256').update(v).digest('hex');
+/** @param {string} file @param {string} content */
 const write=(file,content)=>{fs.mkdirSync(path.dirname(path.join(out,file)),{recursive:true});fs.writeFileSync(path.join(out,file),content);};
 const maintainerUrl='https://mrkhan.co.technology/';
 const maintainerId=maintainerUrl+'#person';
 const indexNowKey='242a5dcf79d9b1321ecc7abbcc603171';
+/** @type {unknown} */
 const facts=JSON.parse(fs.readFileSync(path.join(out,'app.json'),'utf8'));
+if(!isRecord(facts)||typeof facts.sourceRevision!=='string')throw Error('Invalid app facts');
 let runtime=fs.readFileSync(path.join(out,'run/index.html'),'utf8');
 if(runtime.split(config.canonical).length-1!==1)throw Error('Runtime canonical anchor changed');
 runtime=runtime.replace(config.canonical,site.canonical);
 write('run/index.html',runtime);
 fs.writeFileSync(path.join(outputRoot,'runtime-security-headers.json'),JSON.stringify(runtimeSecurity(runtime),null,2)+'\n');
-facts.url=site.canonical;facts.applicationUrl=origin+'/run/';facts.runtimeSha256=sha(runtime);
+const runtimeSha256=sha(runtime);
+facts.url=site.canonical;facts.applicationUrl=origin+'/run/';facts.runtimeSha256=runtimeSha256;
 facts.methodologyUrl=origin+'/methodology/';facts.authorUrl=maintainerUrl;
 facts.dataset={status:'synthetic historical demonstration',retainedHourlyObservations:3888,strategies:9,siteCapacityMW:30,start:'2024-07-20',end:'2024-12-31',timezone:'UTC',absentHoursWithinTestSpan:53};
 write('app.json',JSON.stringify(facts,null,2)+'\n');
 const author={'@type':'Person','@id':maintainerId,name:'Mohammad Rezwan Khan',url:maintainerUrl,sameAs:['https://github.com/mohammadrezwankhan']};
 const nav=`<header class="masthead"><a class="wordmark" href="/">Z<span>↗</span> ZephyrTrade</a><nav aria-label="Main"><a href="/run/">Open app</a><a href="/methodology/">Methodology</a><a href="/about/">About</a></nav></header>`;
 const footer=`<footer><a class="wordmark" href="/">ZephyrTrade</a><p>Wind-market research, with its assumptions in view.</p><a href="https://mklab.co.technology/">Explore MKLab apps →</a></footer>`;
+/** @param {string} url @param {string} title @param {string} description @param {string} content @param {Record<string,unknown>[]} [extra] */
 const page=(url,title,description,content,extra=[])=>{
  const graph=[{'@type':'WebSite','@id':origin+'/#website',name:'ZephyrTrade',url:site.canonical,publisher:author,inLanguage:'en'},author,{'@type':'WebPage','@id':url+'#page',name:title,url,description,inLanguage:'en',dateModified:config.updated,isPartOf:{'@id':origin+'/#website'},author},...extra];
  return `<!doctype html><html lang="en"><head><meta charset="utf-8"><meta name="viewport" content="width=device-width,initial-scale=1"><title>${esc(title)}</title><meta name="description" content="${esc(description)}"><meta name="robots" content="index,follow,max-image-preview:large"><meta name="author" content="Mohammad Rezwan Khan"><meta name="theme-color" content="#132923"><link rel="canonical" href="${url}"><link rel="icon" href="/favicon.svg"><link rel="stylesheet" href="/site.css"><link rel="stylesheet" href="/domain.css"><meta property="og:type" content="website"><meta property="og:site_name" content="ZephyrTrade"><meta property="og:title" content="${esc(title)}"><meta property="og:description" content="${esc(description)}"><meta property="og:url" content="${url}"><meta property="og:image" content="${origin}/social-preview.png"><meta property="og:image:alt" content="ZephyrTrade wind-market research application"><meta name="twitter:card" content="summary_large_image"><meta name="twitter:title" content="${esc(title)}"><meta name="twitter:description" content="${esc(description)}"><meta name="twitter:image" content="${origin}/social-preview.png"><script type="application/ld+json">${json({'@context':'https://schema.org','@graph':graph})}</script></head><body><a class="skip" href="#main">Skip to content</a>${nav}<main id="main">${content}</main>${footer}</body></html>`;
 };
+/** @param {string[]} items */
 const list=items=>items.map(item=>`<li>${esc(item)}</li>`).join('');
-const home=`<section class="app-hero"><div><p class="eyebrow">WIND / ENERGY / RESEARCH</p><h1>Explore the assumptions behind an energy offer.</h1><p class="lead">${esc(config.summary)}</p><div class="actions"><a class="button primary" href="/run/">Open ZephyrTrade ↗</a><a href="/methodology/">Read the method</a></div><p class="micro">Free browser app · No sign-in · Synthetic historical data</p></div><figure class="app-preview"><img src="/preview.png" alt="ZephyrTrade’s actual strategy comparison interface" width="1440" height="1000" fetchpriority="high"><figcaption>Actual browser interface. The observations are synthetic.</figcaption></figure></section><section class="content-grid"><div><p class="eyebrow">EXPLORE</p><h2>From observations to hypothetical offers</h2><ul class="feature-list">${list(config.features)}</ul></div><div id="how-to-use"><p class="eyebrow">START HERE</p><h2>Try it in three steps</h2><ol class="steps">${list(config.steps)}</ol></div></section><section class="boundary"><div><p class="eyebrow">DATA &amp; ASSUMPTIONS</p><h2>A transparent research snapshot</h2></div><div><p>The bundled example has <strong>3,888 retained hourly observations</strong>, <strong>nine strategies</strong> and one <strong>30 MW synthetic site</strong>. It spans 20 July–31 December 2024 UTC with 53 absent hours. These are historical synthetic examples, not current market observations.</p><ul>${list(config.limitations)}</ul><p><a href="/methodology/">Read the data exclusions and numerical method →</a></p></div></section><section class="faq"><p class="eyebrow">COMMON QUESTIONS</p><h2>Before you explore</h2>${config.faqs.map(f=>`<details><summary>${esc(f.question)}</summary><p>${esc(f.answer)}</p></details>`).join('')}<details><summary>Where are my saved scenarios stored?</summary><p>Scenarios stay in this browser’s local storage. Export JSON backups. Saves on MKLab or another domain do not automatically transfer to this address.</p></details><details><summary>Does this place trades or make investment recommendations?</summary><p>No. It calculates hypothetical offers from synthetic examples and your assumptions. There are no orders, broker connections or accounts.</p></details></section><section class="release"><h2>Open methods and source</h2><p>Maintained by <a href="${maintainerUrl}">Mohammad Rezwan Khan</a>. Updated <time datetime="${config.updated}">${config.updated}</time>.</p><p><a href="${config.publicSource}">Public source and verification</a> · <a href="/app.json">App facts</a> · <a href="/llms.txt">Plain-text guide</a> · <a href="/NOTICES.txt">Notices</a></p><p class="micro">Source revision ${facts.sourceRevision.slice(0,12)} · Browser runtime SHA-256 ${facts.runtimeSha256.slice(0,16)}</p></section>`;
+const home=`<section class="app-hero"><div><p class="eyebrow">WIND / ENERGY / RESEARCH</p><h1>Explore the assumptions behind an energy offer.</h1><p class="lead">${esc(config.summary)}</p><div class="actions"><a class="button primary" href="/run/">Open ZephyrTrade ↗</a><a href="/methodology/">Read the method</a></div><p class="micro">Free browser app · No sign-in · Synthetic historical data</p></div><figure class="app-preview"><img src="/preview.png" alt="ZephyrTrade’s actual strategy comparison interface" width="1440" height="1000" fetchpriority="high"><figcaption>Actual browser interface. The observations are synthetic.</figcaption></figure></section><section class="content-grid"><div><p class="eyebrow">EXPLORE</p><h2>From observations to hypothetical offers</h2><ul class="feature-list">${list(config.features)}</ul></div><div id="how-to-use"><p class="eyebrow">START HERE</p><h2>Try it in three steps</h2><ol class="steps">${list(config.steps)}</ol></div></section><section class="boundary"><div><p class="eyebrow">DATA &amp; ASSUMPTIONS</p><h2>A transparent research snapshot</h2></div><div><p>The bundled example has <strong>3,888 retained hourly observations</strong>, <strong>nine strategies</strong> and one <strong>30 MW synthetic site</strong>. It spans 20 July–31 December 2024 UTC with 53 absent hours. These are historical synthetic examples, not current market observations.</p><ul>${list(config.limitations)}</ul><p><a href="/methodology/">Read the data exclusions and numerical method →</a></p></div></section><section class="faq"><p class="eyebrow">COMMON QUESTIONS</p><h2>Before you explore</h2>${config.faqs.map(f=>`<details><summary>${esc(f.question)}</summary><p>${esc(f.answer)}</p></details>`).join('')}<details><summary>Where are my saved scenarios stored?</summary><p>Scenarios stay in this browser’s local storage. Export JSON backups. Saves on MKLab or another domain do not automatically transfer to this address.</p></details><details><summary>Does this place trades or make investment recommendations?</summary><p>No. It calculates hypothetical offers from synthetic examples and your assumptions. There are no orders, broker connections or accounts.</p></details></section><section class="release"><h2>Open methods and source</h2><p>Maintained by <a href="${maintainerUrl}">Mohammad Rezwan Khan</a>. Updated <time datetime="${config.updated}">${config.updated}</time>.</p><p><a href="${config.publicSource}">Public source and verification</a> · <a href="/app.json">App facts</a> · <a href="/llms.txt">Plain-text guide</a> · <a href="/NOTICES.txt">Notices</a></p><p class="micro">Source revision ${facts.sourceRevision.slice(0,12)} · Browser runtime SHA-256 ${runtimeSha256.slice(0,16)}</p></section>`;
 const application={'@type':'SoftwareApplication','@id':origin+'/#app',name:'ZephyrTrade',url:site.canonical,description:site.description,applicationCategory:'EducationalApplication',operatingSystem:'Web browser',isAccessibleForFree:true,author,featureList:config.features,softwareHelp:{'@id':origin+'/methodology/#page'},sameAs:[config.publicSource]};
 const googleVerification='xZhKdS0U-QfuZ7T0-Rz75ERIZu732Mh0sa85UiwUcgs';
 const verificationTag=`<meta name="google-site-verification" content="${googleVerification}">`;
@@ -74,26 +124,8 @@ write('favicon.svg','<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"
 write('robots.txt',`User-agent: *\nAllow: /\n\nUser-agent: Googlebot\nAllow: /\n\nUser-agent: Bingbot\nAllow: /\n\nUser-agent: OAI-SearchBot\nAllow: /\n\n# GPTBot permission covers model training separately from search.\nUser-agent: GPTBot\nAllow: /\n\nUser-agent: PerplexityBot\nAllow: /\n\nUser-agent: Claude-SearchBot\nAllow: /\n\nSitemap: ${origin}/sitemap.xml\n`);
 write('sitemap.xml','<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">'+['/','/methodology/','/about/'].map(p=>`<url><loc>${origin+p}</loc><lastmod>${config.updated}</lastmod></url>`).join('')+'</urlset>\n');
 write('llms.txt',`# ZephyrTrade\n\nA free browser research application maintained by Mohammad Rezwan Khan. It explores synthetic wind-market observations and hypothetical offers, with no live prices or real trades.\n\n- [Overview](${origin}/)\n- [Browser app](${origin}/run/)\n- [Methodology and data limits](${origin}/methodology/)\n- [Author, source and privacy](${origin}/about/)\n- [Machine-readable app facts](${origin}/app.json)\n- [Public source](${config.publicSource})\n\n## Maintainer and related research\nMaintainer: [Mohammad Rezwan Khan](${maintainerUrl}); unified identity: ${maintainerId}.\n\n- [Engineering profile and publications](${maintainerUrl})\n- [Separate MKGrid hybrid-energy research preview](https://mkgrid.co.technology/)\n\n## Dataset\n3,888 retained hourly test observations; nine strategies; one 30 MW synthetic site; 20 July–31 December 2024 UTC; 53 absent hours in that span. The source pipeline excluded negative-price observations. This is not live market data or an unfiltered calendar backtest.\n\n## Boundaries\nBrowser calculations use JavaScript. The optional Python/SciPy cross-check runs locally and is not hosted here. Changing filters does not train new models. Scenarios are stored locally and should be exported for backup.\n\nThis optional text supplements the visible pages; it does not guarantee search rankings or AI citations.\n`);
-const decodeEntities=text=>text.replace(/&(#x[\da-f]+|#\d+|amp|lt|gt|quot|apos|nbsp);/gi,(entity,code)=>{
- if(code[0]==='#')return String.fromCodePoint(code[1]?.toLowerCase()==='x'?parseInt(code.slice(2),16):parseInt(code.slice(1),10));
- return ({amp:'&',lt:'<',gt:'>',quot:'"',apos:"'",nbsp:' '})[code.toLowerCase()]??entity;
-});
-const staticPageText=(file,source)=>{
- const html=fs.readFileSync(path.join(out,file),'utf8');
- const title=decodeEntities(html.match(/<title>([\s\S]*?)<\/title>/i)?.[1]??'');
- const main=html.match(/<main id="main">([\s\S]*?)<\/main>/i)?.[1];
- if(!main||!title)throw Error('Cannot extract published static page text: '+file);
- const visible=decodeEntities(main
-  .replace(/<a\b[^>]*href="([^"]*)"[^>]*>([\s\S]*?)<\/a>/gi,(_,href,label)=>label.replace(/<[^>]+>/g,'')+' ('+href+') ')
-  .replace(/<br\s*\/?\s*>/gi,'\n')
-  .replace(/<\/(?:h[1-6]|p|li|summary|figcaption|div|section|article)>/gi,'\n')
-  .replace(/<[^>]+>/g,' ')
-  .replace(/[ \t\r\f\v]+/g,' ')
-  .replace(/ *\n */g,'\n')
-  .replace(/\n{3,}/g,'\n\n')
-  .trim());
- return `### ${title}\nSource: ${source}\n\n${visible}`;
-};
+/** @param {string} file @param {string} source */
+const staticPageText=(file,source)=>extractStaticPageText(fs.readFileSync(path.join(out,file),'utf8'),source);
 const fullTextPages=[
  staticPageText('index.html',site.canonical),
  staticPageText('about/index.html',origin+'/about/'),

@@ -24,8 +24,8 @@
     },
     {
       "path": "index.html",
-      "bytes": 1574,
-      "sha256": "59f088e5fe88d71b3caa4aa77ee3311097923b36931acb805a7a54a83eddcb25"
+      "bytes": 1982,
+      "sha256": "0a900a1dfc193e7424897ee4611e6e4a07a2be587d09ea8377695636ac760441"
     },
     {
       "path": "integration/vanilla/embed.css",
@@ -39,8 +39,8 @@
     },
     {
       "path": "integration/vanilla/example.html",
-      "bytes": 1159,
-      "sha256": "4f448ec4e33f54ef6f29157ec7982d05ef61e9459eed9f0131a8a0f76f7bf6e3"
+      "bytes": 1513,
+      "sha256": "beec134a0e6760e913dbc4f3988e5f33a155dc4361234831fef68b4bf06ee86d"
     },
     {
       "path": "integration/vanilla/host.css",
@@ -49,8 +49,8 @@
     },
     {
       "path": "integration/vanilla/khan-grid-hero.js",
-      "bytes": 8956,
-      "sha256": "8a8f94696c29be49aab46a6136f2e1ebc4b0907bd0666758b3b099d3e70ed2ed"
+      "bytes": 11546,
+      "sha256": "f2fe530449e8c7e1cc99ac9112e723d19e886292d227bc7a77c08435fcd4b752"
     },
     {
       "path": "poster.png",
@@ -64,48 +64,48 @@
     },
     {
       "path": "src/config.js",
-      "bytes": 3477,
-      "sha256": "14d0be1c56eb71580c9f39da65edc9a72fd55a84fde6cb51ceb5c6767da0a2fa"
+      "bytes": 4108,
+      "sha256": "279d1a4468af39141c4694ca8eec21788f84a66611ae8e2fe7a5678c376643da"
     },
     {
       "path": "src/font-assets.js",
-      "bytes": 1417,
-      "sha256": "88e9bd360a8489fb073f4ff928b814ed656e3909d03e29f9fe15f1594e41611d"
+      "bytes": 1644,
+      "sha256": "730e80886b6a8a5eeb1f6077903ab4d7dffce837cafbdc320c6b18fb243f0a71"
     },
     {
       "path": "src/kinematics.js",
-      "bytes": 5268,
-      "sha256": "3271c1b5d6f042ae03842e40419729298eabebcd739f0743060938b8ed160307"
+      "bytes": 7161,
+      "sha256": "b74fbc4f0868a21554aca072c7b154bbc166aee8fdbd947e07c29ce9a6d4db57"
     },
     {
       "path": "src/main.js",
-      "bytes": 5179,
-      "sha256": "156c01925d79e2b7c5d6ddd50205fe1bd13043b5e5e7541bed96727920b206d9"
+      "bytes": 5712,
+      "sha256": "7bcc8842f8e3582ec99962ed27ceb29936ee982609f127bec1c38af53230e683"
     },
     {
       "path": "src/scene/conduit.js",
-      "bytes": 1649,
-      "sha256": "6a400c63b7df4651d984e23d3b264a2cc8d9d47ed3de23cfc801bcf3656a3a30"
+      "bytes": 1752,
+      "sha256": "af76cae4ba1b44f571425387c11b860f67dc51c2241999ce7e5311e3962b7fdc"
     },
     {
       "path": "src/scene/environment.js",
-      "bytes": 3723,
-      "sha256": "ff1dbe422b90d26b018b5d79e2449d392f2d0b033cd8a5f330323aa25abe9f78"
+      "bytes": 4126,
+      "sha256": "4407e10644dc5f7edabdaa5e4de146a49dce4eadb2cdd067bb7cc2cd2d4bee1d"
     },
     {
       "path": "src/scene/index.js",
-      "bytes": 11973,
-      "sha256": "51ed883b0b7a905088255857d5c5fe3dc2cc2de6586d75a6ad8d2141ad73aa31"
+      "bytes": 13219,
+      "sha256": "cc8221b909a5d8ea9df61c5e33449f502cfee46a2de9cad65854615783bff51b"
     },
     {
       "path": "src/scene/materials.js",
-      "bytes": 2903,
-      "sha256": "3824a39eb2f0ce67bacd7a00041cc0f8b6370ddb60eae6564c69db7612c03be0"
+      "bytes": 3991,
+      "sha256": "7c4fba805ddfd79c45eaee65731d15eddd6577da34790368b3f3671d00786168"
     },
     {
       "path": "src/scene/objects.js",
-      "bytes": 6801,
-      "sha256": "0b444a2fa60442c6857bef0955259dd23cf031c558d05ca9a5447b63bda17443"
+      "bytes": 7626,
+      "sha256": "6c28634a7f5aa25835706b5c9db16ab00dea845a74fdff5a1beab2fd907c719d"
     },
     {
       "path": "src/styles/hero.css",
@@ -114,13 +114,13 @@
     },
     {
       "path": "src/ui/draw.js",
-      "bytes": 2625,
-      "sha256": "38dc15ca7da25f248d26b27498ad48f24d4d313e34f85067808396a7547f5673"
+      "bytes": 4200,
+      "sha256": "44cc987fe730ad29bb46fc4fff3089cdc93a0f7758db6fd3a58b0e0e4a1d827b"
     },
     {
       "path": "src/ui/panels.js",
-      "bytes": 9178,
-      "sha256": "25ee98a7c1add3201b6838fad446a556c2f99599de84325376efd494622516be"
+      "bytes": 10098,
+      "sha256": "1278209f6f6ba96c067b4335469b0084bb257931856863f3123514b010b4f8dd"
     },
     {
       "path": "vendor/manifest.json",

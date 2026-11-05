@@ -3,11 +3,13 @@
 from __future__ import annotations
 
 import json
+from pathlib import Path
 
 import numpy as np
 import pandas as pd
 
 from zephyrtrade.data_loader import (
+    DataBundle,
     SyntheticDataConfig,
     generate_synthetic_data,
     write_data_bundle,
@@ -22,7 +24,7 @@ from zephyrtrade.preprocessing import (
 )
 
 
-def _quarter_year_bundle():
+def _quarter_year_bundle() -> DataBundle:
     """Return a stable fixture with enough history for weekly features."""
     config = SyntheticDataConfig(
         start="2024-01-01",
@@ -87,7 +89,7 @@ def test_splits_are_ordered_and_scaler_is_fit_on_training_only() -> None:
     assert scaler.n_features_in_ == len(FEATURE_COLUMNS)
 
 
-def test_end_to_end_preprocessing_writes_schema_and_splits(tmp_path) -> None:
+def test_end_to_end_preprocessing_writes_schema_and_splits(tmp_path: Path) -> None:
     """The persisted pipeline should expose auditable schema and split artifacts."""
     raw_dir = tmp_path / "raw"
     processed_dir = tmp_path / "processed"

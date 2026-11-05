@@ -5,10 +5,11 @@ from __future__ import annotations
 from typing import Any
 
 import numpy as np
+from numpy.typing import ArrayLike, NDArray
 from sklearn.metrics import mean_absolute_error, mean_squared_error, r2_score
 
 
-def _aligned_vectors(**vectors: np.ndarray) -> dict[str, np.ndarray]:
+def _aligned_vectors(**vectors: ArrayLike) -> dict[str, NDArray[np.float64]]:
     """Validate and return finite aligned one-dimensional float vectors."""
     converted = {
         name: np.asarray(value, dtype=float) for name, value in vectors.items()
@@ -25,8 +26,8 @@ def _aligned_vectors(**vectors: np.ndarray) -> dict[str, np.ndarray]:
 
 
 def regression_metrics(
-    actual_mw: np.ndarray,
-    predicted_mw: np.ndarray,
+    actual_mw: ArrayLike,
+    predicted_mw: ArrayLike,
 ) -> dict[str, float | None]:
     """Return physical-scale errors; R-squared is None for a single interval."""
     values = _aligned_vectors(actual_mw=actual_mw, predicted_mw=predicted_mw)
@@ -40,13 +41,13 @@ def regression_metrics(
 
 
 def realized_market_revenue(
-    offer_mw: np.ndarray,
-    actual_power_mw: np.ndarray,
-    day_ahead_price_dkk_mwh: np.ndarray,
-    up_regulation_price_dkk_mwh: np.ndarray,
-    down_regulation_price_dkk_mwh: np.ndarray,
+    offer_mw: ArrayLike,
+    actual_power_mw: ArrayLike,
+    day_ahead_price_dkk_mwh: ArrayLike,
+    up_regulation_price_dkk_mwh: ArrayLike,
+    down_regulation_price_dkk_mwh: ArrayLike,
     interval_hours: float = 1.0,
-) -> np.ndarray:
+) -> NDArray[np.float64]:
     """Calculate realized day-ahead plus two-price imbalance revenue by interval."""
     if not np.isfinite(interval_hours) or interval_hours <= 0.0:
         raise ValueError("interval_hours must be finite and positive.")
@@ -69,11 +70,11 @@ def realized_market_revenue(
 
 
 def revenue_metrics(
-    offer_mw: np.ndarray,
-    actual_power_mw: np.ndarray,
-    day_ahead_price_dkk_mwh: np.ndarray,
-    up_regulation_price_dkk_mwh: np.ndarray,
-    down_regulation_price_dkk_mwh: np.ndarray,
+    offer_mw: ArrayLike,
+    actual_power_mw: ArrayLike,
+    day_ahead_price_dkk_mwh: ArrayLike,
+    up_regulation_price_dkk_mwh: ArrayLike,
+    down_regulation_price_dkk_mwh: ArrayLike,
     interval_hours: float = 1.0,
 ) -> dict[str, Any]:
     """Summarize realized revenue, imbalance, and perfect-foresight regret."""

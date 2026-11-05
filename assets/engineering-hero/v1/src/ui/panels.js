@@ -1,19 +1,23 @@
 import { COLORS as C, FILM, CHAPTERS, SITES, getSite } from '../config.js';
-import { clamp, smooth, telemetry, timeline } from '../kinematics.js';
+import { telemetry, timeline, at } from '../kinematics.js';
 import { card, round, text, label, pill, line, check, grid, chart } from './draw.js';
+/** @typedef {import('../contracts.js').Surface} Surface */
 export const PANEL_SIZE = Object.freeze({ width: 1024, height: 608 });
+/** @param {number} width @param {number} height @param {number} [dpr] @returns {Surface} */
 export function makeCanvas(width, height, dpr = FILM.textureDPR) {
   const canvas=document.createElement('canvas');canvas.width=Math.round(width*dpr);canvas.height=Math.round(height*dpr);
   const ctx=canvas.getContext('2d',{alpha:true});
   if(!ctx) throw new Error('Canvas 2D is unavailable.');
   return { canvas, ctx, width, height, dpr, audit: [] };
 }
+/** @param {Surface} s */
 export function clearSurface(s) {
   s.ctx.setTransform(1,0,0,1,0,0);s.ctx.clearRect(0,0,s.canvas.width,s.canvas.height);
   s.ctx.setTransform(s.dpr,0,0,s.dpr,0,0);s.ctx.globalAlpha=1;s.audit=[];
 }
+/** @param {Surface} s @param {number} index */
 function base(s,index) {
-  const {ctx:c,audit:a}=s, chapter=CHAPTERS[index];
+  const {ctx:c,audit:a}=s, chapter=at(CHAPTERS,index);
   const g=c.createLinearGradient(0,0,1024,608);g.addColorStop(0,'rgba(5,12,25,0.93)');g.addColorStop(1,'rgba(9,19,36,0.87)');
   round(c,1,1,1022,606,25);c.fillStyle=g;c.fill();c.strokeStyle='rgba(255,255,255,0.38)';c.lineWidth=1;c.stroke();
   label(c,a,chapter.panelCode,32,40,C.orange,{maxWidth:260});
@@ -23,6 +27,7 @@ function base(s,index) {
   label(c,a,'ASSUMPTIONS VISIBLE',32,581,C.muted,{maxWidth:430});
   label(c,a,'NO LIVE DATA',990,581,C.muted,{align:'right',maxWidth:210});
 }
+/** @param {Surface} s @param {number} t */
 function physics(s,t) {
   const {ctx:c,audit:a}=s, d=telemetry(0,t);
   card(c,32,135,590,142);label(c,a,'LUMPED THERMAL BALANCE',52,166);
@@ -43,6 +48,7 @@ function physics(s,t) {
   });
   label(c,a,'Research illustration',666,520,C.muted,{maxWidth:310});
 }
+/** @param {Surface} s @param {number} t */
 function models(s,t) {
   const {ctx:c,audit:a}=s,d=telemetry(1,t);
   card(c,32,135,960,135);label(c,a,'POWER PATH / CONCEPTUAL',52,165);
@@ -53,18 +59,23 @@ function models(s,t) {
     if(i<3){line(c,[[x+204,215],[x+230,215]],C.blue,2);const p=(t*.7+i*.2)%1;c.beginPath();c.arc(x+207+20*p,215,3,0,Math.PI*2);c.fillStyle=C.blue;c.fill();}
   });
   card(c,32,291,566,252);label(c,a,'MODEL / LOCAL REFERENCE',52,323);
+  /** @type {[string,string,string][]} */
   const code=[['01','system = define(boundary);',C.white],['02','model  = build(system);',C.white],['03','trace  = simulate(model, t);',C.blue],['04','review(trace, assumptions);',C.orange]];
   const reveal=Math.max(1,Math.ceil(d.p*4));
   code.slice(0,reveal).forEach(([n,txt,color],i)=>{label(c,a,n,52,371+i*40,C.muted);text(c,a,txt,97,371+i*40,18,color,{mono:true,maxWidth:477});});
   if(d.cursor){c.fillStyle=C.orange;c.fillRect(97,518,11,3);}
   card(c,620,291,372,252);label(c,a,'INSPECTABLE BY DESIGN',643,323);
-  [['01','Equations'],['02','Boundary conditions'],['03','Reproducible inputs'],['04','Known limitations']].forEach(([n,txt],i)=>{
+  /** @type {[string,string][]} */
+  const designChecks=[['01','Equations'],['02','Boundary conditions'],['03','Reproducible inputs'],['04','Known limitations']];
+  designChecks.forEach(([n,txt],i)=>{
     label(c,a,n,643,369+i*45,C.orange);text(c,a,txt,684,369+i*45,19,C.white,{maxWidth:283});
   });
 }
+/** @param {Surface} s @param {number} t */
 function evidence(s,t) {
   const {ctx:c,audit:a}=s,d=telemetry(2,t);
   card(c,32,135,478,408);label(c,a,'REQUIREMENT → REVIEW',53,167);
+  /** @type {[string,string][]} */
   const rows=[['Requirement','Define acceptance criteria'],['Test plan','Identify the evidence'],['Traceability','Link result to requirement'],['Engineer review','Approval remains human']];
   rows.forEach(([name,sub],i)=>{
     const y=211+i*82;check(c,68,y+1,i<d.checks);
@@ -81,6 +92,7 @@ function evidence(s,t) {
   text(c,a,'Evidence, not assertion.',554,470,26,C.white,{weight:600,maxWidth:418});
   text(c,a,'Demo checks ≠ certified acceptance.',554,509,18,C.muted,{maxWidth:418});
 }
+/** @param {Surface} s @param {number} t */
 function gridSystem(s,t) {
   const {ctx:c,audit:a}=s,d=telemetry(3,t);
   card(c,32,135,960,234);label(c,a,'NORMALIZED ENERGY FLOWS',53,167);
@@ -88,7 +100,10 @@ function gridSystem(s,t) {
   chart(c,62,194,902,124,u=>.43+.18*Math.sin(u*6.28+t*.21),C.orange,Math.max(.04,d.p));
   chart(c,62,194,902,124,u=>.30+.13*Math.sin(u*9+t*.14+1),C.blue,Math.max(.04,d.p));
   chart(c,62,194,902,124,u=>.56+.09*Math.sin(u*7+2),C.green,Math.max(.04,d.p));
-  [['GENERATION',C.orange,53],['STORAGE',C.blue,345],['LOAD',C.green,606]].forEach(([str,col,x])=>label(c,a,str,x,349,col));
+  /** @type {[string,string,number][]} */
+  const flowLabels=[['GENERATION',C.orange,53],['STORAGE',C.blue,345],['LOAD',C.green,606]];
+  flowLabels.forEach(([str,col,x])=>label(c,a,str,x,349,col));
+  /** @type {[string,string,string][]} */
   const boxes=[['GENERATION','Wind + solar',C.orange],['STORAGE','BESS + control',C.blue],['DECISIONS','Limits + review',C.green]];
   boxes.forEach(([tag,txt,col],i)=>{
     const x=32+i*326;card(c,x,391,308,152);label(c,a,tag,x+20,424,col);
@@ -96,22 +111,26 @@ function gridSystem(s,t) {
     text(c,a,i===2?'Human accountability':'System-level relationships',x+20,508,16,C.muted,{maxWidth:268});
   });
 }
+/** @param {Surface} s @param {number} index @param {number} t */
 export function drawPanel(s,index,t) {
-  clearSurface(s);base(s,index);[physics,models,evidence,gridSystem][index](s,t);return s.audit;
+  clearSurface(s);base(s,index);at([physics,models,evidence,gridSystem],index)(s,t);return s.audit;
 }
-export function drawHeader(s,index,t) {
-  clearSurface(s);const {ctx:c,audit:a}=s,chapter=CHAPTERS[index];
+/** @param {Surface} s @param {number} index */
+export function drawHeader(s,index) {
+  clearSurface(s);const {ctx:c,audit:a}=s,chapter=at(CHAPTERS,index);
   label(c,a,chapter.eyebrow,0,24,C.orange,{maxWidth:1580});
   text(c,a,chapter.title,0,92,64,C.white,{weight:600,maxWidth:1580});
   text(c,a,chapter.subtitle,3,140,26,C.muted,{maxWidth:1580});
   return a;
 }
-export function drawObjectLabel(s,index,t) {
+/** @param {Surface} s @param {number} index */
+export function drawObjectLabel(s,index) {
   clearSurface(s);const {ctx:c,audit:a}=s;
   c.fillStyle=C.ink;c.fillRect(0,0,s.width,s.height);
-  text(c,a,CHAPTERS[index].objectLabel,s.width/2,28,22,C.orange,{mono:true,align:'center',maxWidth:s.width});
+  text(c,a,at(CHAPTERS,index).objectLabel,s.width/2,28,22,C.orange,{mono:true,align:'center',maxWidth:s.width});
   text(c,a,'CONCEPTUAL SYSTEM',s.width/2,53,15,C.muted,{mono:true,align:'center',maxWidth:s.width});
 }
+/** @param {Surface} s @param {number} t @param {string} [siteKey] */
 export function drawHUD(s,t,siteKey='mrkhan') {
   clearSurface(s);const {ctx:c,audit:a}=s,state=timeline(t),site=getSite(siteKey);
   // Screen-fixed typography is a transparent 2x canvas, not DOM/capture-clock animation.
@@ -141,6 +160,7 @@ export function drawHUD(s,t,siteKey='mrkhan') {
   }
   return a;
 }
+/** @param {Surface} s */
 export function summarizeSurface(s) {
   return { width:s.width,height:s.height,dpr:s.dpr,items:s.audit,
     errors:s.audit.filter(b=>b.overflow || b.x<-.5 || b.y<-.5 || b.x+b.width>s.width+.5 || b.y+b.height>s.height+.5) };

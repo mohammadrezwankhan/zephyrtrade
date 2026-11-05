@@ -5,6 +5,7 @@ from __future__ import annotations
 from typing import Literal
 
 import numpy as np
+from numpy.typing import ArrayLike, NDArray
 from sklearn.base import BaseEstimator, RegressorMixin
 from sklearn.cluster import KMeans
 from sklearn.linear_model import Lasso, LinearRegression, Ridge
@@ -19,8 +20,8 @@ class ClosedFormLinearRegression(BaseEstimator, RegressorMixin):
 
     def fit(
         self,
-        x: np.ndarray,
-        y: np.ndarray,
+        x: ArrayLike,
+        y: ArrayLike,
     ) -> ClosedFormLinearRegression:
         """Estimate intercept and coefficients by the Moore-Penrose OLS solution."""
         features, target = check_X_y(x, y, y_numeric=True)
@@ -39,11 +40,12 @@ class ClosedFormLinearRegression(BaseEstimator, RegressorMixin):
         self.objective_ = float(0.5 * np.mean(residual**2))
         return self
 
-    def predict(self, x: np.ndarray) -> np.ndarray:
+    def predict(self, x: ArrayLike) -> NDArray[np.float64]:
         """Predict continuous power from a fitted closed-form model."""
         check_is_fitted(self, attributes=["coef_", "intercept_"])
         features = check_array(x)
-        return self.intercept_ + features @ self.coef_
+        prediction: NDArray[np.float64] = self.intercept_ + features @ self.coef_
+        return prediction
 
 
 class GradientDescentLinearRegression(BaseEstimator, RegressorMixin):
@@ -62,8 +64,8 @@ class GradientDescentLinearRegression(BaseEstimator, RegressorMixin):
 
     def fit(
         self,
-        x: np.ndarray,
-        y: np.ndarray,
+        x: ArrayLike,
+        y: ArrayLike,
     ) -> GradientDescentLinearRegression:
         """Minimize mean squared error with deterministic batch updates."""
         features, target = check_X_y(x, y, y_numeric=True)
@@ -104,11 +106,12 @@ class GradientDescentLinearRegression(BaseEstimator, RegressorMixin):
         self.objective_ = float(0.5 * np.mean(residual**2))
         return self
 
-    def predict(self, x: np.ndarray) -> np.ndarray:
+    def predict(self, x: ArrayLike) -> NDArray[np.float64]:
         """Predict continuous power from fitted gradient-descent coefficients."""
         check_is_fitted(self, attributes=["coef_", "intercept_"])
         features = check_array(x)
-        return self.intercept_ + features @ self.coef_
+        prediction: NDArray[np.float64] = self.intercept_ + features @ self.coef_
+        return prediction
 
 
 class LocallyWeightedLinearRegression(BaseEstimator, RegressorMixin):
@@ -121,8 +124,8 @@ class LocallyWeightedLinearRegression(BaseEstimator, RegressorMixin):
 
     def fit(
         self,
-        x: np.ndarray,
-        y: np.ndarray,
+        x: ArrayLike,
+        y: ArrayLike,
     ) -> LocallyWeightedLinearRegression:
         """Store training observations and fit a nearest-neighbor search index."""
         features, target = check_X_y(x, y, y_numeric=True)
@@ -143,7 +146,7 @@ class LocallyWeightedLinearRegression(BaseEstimator, RegressorMixin):
         ).fit(features)
         return self
 
-    def predict(self, x: np.ndarray) -> np.ndarray:
+    def predict(self, x: ArrayLike) -> NDArray[np.float64]:
         """Fit a weighted local plane at each query and return its intercept."""
         check_is_fitted(
             self,
@@ -197,8 +200,8 @@ class ClusteredRidgeRegressor(BaseEstimator, RegressorMixin):
 
     def fit(
         self,
-        x: np.ndarray,
-        y: np.ndarray,
+        x: ArrayLike,
+        y: ArrayLike,
     ) -> ClusteredRidgeRegressor:
         """Fit k-means and a local regression model for every populated regime."""
         features, target = check_X_y(x, y, y_numeric=True)
@@ -241,7 +244,7 @@ class ClusteredRidgeRegressor(BaseEstimator, RegressorMixin):
         self.n_features_in_ = features.shape[1]
         return self
 
-    def predict(self, x: np.ndarray) -> np.ndarray:
+    def predict(self, x: ArrayLike) -> NDArray[np.float64]:
         """Assign each observation to a regime and apply its local model."""
         check_is_fitted(self, attributes=["kmeans_", "global_model_"])
         features = check_array(x)
