@@ -1,4 +1,4 @@
-"""Validate the source-linked learning companion without dependencies."""
+"""Validate the source-linked learning companion with hardened XML parsing."""
 
 from __future__ import annotations
 
@@ -8,10 +8,7 @@ import sys
 from pathlib import Path
 from urllib.parse import quote
 
-# Every SVG parse rejects a DTD in StartDoctypeDeclHandler before entity expansion.
-from xml.parsers import (
-    expat,  # nosemgrep: python.lang.security.use-defused-xml.use-defused-xml
-)
+from defusedxml import ElementTree
 
 
 def require(condition: bool, message: str) -> None:
@@ -46,19 +43,14 @@ def sequence(value: object, name: str) -> list[object]:
     return list(value)
 
 
-def reject_doctype(
-    _name: str, _system_id: str | None, _public_id: str | None, _internal_subset: int
-) -> None:
-    """Reject a document type before XML entity expansion."""
-    raise ValueError("SVG documents must not contain a DTD or entity declarations")
-
-
 def validate_svg(path: Path) -> None:
     """Parse well-formed XML while refusing all document type declarations."""
-    parser = expat.ParserCreate()
-    parser.StartDoctypeDeclHandler = reject_doctype
-    parser.SetParamEntityParsing(expat.XML_PARAM_ENTITY_PARSING_NEVER)
-    parser.Parse(path.read_bytes(), True)
+    ElementTree.fromstring(
+        path.read_bytes(),
+        forbid_dtd=True,
+        forbid_entities=True,
+        forbid_external=True,
+    )
 
 
 def validate_sources(

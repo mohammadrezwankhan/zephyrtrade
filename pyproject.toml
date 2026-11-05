@@ -31,6 +31,8 @@ dependencies = [
 [project.optional-dependencies]
 dev = [
   "build>=1,<2",
+  "defusedxml==0.7.1",
+  "playwright==1.64.1",
   "pytest>=9.0.3,<10",
   "pytest-cov>=5,<8",
   "ruff>=0.5,<1",
@@ -78,6 +80,7 @@ dev = [
   "scipy-stubs==1.18.1.1",
   "scikit-learn-stubs==0.0.3",
   "joblib-stubs==1.6.0.1.20261012",
+  "types-defusedxml==0.7.0.20260504",
   "playwright==1.64.1",
 ]
 
