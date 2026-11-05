@@ -433,7 +433,7 @@ for (const [route, heading] of Object.entries(ROUTES)) {
 }
 
 for (const viewport of VIEWPORTS) {
-  test(`Responsive routes and dialogs fit ${String(viewport.width)}×${String(viewport.height)}`, async ({ page }, info) => {
+  test(`Responsive routes and dialogs fit ${String(viewport.width)}×${String(viewport.height)}`, async ({ page }) => {
     test.setTimeout(90_000);
     await page.setViewportSize(viewport);
     await open(page, 'overview');
@@ -454,7 +454,6 @@ for (const viewport of VIEWPORTS) {
     await fitsViewport(page.locator('#save-dialog'), page);
     await page.locator('#save-dialog').getByRole('button', { name: 'Cancel', exact: true }).click();
     await expect(page.locator('#save-dialog')).toBeHidden();
-    await info.attach(`lab-${String(viewport.width)}`, { body: await page.screenshot({ fullPage: true }), contentType: 'image/png' });
   });
 }
 

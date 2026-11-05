@@ -45,12 +45,15 @@ jobs:
           languages: ${{ matrix.language }}
           build-mode: none
           config-file: .github/codeql/codeql-config.yml
-      - name: Analyze and upload security results
+      - name: Analyze security results
         uses: github/codeql-action/analyze@9b3254085494b55a0f7c4c2b3d2d52cc712ce370 # v4.39.1
         with:
           output: hardening-artifacts/codeql
           category: /language:${{ matrix.language }}
-          wait-for-processing: true
+          # Default setup publishes GitHub alerts; this extended scan is gated below.
+          # Never upload duplicate SARIF, including diagnostics from failed analyses.
+          upload: never
+          wait-for-processing: false
       - name: Enforce the SARIF quality gate
         run: python .github/security/check_sarif.py hardening-artifacts/codeql
       - name: Preserve CodeQL analysis reports

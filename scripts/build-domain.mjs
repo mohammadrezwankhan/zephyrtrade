@@ -5,6 +5,7 @@ import {fileURLToPath} from 'node:url';
 import {execFileSync} from 'node:child_process';
 import {createHash} from 'node:crypto';
 import {runtimeSecurity, runtimeHeaderBlock} from './runtime-security.mjs';
+import {extractStaticPageText} from './html-document.mjs';
 import {addEngineeringHeroFramePolicy, insertEngineeringHeroSection, prepareEngineeringHero} from './engineering-hero.mjs';
 /** @typedef {{question:string, answer:string}} FAQ */
 /** @typedef {{canonical:string, summary:string, updated:string, publicSource:string, features:string[], steps:string[], limitations:string[], faqs:FAQ[]}} AppConfig */
@@ -123,32 +124,8 @@ write('favicon.svg','<svg xmlns="http://www.w3.org/2000/svg" viewBox="0 0 64 64"
 write('robots.txt',`User-agent: *\nAllow: /\n\nUser-agent: Googlebot\nAllow: /\n\nUser-agent: Bingbot\nAllow: /\n\nUser-agent: OAI-SearchBot\nAllow: /\n\n# GPTBot permission covers model training separately from search.\nUser-agent: GPTBot\nAllow: /\n\nUser-agent: PerplexityBot\nAllow: /\n\nUser-agent: Claude-SearchBot\nAllow: /\n\nSitemap: ${origin}/sitemap.xml\n`);
 write('sitemap.xml','<?xml version="1.0" encoding="UTF-8"?>\n<urlset xmlns="http://www.sitemaps.org/schemas/sitemap/0.9">'+['/','/methodology/','/about/'].map(p=>`<url><loc>${origin+p}</loc><lastmod>${config.updated}</lastmod></url>`).join('')+'</urlset>\n');
 write('llms.txt',`# ZephyrTrade\n\nA free browser research application maintained by Mohammad Rezwan Khan. It explores synthetic wind-market observations and hypothetical offers, with no live prices or real trades.\n\n- [Overview](${origin}/)\n- [Browser app](${origin}/run/)\n- [Methodology and data limits](${origin}/methodology/)\n- [Author, source and privacy](${origin}/about/)\n- [Machine-readable app facts](${origin}/app.json)\n- [Public source](${config.publicSource})\n\n## Maintainer and related research\nMaintainer: [Mohammad Rezwan Khan](${maintainerUrl}); unified identity: ${maintainerId}.\n\n- [Engineering profile and publications](${maintainerUrl})\n- [Separate MKGrid hybrid-energy research preview](https://mkgrid.co.technology/)\n\n## Dataset\n3,888 retained hourly test observations; nine strategies; one 30 MW synthetic site; 20 July–31 December 2024 UTC; 53 absent hours in that span. The source pipeline excluded negative-price observations. This is not live market data or an unfiltered calendar backtest.\n\n## Boundaries\nBrowser calculations use JavaScript. The optional Python/SciPy cross-check runs locally and is not hosted here. Changing filters does not train new models. Scenarios are stored locally and should be exported for backup.\n\nThis optional text supplements the visible pages; it does not guarantee search rankings or AI citations.\n`);
-/** @type {Record<string,string>} */
-const namedEntities={amp:'&',lt:'<',gt:'>',quot:'"',apos:"'",nbsp:' '};
-/** @param {string} entity @param {string} code */
-function decodeEntity(entity,code){
- if(code[0]==='#')return String.fromCodePoint(code[1]?.toLowerCase()==='x'?parseInt(code.slice(2),16):parseInt(code.slice(1),10));
- return namedEntities[code.toLowerCase()]??entity;
-}
-/** @param {string} text */
-const decodeEntities=text=>text.replace(/&(#x[\da-f]+|#\d+|amp|lt|gt|quot|apos|nbsp);/gi,decodeEntity);
 /** @param {string} file @param {string} source */
-const staticPageText=(file,source)=>{
- const html=fs.readFileSync(path.join(out,file),'utf8');
- const title=decodeEntities(html.match(/<title>([\s\S]*?)<\/title>/i)?.[1]??'');
- const main=html.match(/<main id="main">([\s\S]*?)<\/main>/i)?.[1];
- if(!main||!title)throw Error('Cannot extract published static page text: '+file);
- const visible=decodeEntities(main
-  .replace(/<a\b[^>]*href="([^"]*)"[^>]*>([\s\S]*?)<\/a>/gi,(_,href,label)=>label.replace(/<[^>]+>/g,'')+' ('+href+') ')
-  .replace(/<br\s*\/?\s*>/gi,'\n')
-  .replace(/<\/(?:h[1-6]|p|li|summary|figcaption|div|section|article)>/gi,'\n')
-  .replace(/<[^>]+>/g,' ')
-  .replace(/[ \t\r\f\v]+/g,' ')
-  .replace(/ *\n */g,'\n')
-  .replace(/\n{3,}/g,'\n\n')
-  .trim());
- return `### ${title}\nSource: ${source}\n\n${visible}`;
-};
+const staticPageText=(file,source)=>extractStaticPageText(fs.readFileSync(path.join(out,file),'utf8'),source);
 const fullTextPages=[
  staticPageText('index.html',site.canonical),
  staticPageText('about/index.html',origin+'/about/'),

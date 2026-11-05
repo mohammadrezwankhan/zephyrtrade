@@ -5,6 +5,7 @@ import {fileURLToPath} from 'node:url';
 import {createHash} from 'node:crypto';
 import assert from 'node:assert/strict';
 import {runtimeSecurity, runtimeHeaderBlock} from './runtime-security.mjs';
+import {hasAnchorUnder} from './html-document.mjs';
 /** @param {unknown} value @returns {value is Record<string,unknown>} */
 function isRecord(value){return value!==null&&typeof value==='object'&&!Array.isArray(value);}
 /** @param {unknown} value @param {string} label @returns {Record<string,unknown>} */
@@ -36,7 +37,7 @@ assert.deepEqual(JSON.parse(fs.readFileSync(path.join(outputRoot,'app-security-h
 assert.equal(facts.url,config.canonical);
 assert.equal(new URL(config.canonical).origin,'https://mklab.co.technology');
 assert.ok(html.includes('MKLab Browser Apps'));
-assert.ok(!html.includes('https://khanlab.co.technology/apps/'));
+assert.equal(hasAnchorUnder(html,'https://khanlab.co.technology/apps/',config.canonical),false);
 assert.equal(facts.access,'public; no sign-in');
 assert.equal(facts.runtimeSha256,createHash('sha256').update(runtime).digest('hex'));
 assert.match(html,/<h1>(?:[^<]|<wbr>)+<\/h1>/);assert.match(html,/name="robots" content="index,follow/);
