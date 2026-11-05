@@ -4,7 +4,7 @@ import { RenderPass } from 'three/addons/postprocessing/RenderPass.js';
 import { UnrealBloomPass } from 'three/addons/postprocessing/UnrealBloomPass.js';
 import { OutputPass } from 'three/addons/postprocessing/OutputPass.js';
 import { FILM, CHAPTERS, LAYOUT } from '../config.js';
-import { cameraState, CAMERA_POINTS, TARGET_POINTS, catmullRom, sub, timeline, validTime } from '../kinematics.js';
+import { cameraState, CAMERA_POINTS, TARGET_POINTS, catmullRom, sub, timeline, validTime, at } from '../kinematics.js';
 import { makeCanvas, drawPanel, drawHeader, drawObjectLabel, drawHUD, summarizeSurface, PANEL_SIZE } from '../ui/panels.js';
 import { loadFonts } from '../font-assets.js';
 import { palette, roundedSlabGeometry, box, wire } from './materials.js';
@@ -12,6 +12,7 @@ import { createEnvironment } from './environment.js';
 import { createHeroObject } from './objects.js';
 import { createConduit } from './conduit.js';
 
+/** @param {import('../contracts.js').Surface} surface @param {number} w @param {number} h */
 function surfacePlane(surface,w,h) {
   const texture=new THREE.CanvasTexture(surface.canvas);texture.colorSpace=THREE.SRGBColorSpace;
   texture.generateMipmaps=false;texture.minFilter=THREE.LinearFilter;texture.magFilter=THREE.LinearFilter;
@@ -20,6 +21,7 @@ function surfacePlane(surface,w,h) {
   const mesh=new THREE.Mesh(new THREE.PlaneGeometry(w,h),mat);
   return {surface,texture,mesh};
 }
+/** @param {THREE.Object3D} object @param {THREE.Camera} camera @param {number} width @param {number} height */
 function projectBox(object,camera,width,height) {
   const b=new THREE.Box3().setFromObject(object),pts=[];
   if(b.isEmpty())return null;
@@ -29,6 +31,7 @@ function projectBox(object,camera,width,height) {
   return {x:Math.min(...pts.map(p=>p.x)),y:Math.min(...pts.map(p=>p.y)),right:Math.max(...pts.map(p=>p.x)),
     bottom:Math.max(...pts.map(p=>p.y)),minZ:Math.min(...pts.map(p=>p.z)),maxZ:Math.max(...pts.map(p=>p.z))};
 }
+/** @param {ReturnType<typeof surfacePlane>} item @param {THREE.Camera} camera @param {number} width @param {number} height */
 function projectedSurface(item,camera,width,height) {
   item.mesh.updateWorldMatrix(true,false);
   const attr=item.mesh.geometry.getAttribute('position'),p=new THREE.Vector3(),corners=[];
@@ -37,12 +40,14 @@ function projectedSurface(item,camera,width,height) {
     right:Math.max(...corners.map(p=>p.x)),bottom:Math.max(...corners.map(p=>p.y)),
     minZ:Math.min(...corners.map(p=>p.z)),maxZ:Math.max(...corners.map(p=>p.z)),corners};
 }
+/** @param {import('../contracts.js').Bounds|null} a @param {import('../contracts.js').Bounds|null} b @param {number} [padding] */
 function overlaps(a,b,padding=0){return a&&b&&Math.min(a.right,b.right)-Math.max(a.x,b.x)>padding&&Math.min(a.bottom,b.bottom)-Math.max(a.y,b.y)>padding;}
 
 /**
  * Create one lifecycle-owned scene. The only animation entry point is setTime(t).
  * This module never calls requestAnimationFrame, Date, performance.now, or timers.
  */
+/** @param {{container?:HTMLElement,capture?:boolean,site?:string,width?:number,height?:number,quality?:string}} [options] */
 export async function createHero({ container, capture=false, site='mrkhan', width=1920, height=1080, quality='high' }={}) {
   if(!(container instanceof HTMLElement))throw new TypeError('createHero requires a container element.');
   const fonts=await loadFonts();
@@ -52,8 +57,12 @@ export async function createHero({ container, capture=false, site='mrkhan', widt
   renderer.setClearColor('#060a14',1);
   renderer.transmissionResolutionScale=capture?1:.65;
   container.appendChild(renderer.domElement);
-  const gl=renderer.getContext(),hasHDR=!!gl.getExtension('EXT_color_buffer_float');
-  const sampleOptions=hasHDR ? Array.from(gl.getInternalformatParameter(gl.RENDERBUFFER,gl.RGBA16F,gl.SAMPLES)||[]) : [];
+  const gl=renderer.getContext();
+  if(!(gl instanceof WebGL2RenderingContext)){renderer.dispose();renderer.domElement.remove();throw new Error('The hero scene requires WebGL2.');}
+  const hasHDR=!!gl.getExtension('EXT_color_buffer_float');
+  /** @type {unknown} */
+  const supportedSamples=hasHDR ? gl.getInternalformatParameter(gl.RENDERBUFFER,gl.RGBA16F,gl.SAMPLES) : null;
+  const sampleOptions=supportedSamples instanceof Int32Array ? Array.from(supportedSamples) : [];
   const samples=Math.max(0,...sampleOptions.filter(n=>n<=4));
   if(capture&&(!hasHDR||samples<4)){renderer.dispose();renderer.domElement.remove();throw new Error('Capture requires WebGL2 RGBA16F HDR + 4x MSAA. Use a compatible GPU/driver.');}
   const target=new THREE.WebGLRenderTarget(width,height,{type:hasHDR?THREE.HalfFloatType:THREE.UnsignedByteType,samples:quality==='low'?0:samples,depthBuffer:true,stencilBuffer:false});
@@ -88,8 +97,9 @@ export async function createHero({ container, capture=false, site='mrkhan', widt
   });
   const hud=makeCanvas(FILM.width,FILM.height);hud.canvas.className='khan-hero-hud';container.appendChild(hud.canvas);
   let currentTime=0,disposed=false;
-  const contextLost=e=>{e.preventDefault();container.dispatchEvent(new CustomEvent('hero-context-lost'));};
+  const contextLost=(/** @type {Event} */ e)=>{e.preventDefault();container.dispatchEvent(new CustomEvent('hero-context-lost'));};
   renderer.domElement.addEventListener('webglcontextlost',contextLost);
+  /** @param {unknown} input */
   function setTime(input) {
     if(disposed)throw new Error('The hero scene was disposed.');
     const t=validTime(input),state=cameraState(t);currentTime=t;
@@ -98,7 +108,7 @@ export async function createHero({ container, capture=false, site='mrkhan', widt
     camera.up.set(0,1,0);camera.lookAt(look);camera.rotateZ(state.roll);camera.updateMatrixWorld(true);
     benches.forEach((b,i)=>{
       b.uiRoot.visible=state.transit?(i===state.transition||i===state.transition+1):i===state.stage;
-      drawPanel(b.panel.surface,i,t);drawHeader(b.header.surface,i,t);drawObjectLabel(b.label.surface,i,t);
+      drawPanel(b.panel.surface,i,t);drawHeader(b.header.surface,i);drawObjectLabel(b.label.surface,i);
       b.panel.texture.needsUpdate=true;b.header.texture.needsUpdate=true;b.label.texture.needsUpdate=true;
       b.animate(t);b.prism.rotation.set(t*.10+i,.4+t*.12,.2*Math.sin(t*.22+i));
     });
@@ -111,8 +121,8 @@ export async function createHero({ container, capture=false, site='mrkhan', widt
     return {t,stage:state.stage};
   }
   function diagnostics() {
-    const state=timeline(currentTime),active=benches[state.stage];
-    const projectItem=item=>({bounds:projectedSurface(item,camera,width,height),...summarizeSurface(item.surface)});
+    const state=timeline(currentTime),active=at(benches,state.stage);
+    const projectItem=(/** @type {ReturnType<typeof surfacePlane>} */ item)=>({bounds:projectedSurface(item,camera,width,height),...summarizeSurface(item.surface)});
     const panel=projectItem(active.panel),header=projectItem(active.header),label=projectItem(active.label);
     const objectBounds=projectBox(active.object,camera,width,height);
     const dbg=gl.getExtension('WEBGL_debug_renderer_info');
@@ -126,6 +136,7 @@ export async function createHero({ container, capture=false, site='mrkhan', widt
       // Normalized state, not wall-time metadata: supports exact seek-history comparisons.
       state:{t:currentTime,stage:state.stage,camera:camera.position.toArray(),objects:benches.map(b=>({rotation:b.prism.rotation.toArray().slice(0,3),position:b.object.position.toArray()}))}};
   }
+  /** @param {number} w @param {number} h */
   function resize(w,h) {
     if(capture)throw new Error('Capture dimensions are immutable.');
     if(!Number.isFinite(w)||!Number.isFinite(h)||w<2||h<2)return;
@@ -135,9 +146,14 @@ export async function createHero({ container, capture=false, site='mrkhan', widt
   function dispose() {
     if(disposed)return;disposed=true;
     renderer.domElement.removeEventListener('webglcontextlost',contextLost);
-    const geometries=new Set(),materials=new Set(),textures=new Set();
-    [world,uiScene].forEach(s=>s.traverse(o=>{if(o.geometry)geometries.add(o.geometry);if(o.material)(Array.isArray(o.material)?o.material:[o.material]).forEach(m=>materials.add(m));}));
-    materials.forEach(m=>{Object.values(m).forEach(v=>{if(v?.isTexture)textures.add(v);});m.dispose();});
+    /** @type {Set<THREE.BufferGeometry>} */
+    const geometries=new Set();
+    /** @type {Set<THREE.Material>} */
+    const materials=new Set();
+    /** @type {Set<THREE.Texture>} */
+    const textures=new Set();
+    [world,uiScene].forEach(s=>s.traverse(o=>{if(o instanceof THREE.Mesh||o instanceof THREE.Line||o instanceof THREE.Points){geometries.add(o.geometry);(Array.isArray(o.material)?o.material:[o.material]).forEach(m=>materials.add(m));}}));
+    materials.forEach(m=>{Object.values(m).forEach((/** @type {unknown} */ v)=>{if(v instanceof THREE.Texture)textures.add(v);});m.dispose();});
     textures.forEach(t=>t.dispose());geometries.forEach(g=>g.dispose());environment.dispose();
     for(const pass of composer.passes)pass.dispose?.();composer.dispose();renderer.dispose();renderer.forceContextLoss();
     renderer.domElement.remove();hud.canvas.remove();

@@ -17,7 +17,7 @@ CONFIG = json.loads((ROOT / "traceability.json").read_text(encoding="utf-8"))
 
 
 class ReadmeLinkTests(unittest.TestCase):
-    def test_exact_markdown_and_html_links_are_accepted(self):
+    def test_exact_markdown_and_html_links_are_accepted(self) -> None:
         readme = (
             f"[MKLab portal]({CONFIG['portal_url']})\n"
             f"[Open app]({CONFIG['overview_url']})"
@@ -29,21 +29,21 @@ class ReadmeLinkTests(unittest.TestCase):
         )
         self.assertEqual([], checker.check_readme(html, CONFIG))
 
-    def test_linked_image_is_a_visible_clickable_markdown_link(self):
+    def test_linked_image_is_a_visible_clickable_markdown_link(self) -> None:
         readme = (
             f"[![Portal badge](https://img.example/badge.svg)]"
             f"({CONFIG['portal_url']}) [Open app]({CONFIG['overview_url']})"
         )
         self.assertEqual([], checker.check_readme(readme, CONFIG))
 
-    def test_spoofed_or_extended_urls_are_rejected(self):
+    def test_spoofed_or_extended_urls_are_rejected(self) -> None:
         readme = (
             f"[Portal]({CONFIG['portal_url']}attacker.example) "
             f"[App]({CONFIG['overview_url']}?redirect=attacker.example)"
         )
         self.assertEqual(2, len(checker.check_readme(readme, CONFIG)))
 
-    def test_comments_code_and_hidden_markup_do_not_count(self):
+    def test_comments_code_and_hidden_markup_do_not_count(self) -> None:
         readme = f"""<!-- [portal]({CONFIG["portal_url"]}) -->
 ```md
 [app]({CONFIG["overview_url"]})
@@ -56,7 +56,7 @@ class ReadmeLinkTests(unittest.TestCase):
 <a data-href="{CONFIG["portal_url"]}">not an href</a>"""
         self.assertEqual(2, len(checker.check_readme(readme, CONFIG)))
 
-    def test_html_attributes_and_anchor_text_cannot_smuggle_markdown(self):
+    def test_html_attributes_and_anchor_text_cannot_smuggle_markdown(self) -> None:
         readme = (
             f'<span data-value="[portal]({CONFIG["portal_url"]})">text</span> '
             f'<a href="https://attacker.example">'
@@ -66,7 +66,7 @@ class ReadmeLinkTests(unittest.TestCase):
         )
         self.assertEqual(2, len(checker.check_readme(readme, CONFIG)))
 
-    def test_collapsed_details_content_is_not_a_visible_link(self):
+    def test_collapsed_details_content_is_not_a_visible_link(self) -> None:
         readme = (
             "<details><summary>More</summary>"
             f"[Portal]({CONFIG['portal_url']})</details> "
@@ -76,18 +76,18 @@ class ReadmeLinkTests(unittest.TestCase):
         self.assertEqual(1, len(errors))
         self.assertIn("portal", errors[0])
 
-    def test_empty_visible_link_text_is_rejected(self):
+    def test_empty_visible_link_text_is_rejected(self) -> None:
         readme = f"[]({CONFIG['portal_url']}) [App]({CONFIG['overview_url']})"
         self.assertEqual(1, len(checker.check_readme(readme, CONFIG)))
 
 
 class MappingTests(unittest.TestCase):
-    def test_code_pinned_identity_matches_single_repo_config(self):
+    def test_code_pinned_identity_matches_single_repo_config(self) -> None:
         self.assertEqual([], checker.validate_config(CONFIG))
         self.assertEqual(checker.EXPECTED, CONFIG)
         self.assertEqual(checker.EXPECTED["repository"], CONFIG["repository"])
 
-    def test_repo_and_hostname_changes_are_rejected(self):
+    def test_repo_and_hostname_changes_are_rejected(self) -> None:
         for key, value in (
             ("app_id", "99"),
             ("repository", "mohammadrezwankhan/some-other-repo"),
@@ -100,11 +100,11 @@ class MappingTests(unittest.TestCase):
                 candidate[key] = value
                 self.assertTrue(checker.validate_config(candidate))
 
-    def test_extra_mapping_fields_are_rejected(self):
+    def test_extra_mapping_fields_are_rejected(self) -> None:
         candidate = dict(CONFIG, private_manifest="must-not-be-copied")
         self.assertTrue(checker.validate_config(candidate))
 
-    def test_github_identity_homepage_branch_and_visibility_are_exact(self):
+    def test_github_identity_homepage_branch_and_visibility_are_exact(self) -> None:
         good = {
             "full_name": CONFIG["repository"],
             "default_branch": CONFIG["default_branch"],
@@ -123,7 +123,7 @@ class MappingTests(unittest.TestCase):
                 candidate[key] = value
                 self.assertTrue(checker.validate_github_metadata(candidate, CONFIG))
 
-    def test_live_check_requires_all_pages_and_exact_source_anchor(self):
+    def test_live_check_requires_all_pages_and_exact_source_anchor(self) -> None:
         requested: list[str] = []
         bodies = {
             CONFIG["portal_url"]: "<html>portal</html>",
@@ -141,7 +141,7 @@ class MappingTests(unittest.TestCase):
             checker.REPOSITORY_URL: "<html>GitHub repository</html>",
         }
 
-        def get_url(url: str):
+        def get_url(url: str) -> tuple[int, str]:
             requested.append(url)
             return 200, bodies[url]
 
@@ -155,12 +155,12 @@ class MappingTests(unittest.TestCase):
             CONFIG,
             get_url=get_url,
             get_repo=lambda _repo, _token: metadata,
-            token="test-token",
+            token="test-token",  # noqa: S106 -- dummy token; both transports are injected
         )
         self.assertEqual([], errors)
         self.assertEqual(set(bodies), set(requested))
 
-    def test_live_check_rejects_hidden_anchor_and_app_json_spoof(self):
+    def test_live_check_rejects_hidden_anchor_and_app_json_spoof(self) -> None:
         bodies = {
             CONFIG["portal_url"]: "ok",
             CONFIG["overview_url"]: (
@@ -187,12 +187,14 @@ class MappingTests(unittest.TestCase):
             CONFIG,
             get_url=lambda url: (200, bodies[url]),
             get_repo=lambda _repo, _token: metadata,
-            token="test-token",
+            token="test-token",  # noqa: S106 -- dummy token; both transports are injected
         )
         self.assertTrue(any("source anchor" in error for error in errors))
         self.assertTrue(any("publicSource" in error for error in errors))
 
-    def test_private_mapping_skips_anonymous_repo_and_checks_api_visibility(self):
+    def test_private_mapping_skips_anonymous_repo_and_checks_api_visibility(
+        self,
+    ) -> None:
         private_config = dict(CONFIG, source_visibility="private")
         private_expected = dict(checker.EXPECTED, source_visibility="private")
         self.assertEqual(
@@ -218,7 +220,7 @@ class MappingTests(unittest.TestCase):
             "private": True,
         }
 
-        def get_url(url: str):
+        def get_url(url: str) -> tuple[int, str]:
             requested.append(url)
             return 200, bodies[url]
 
@@ -226,7 +228,7 @@ class MappingTests(unittest.TestCase):
             private_config,
             get_url=get_url,
             get_repo=lambda _repo, _token: metadata,
-            token="read-only-test-token",
+            token="read-only-test-token",  # noqa: S106 -- dummy token; both transports are injected
         )
         self.assertEqual([], errors)
         self.assertNotIn(checker.REPOSITORY_URL, requested)
@@ -243,7 +245,7 @@ class MappingTests(unittest.TestCase):
                 private_config,
                 get_url=get_url,
                 get_repo=lambda _repo, _token: metadata,
-                token="test-token",
+                token="test-token",  # noqa: S106 -- dummy token; both transports are injected
             ),
         )
         bodies[private_config["overview_url"]] = "<p>No runtime link</p>"
@@ -254,7 +256,7 @@ class MappingTests(unittest.TestCase):
                     private_config,
                     get_url=get_url,
                     get_repo=lambda _repo, _token: metadata,
-                    token="test-token",
+                    token="test-token",  # noqa: S106 -- dummy token; both transports are injected
                 )
             )
         )
@@ -265,11 +267,11 @@ class MappingTests(unittest.TestCase):
             private_config,
             get_url=get_url,
             get_repo=lambda _repo, _token: metadata,
-            token="read-only-test-token",
+            token="read-only-test-token",  # noqa: S106 -- dummy token; both transports are injected
         )
         self.assertTrue(any("applicationUrl" in error for error in errors))
 
-    def test_private_mapping_rejects_url_leaks_in_public_pages(self):
+    def test_private_mapping_rejects_url_leaks_in_public_pages(self) -> None:
         private_config = dict(CONFIG, source_visibility="private")
         bodies = {
             private_config["portal_url"]: "ok",
@@ -294,13 +296,13 @@ class MappingTests(unittest.TestCase):
             private_config,
             get_url=lambda url: (200, bodies[url]),
             get_repo=lambda _repo, _token: metadata,
-            token="read-only-test-token",
+            token="read-only-test-token",  # noqa: S106 -- dummy token; both transports are injected
         )
         self.assertTrue(
             any("private repository URL is leaked" in error for error in errors)
         )
 
-    def test_live_check_fails_closed_without_gh_token(self):
+    def test_live_check_fails_closed_without_gh_token(self) -> None:
         errors = checker.check_live(
             CONFIG,
             get_url=lambda _url: (200, ""),

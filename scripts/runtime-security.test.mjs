@@ -10,6 +10,7 @@ test('runtime CSP follows actual inline script bytes and normalizes HTML newline
   const hash = "'sha256-" + createHash('sha256').update('first\nline').digest('base64') + "'";
   for (const directive of ['script-src', 'script-src-elem']) {
     const policy = result.headers['Content-Security-Policy'].split('; ').find(s => s.startsWith(directive+' '));
+    assert.ok(policy, `Missing ${directive} policy`);
     assert.ok(policy.includes(hash));
     assert.ok(!policy.includes('unsafe-inline'));
   }

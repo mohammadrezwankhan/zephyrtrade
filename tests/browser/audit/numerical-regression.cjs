@@ -18,7 +18,7 @@ function check(name, ok, details = {}) { checks.push({ name, status: ok ? 'pass'
 const badLists = [',2,5', '2,5,', ';2;5', '2;5;', '2,,5', '2;;5', '2, ;5', ',0.2,0.8'];
 for (const text of badLists) {
   let rejected = false, parsed;
-  try { parsed = [...E.parseNumbers(text)]; } catch (_) { rejected = true; }
+  try { parsed = [...E.parseNumbers(text)]; } catch { rejected = true; }
   check('reject_empty_field:' + JSON.stringify(text), rejected, { issue: 'ISS-001', parsed });
 }
 for (const [text, expected] of [['', []], [' \n\t', []], ['2, 5; 9\n13', [2,5,9,13]], [' 2 5\t9 ', [2,5,9]], ['0.2,0.8', [0.2,0.8]]]) {

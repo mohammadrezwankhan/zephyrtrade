@@ -1,6 +1,39 @@
 import { test as base, expect, type Page, type Locator, type TestInfo } from 'playwright/test';
 import { createHash } from 'node:crypto';
 
+declare global {
+  interface Window {
+    __auditUnhandledRejection: (detail: string) => Promise<void>;
+  }
+}
+
+function required<T>(value: T | null | undefined, label: string): T {
+  if (value === null || value === undefined) throw new Error(`Missing ${label}`);
+  return value;
+}
+
+function record(value: unknown, label: string): Record<string, unknown> {
+  if (value === null || typeof value !== 'object' || Array.isArray(value))
+    throw new Error(`${label} must be a JSON object`);
+  return value as Record<string, unknown>;
+}
+
+function jsonRecord(text: string): Record<string, unknown> {
+  const value: unknown = JSON.parse(text);
+  return record(value, 'Downloaded document');
+}
+
+function finiteNumber(value: unknown, label: string): number {
+  if (typeof value !== 'number' || !Number.isFinite(value))
+    throw new Error(`${label} must be a finite number`);
+  return value;
+}
+
+function stringValue(value: unknown, label: string): string {
+  if (typeof value !== 'string') throw new Error(`${label} must be a string`);
+  return value;
+}
+
 /**
  * Release verification, authored against proposed/run.html on 2026-10-20.
  * Browser E2E was NOT run during authorship. --list validates discovery/transpilation only.
@@ -58,18 +91,18 @@ const test = base.extend<{ audit: AuditLog }>({
     context.on('requestfailed', request => record('requestfailed',
       `${request.method()} ${request.url()} ${request.failure()?.errorText || 'unknown failure'}`));
     context.on('response', response => {
-      if (response.status() >= 400) record('HTTP >= 400', `${response.status()} ${response.url()}`);
+      if (response.status() >= 400) record('HTTP >= 400', `${String(response.status())} ${response.url()}`);
     });
     // The Node-side binding retains failures across reloads and route changes.
     await context.exposeBinding('__auditUnhandledRejection', (_source, detail: string) =>
       record('unhandledrejection', detail));
     await context.addInitScript(() => {
       window.addEventListener('unhandledrejection', event => {
-        const reason = event.reason;
+        const reason: unknown = event.reason;
         let detail: string;
         try { detail = reason instanceof Error ? (reason.stack || reason.message) : String(reason); }
         catch { detail = 'Unserializable rejection reason'; }
-        void (window as any).__auditUnhandledRejection(detail);
+        void window.__auditUnhandledRejection(detail);
       });
     });
     await use(log);
@@ -88,12 +121,12 @@ function address(route: string): string {
 }
 
 async function open(page: Page, route: Route) {
-  const response = await page.goto(address(route), { waitUntil: 'load' });
+  const response = required(await page.goto(address(route), { waitUntil: 'load' }), 'document response');
   expect(response, 'A document response is required').not.toBeNull();
-  expect(response!.status(), 'Main document must return 200').toBe(200);
+  expect(response.status(), 'Main document must return 200').toBe(200);
   await expect(page.locator('#page-title')).toHaveText(ROUTES[route]);
   await expect(page.locator('#fatal-error')).toBeHidden();
-  return response!;
+  return response;
 }
 
 async function navigate(page: Page, route: Route) {
@@ -113,7 +146,7 @@ function numeric(text: string): number {
 
 async function result(page: Page, offer: number, revenue?: number) {
   await expect.poll(async () => numeric(await page.locator('#optimal-offer').innerText()),
-    { message: `Wait for the calculated ${offer} MW result` }).toBeCloseTo(offer, 2);
+    { message: `Wait for the calculated ${String(offer)} MW result` }).toBeCloseTo(offer, 2);
   await expect(page.locator('#lab-stale')).toBeHidden();
   await expect(page.locator('#lab-error')).toBeHidden();
   if (revenue !== undefined) {
@@ -157,23 +190,27 @@ async function noRootOverflow(page: Page) {
 }
 
 async function fitsViewport(locator: Locator, page: Page) {
-  const box = await locator.boundingBox();
+  const box = required(await locator.boundingBox(), 'element bounding box');
   expect(box).not.toBeNull();
-  const size = page.viewportSize()!;
-  expect(box!.x).toBeGreaterThanOrEqual(-1);
-  expect(box!.y).toBeGreaterThanOrEqual(-1);
-  expect(box!.x + box!.width).toBeLessThanOrEqual(size.width + 1);
-  expect(box!.y + box!.height).toBeLessThanOrEqual(size.height + 1);
+  const size = required(page.viewportSize(), 'viewport size');
+  expect(box.x).toBeGreaterThanOrEqual(-1);
+  expect(box.y).toBeGreaterThanOrEqual(-1);
+  expect(box.x + box.width).toBeLessThanOrEqual(size.width + 1);
+  expect(box.y + box.height).toBeLessThanOrEqual(size.height + 1);
 }
 
 async function download(page: Page, selector: string, info: TestInfo) {
   const pending = page.waitForEvent('download'); // Arm before the click.
   await page.locator(selector).click();
   const item = await pending;
-  const stream = await item.createReadStream();
+  const stream = required(await item.createReadStream(), 'download byte stream');
   expect(stream, 'A real readable download is required').not.toBeNull();
   const chunks: Buffer[] = [];
-  for await (const chunk of stream!) chunks.push(Buffer.from(chunk));
+  for await (const raw of stream) {
+    const chunk: unknown = raw;
+    if (typeof chunk === 'string' || chunk instanceof Uint8Array) chunks.push(Buffer.from(chunk));
+    else throw new Error('Unexpected download stream chunk');
+  }
   const bytes = Buffer.concat(chunks);
   expect(await item.failure()).toBeNull();
   expect(bytes.length).toBeGreaterThan(0);
@@ -188,7 +225,7 @@ function csv(text: string): Record<string, string>[] {
   const rows: string[][] = [];
   let row: string[] = [], cell = '', quoted = false;
   for (let i = 0; i < text.length; i++) {
-    const c = text[i];
+    const c = required(text[i], 'CSV character');
     if (c === '"') {
       if (quoted && text[i + 1] === '"') { cell += '"'; i++; } else quoted = !quoted;
     } else if (c === ',' && !quoted) { row.push(cell); cell = ''; }
@@ -199,20 +236,21 @@ function csv(text: string): Record<string, string>[] {
   }
   expect(quoted, 'CSV must not contain an unterminated quote').toBe(false);
   if (cell || row.length) { row.push(cell); rows.push(row); }
-  const header = rows.shift();
+  const header = required(rows.shift(), 'CSV header');
   expect(header).toBeDefined();
-  expect(new Set(header!).size).toBe(header!.length);
+  expect(new Set(header).size).toBe(header.length);
   return rows.map(values => {
-    expect(values.length, `CSV row width: ${values}`).toBe(header!.length);
-    return Object.fromEntries(header!.map((key, i) => [key, values[i]]));
+    expect(values.length, `CSV row width: ${values.join(',')}`).toBe(header.length);
+    return Object.fromEntries(header.map((key, i) => [key, required(values[i], `CSV cell ${key}`)]));
   });
 }
 
 function value(row: Record<string, string>, key: string): number {
   expect(row, `CSV field ${key}`).toHaveProperty(key);
-  expect(row[key].trim()).not.toBe('');
-  const result = Number(row[key]);
-  expect(Number.isFinite(result), `${key}=${row[key]}`).toBe(true);
+  const field = required(row[key], `CSV field ${key}`);
+  expect(field.trim()).not.toBe('');
+  const result = Number(field);
+  expect(Number.isFinite(result), `${key}=${field}`).toBe(true);
   return result;
 }
 
@@ -241,7 +279,7 @@ function validateDataRows(rows: Record<string, string>[], model: string, count =
 
 function expectedRevenue(input: LabInput, offer: number): number {
   const weights = input.probabilities.length ? input.probabilities : input.scenarios.map(() => 1 / input.scenarios.length);
-  return input.scenarios.reduce((sum, output, index) => sum + weights[index] * input.hours *
+  return input.scenarios.reduce((sum, output, index) => sum + required(weights[index], 'scenario weight') * input.hours *
     (input.da * offer + input.down * Math.max(output - offer, 0) - input.up * Math.max(offer - output, 0)), 0);
 }
 
@@ -249,27 +287,32 @@ async function colourContrast(page: Page, selector: string, border = false) {
   return page.locator(selector).evaluateAll((elements, isBorder) => {
     type RGBA = [number, number, number, number];
     const canvas = document.createElement('canvas'); canvas.width = canvas.height = 1;
-    const ctx = canvas.getContext('2d', { willReadFrequently: true })!;
+    const ctx = canvas.getContext('2d', { willReadFrequently: true });
+    if (ctx === null) throw new Error('Canvas 2D context is required for colour sampling');
+    const channel = (value: number | undefined): number => {
+      if (value === undefined) throw new Error('RGBA channel is missing');
+      return value;
+    };
     const resolve = (colour: string): RGBA => {
       ctx.clearRect(0, 0, 1, 1); ctx.fillStyle = colour; ctx.fillRect(0, 0, 1, 1);
       const p = ctx.getImageData(0, 0, 1, 1).data;
-      return [p[0], p[1], p[2], p[3] / 255];
+      return [channel(p[0]), channel(p[1]), channel(p[2]), channel(p[3]) / 255];
     };
     const over = (top: RGBA, bottom: RGBA): RGBA => {
       const a = top[3] + bottom[3] * (1 - top[3]);
-      return [0, 1, 2].map(i => a ? (top[i] * top[3] + bottom[i] * bottom[3] * (1 - top[3])) / a : 0)
+      return ([0, 1, 2] as const).map(i => a ? (top[i] * top[3] + bottom[i] * bottom[3] * (1 - top[3])) / a : 0)
         .concat(a) as RGBA;
     };
     const chain = (el: Element) => { const list = []; for (let n: Element | null = el; n; n = n.parentElement) list.unshift(n); return list; };
-    const background = (el: Element) => chain(el).reduce((base, node) =>
-      over(resolve(getComputedStyle(node).backgroundColor), base), [255, 255, 255, 1] as RGBA);
+    const background = (el: Element) => chain(el).reduce<RGBA>((base, node) =>
+      over(resolve(getComputedStyle(node).backgroundColor), base), [255, 255, 255, 1]);
     const luminance = (rgba: RGBA) => rgba.slice(0, 3).map(x => x / 255)
       .map(x => x <= 0.04045 ? x / 12.92 : ((x + 0.055) / 1.055) ** 2.4)
-      .reduce((sum, x, i) => sum + x * [0.2126, 0.7152, 0.0722][i], 0);
+      .reduce((sum, x, i) => sum + x * channel([0.2126, 0.7152, 0.0722][i]), 0);
     return elements.map(el => {
       const css = getComputedStyle(el), panel = el.closest('.panel');
       if (isBorder && !panel) throw new Error('Border comparison requires a panel');
-      const backdrop = background(isBorder ? panel! : el);
+      const backdrop = background(isBorder && panel ? panel : el);
       const ink = resolve(isBorder ? css.borderTopColor : css.color);
       ink[3] *= Number(css.opacity);
       const painted = over(ink, backdrop), a = luminance(painted), b = luminance(backdrop);
@@ -285,7 +328,9 @@ async function inspectChart(page: Page, selector: string, compact: boolean) {
   await expect(chart).toBeVisible();
   if (compact) await expect(chart).toHaveClass(/chart-compact/);
   const checks = await chart.evaluate((el: SVGSVGElement) => {
-    const panel = el.closest('.panel')!.getBoundingClientRect();
+    const panelElement = el.closest('.panel');
+    if (!panelElement) throw new Error('Chart is missing its containing panel');
+    const panel = panelElement.getBoundingClientRect();
     const geometry = [...el.querySelectorAll('*')].flatMap(node =>
       [...node.attributes].filter(a => ['d', 'points', 'x', 'y', 'x1', 'x2', 'y1', 'y2', 'cx', 'cy', 'r'].includes(a.name))
         .map(a => `${a.name}=${a.value}`));
@@ -309,7 +354,7 @@ async function inspectChart(page: Page, selector: string, compact: boolean) {
   expect(checks.geometry.length).toBeGreaterThan(0);
   for (const geometry of checks.geometry) {
     expect(geometry).not.toMatch(/NaN|Infinity|undefined/);
-    for (const token of geometry.split('=')[1].match(/[-+]?(?:\d*\.)?\d+(?:e[-+]?\d+)?/gi) || [])
+    for (const token of required(geometry.split('=')[1], 'SVG geometry value').match(/[-+]?(?:\d*\.)?\d+(?:e[-+]?\d+)?/gi) || [])
       expect(Number.isFinite(Number(token))).toBe(true);
   }
   expect(checks.labels.length).toBeGreaterThan(0);
@@ -330,6 +375,7 @@ async function inspectChart(page: Page, selector: string, compact: boolean) {
 
 test('Release gate: exact document, HTTPS security headers and both CSP script directives', async ({ page }, info) => {
   const response = await open(page, 'overview');
+  expect(await page.evaluate(() => matchMedia('(prefers-reduced-motion: reduce)').matches)).toBe(true);
   const endpoint = new URL(response.url());
   const loopback = ['localhost', '127.0.0.1', '[::1]'].includes(endpoint.hostname);
   expect(endpoint.protocol === 'https:' || (loopback && endpoint.protocol === 'http:')).toBe(true);
@@ -346,28 +392,29 @@ test('Release gate: exact document, HTTPS security headers and both CSP script d
   expect(headers['referrer-policy']).toBe('strict-origin-when-cross-origin');
   for (const feature of ['camera', 'microphone', 'geolocation'])
     expect(headers['permissions-policy']).toMatch(new RegExp(`${feature}=\\(\\)`));
-  const hsts = headers['strict-transport-security'];
+  const hsts = required(headers['strict-transport-security'], 'HSTS header');
   expect(hsts).toBeTruthy();
   expect(Number(hsts.match(/max-age=(\d+)/i)?.[1])).toBeGreaterThanOrEqual(31_536_000);
   expect(hsts).toMatch(/includeSubDomains/i);
-  const csp = headers['content-security-policy']; expect(csp).toBeTruthy();
+  const csp = required(headers['content-security-policy'], 'CSP header'); expect(csp).toBeTruthy();
   const directives = new Map<string, string[]>();
   for (const section of csp.split(';').map(x => x.trim()).filter(Boolean)) {
-    const [name, ...tokens] = section.split(/\s+/);
+    const [rawName, ...tokens] = section.split(/\s+/);
+    const name = required(rawName, 'CSP directive name');
     expect(directives.has(name), `Duplicate CSP directive ${name}`).toBe(false);
     directives.set(name, tokens);
   }
   const scripts = [...body.toString('utf8').matchAll(/<script(?=[\t\n\f\r />])([^>]*)>([\s\S]*?)<\/script(?=[\t\n\f\r />])[^>]*>/gi)];
   expect(scripts).toHaveLength(3);
-  expect(scripts.every(match => !/\bsrc\s*=/i.test(match[1]))).toBe(true);
+  expect(scripts.every(match => !/\bsrc\s*=/i.test(required(match[1], 'script attributes')))).toBe(true);
   for (const name of ['script-src', 'script-src-elem']) {
-    const tokens = directives.get(name); expect(tokens, `Missing ${name}`).toBeDefined();
+    const tokens = required(directives.get(name), `CSP directive ${name}`); expect(tokens, `Missing ${name}`).toBeDefined();
     expect(tokens).not.toContain("'unsafe-inline'"); expect(tokens).not.toContain("'unsafe-eval'");
     for (const script of scripts) {
-      const hash = createHash('sha256').update(script[2].replace(/\r\n?/g, '\n')).digest('base64');
+      const hash = createHash('sha256').update(required(script[2], 'script content').replace(/\r\n?/g, '\n')).digest('base64');
       expect(tokens, `${name} must authorize the exact delivered script`).toContain(`'sha256-${hash}'`);
     }
-    expect(tokens!.some(token => /cloudflareinsights|\*/i.test(token))).toBe(false);
+    expect(tokens.some(token => /cloudflareinsights|\*/i.test(token))).toBe(false);
   }
   for (const [directive, required] of Object.entries({
     'default-src': "'self'", 'object-src': "'none'", 'base-uri': "'self'",
@@ -386,7 +433,7 @@ for (const [route, heading] of Object.entries(ROUTES)) {
 }
 
 for (const viewport of VIEWPORTS) {
-  test(`Responsive routes and dialogs fit ${viewport.width}×${viewport.height}`, async ({ page }, info) => {
+  test(`Responsive routes and dialogs fit ${String(viewport.width)}×${String(viewport.height)}`, async ({ page }, info) => {
     test.setTimeout(90_000);
     await page.setViewportSize(viewport);
     await open(page, 'overview');
@@ -407,7 +454,7 @@ for (const viewport of VIEWPORTS) {
     await fitsViewport(page.locator('#save-dialog'), page);
     await page.locator('#save-dialog').getByRole('button', { name: 'Cancel', exact: true }).click();
     await expect(page.locator('#save-dialog')).toBeHidden();
-    await info.attach(`lab-${viewport.width}`, { body: await page.screenshot({ fullPage: true }), contentType: 'image/png' });
+    await info.attach(`lab-${String(viewport.width)}`, { body: await page.screenshot({ fullPage: true }), contentType: 'image/png' });
   });
 }
 
@@ -415,7 +462,7 @@ test('ISS-001: default calculation retains 9 MW and DKK 4,902.86', async ({ page
   await open(page, 'lab'); await calculate(page); await result(page, 9, 4902.857142857143);
 });
 
-const malformed = [
+const malformed: [string, string, string][] = [
   ['leading comma', ',0,30', ',0.2,0.8'], ['trailing comma', '0,30,', '0.2,0.8,'],
   ['repeated comma', '0,,30', '0.2,,0.8'], ['leading semicolon', ';0;30', ';0.2;0.8'],
   ['trailing semicolon', '0;30;', '0.2;0.8;'], ['repeated semicolon', '0;;30', '0.2;;0.8'],
@@ -472,7 +519,7 @@ test('Lab rejects bounded numeric violations, bad price ordering and invalid dis
 });
 
 for (const [preset, offer] of [['balanced', 13], ['shortfall', 5], ['surplus', 24]] as const) {
-  test(`Lab preset ${preset} calculates ${offer} MW`, async ({ page }) => {
+  test(`Lab preset ${preset} calculates ${String(offer)} MW`, async ({ page }) => {
     await open(page, 'lab'); await page.locator(`[data-preset="${preset}"]`).click();
     await result(page, offer); await expect(page.locator('#save-scenario')).toBeEnabled();
   });
@@ -519,7 +566,7 @@ test('Import button accepts valid JSON and rejects malformed, unsupported and ov
     ['malformed.json', '{broken', 'Import failed:'],
     ['schema.json', JSON.stringify({ schema_version: 2, input }), 'Unsupported scenario schema'],
     ['oversized.json', ' '.repeat(32769), 'smaller than 32 KB'],
-  ]) {
+  ] as const) {
     await page.locator('#scenario-file').setInputFiles({ name, mimeType: 'application/json', buffer: Buffer.from(content) });
     await expect(page.locator('#toast')).toContainText(message);
     await result(page, 30, 8940);
@@ -532,10 +579,12 @@ test('ISS-005: extreme in-bounds CDF case selects the true 10,000 MW maximum', a
     scenarios: [0, 10000], probabilities: [0.5, 0.5] };
   await fillLab(page, { ...input, scenarios: '0,10000', probabilities: '0.5,0.5' });
   await calculate(page); await result(page, 10000, expectedRevenue(input, 10000));
-  const json = JSON.parse((await download(page, '#export-scenario', info)).text);
-  expect(json.calculated.offer_mw).toBe(10000);
-  expect(Math.abs(json.calculated.expected_revenue_dkk - expectedRevenue(input, 10000))).toBeLessThan(1e-5);
-  expect(json.calculated.expected_revenue_dkk).toBeGreaterThan(expectedRevenue(input, 0));
+  const json = jsonRecord((await download(page, '#export-scenario', info)).text);
+  const calculated = record(json.calculated, 'Calculated scenario');
+  const revenue = finiteNumber(calculated.expected_revenue_dkk, 'Expected scenario revenue');
+  expect(calculated.offer_mw).toBe(10000);
+  expect(Math.abs(revenue - expectedRevenue(input, 10000))).toBeLessThan(1e-5);
+  expect(revenue).toBeGreaterThan(expectedRevenue(input, 0));
 });
 
 test('Date controls select 168, 714, 3,888 and 24 retained hours; invalid ranges retain prior data', async ({ page }) => {
@@ -546,7 +595,7 @@ test('Date controls select 168, 714, 3,888 and 24 retained hours; invalid ranges
     expect(numeric(await intervals.innerText())).toBe(hours);
   }
   await customDate(page); expect(numeric(await intervals.innerText())).toBe(24);
-  for (const [from, to] of [['2024-12-16', '2024-12-15'], ['2024-07-19', '2024-12-15'], ['', '2024-12-15']]) {
+  for (const [from, to] of [['2024-12-16', '2024-12-15'], ['2024-07-19', '2024-12-15'], ['', '2024-12-15']] as const) {
     await page.locator('#from-date').fill(from); await page.locator('#to-date').fill(to);
     await page.locator('#apply-dates').click();
     await expect(page.locator('#filter-error')).toContainText('Choose valid dates');
@@ -574,17 +623,21 @@ test('ISS-002: case-insensitive search exports the identical 24 timestamps and n
   const file = await download(page, '#export-filtered', info);
   expect(file.name).toMatch(/\.csv$/);
   const rows = csv(file.text); validateDataRows(rows, 'direct_regression');
-  expect(rows.map(row => row.timestamp_utc.slice(0, 16).replace('T', ' '))).toEqual(shown);
+  expect(rows.map(row => required(row.timestamp_utc, 'UTC timestamp').slice(0, 16).replace('T', ' '))).toEqual(shown);
   const cells = await page.locator('#page-content tbody tr').evaluateAll(nodes =>
     nodes.map(row => [...row.querySelectorAll('td')].map(cell => cell.textContent || '')));
   const fields = ['actual_mw', 'offer_mw', 'day_ahead_dkk_mwh', 'up_dkk_mwh', 'down_dkk_mwh', 'revenue_dkk'];
-  rows.forEach((row, i) => fields.forEach((field, j) =>
-    expect(Math.abs(value(row, field) - numeric(cells[i][j + 1]))).toBeLessThanOrEqual(j < 2 ? 0.00051 : 0.0051)));
+  rows.forEach((row, i) => {
+    fields.forEach((field, j) => {
+      expect(Math.abs(value(row, field) - numeric(required(required(cells[i], 'display row')[j + 1], 'display cell'))))
+        .toBeLessThanOrEqual(j < 2 ? 0.00051 : 0.0051);
+    });
+  });
 });
 
 test('ISS-010: persistent polite search status announces counts and no matches while focus stays in search', async ({ page }) => {
   await open(page, 'data');
-  const status = page.locator('#data-search-status'), handle = await status.elementHandle();
+  const status = page.locator('#data-search-status'), handle = required(await status.elementHandle(), 'search status element');
   expect(handle).not.toBeNull();
   await expect(status).toHaveAttribute('role', 'status');
   await expect(status).toHaveAttribute('aria-live', 'polite');
@@ -597,7 +650,7 @@ test('ISS-010: persistent polite search status announces counts and no matches w
   await expect(status).toHaveText('No matching records.');
   await expect(page.locator('#page-content tbody')).toContainText('No matching records.');
   await expect(page.locator('#data-search')).toBeFocused();
-  expect(await handle!.evaluate(el => el.isConnected && el === document.getElementById('data-search-status'))).toBe(true);
+  expect(await handle.evaluate(el => el.isConnected && el === document.getElementById('data-search-status'))).toBe(true);
   await page.locator('#export-filtered').click();
   await expect(page.locator('#toast')).toHaveText('No rows match this selection.');
 });
@@ -609,7 +662,7 @@ test('Ledger traverses all 156 pages with 3,888 unique ordered timestamps and bo
   const timestamps: string[] = []; let pages = 0, completed = false;
   while (pages < 200) {
     pages++;
-    await expect(page.locator('.pagination')).toContainText(`Page ${pages} / 156`);
+    await expect(page.locator('.pagination')).toContainText(`Page ${String(pages)} / 156`);
     const current = await page.locator('#page-content tbody tr td:first-child').allTextContents();
     expect(current).toHaveLength(pages < 156 ? 25 : 13);
     for (const stamp of current) expect(stamp).toMatch(/^2024-\d{2}-\d{2} \d{2}:00$/);
@@ -623,7 +676,7 @@ test('Ledger traverses all 156 pages with 3,888 unique ordered timestamps and bo
   expect(new Set(timestamps).size).toBe(3888); expect(timestamps).toEqual([...timestamps].sort());
   expect(timestamps[0]).toBe('2024-07-20 18:00'); expect(timestamps.at(-1)).toBe('2024-12-31 22:00');
   const millis = timestamps.map(t => Date.parse(t.replace(' ', 'T') + ':00Z'));
-  const absent = millis.slice(1).reduce((sum, t, i) => sum + (t - millis[i]) / 3_600_000 - 1, 0);
+  const absent = millis.slice(1).reduce((sum, t, i) => sum + (t - required(millis[i], 'preceding timestamp')) / 3_600_000 - 1, 0);
   expect(absent).toBe(53);
   await expect(page.locator('[data-paginate="1"]')).toBeDisabled();
   await page.locator('[data-paginate="-1"]').click();
@@ -658,7 +711,7 @@ test('All nine strategies select and Inspect correctly; comparison CSV reconcile
   expect(rows.map(r => r.strategy).sort()).toEqual([...MODELS].sort());
   let prior = Infinity;
   for (const row of rows) {
-    const expected = totals.get(row.strategy)!;
+    const expected = required(totals.get(required(row.strategy, 'strategy identifier')), 'strategy totals');
     expect(row.data_kind).toBe('synthetic_research'); expect(value(row, 'hours')).toBe(24);
     expect(row.start_utc).toBe('2024-12-15T00:00:00Z'); expect(row.end_utc).toBe('2024-12-15T23:00:00Z');
     expect(value(row, 'revenue_dkk')).toBeLessThanOrEqual(prior); prior = value(row, 'revenue_dkk');
@@ -675,7 +728,7 @@ test('All three chart measures render the correct accessible chart and finite ou
     ['power', 'Actual synthetic wind output and selected strategy offer'],
     ['revenue', 'Cumulative synthetic revenue, selected offer and perfect-foresight benchmark'],
     ['prices', 'Synthetic day-ahead and balancing settlement prices'],
-  ]) {
+  ] as const) {
     await page.locator(`[data-chart="${mode}"]`).click();
     await expect(page.locator(`[data-chart="${mode}"]`)).toHaveAttribute('aria-pressed', 'true');
     await expect(page.locator('#overview-plot svg')).toHaveAttribute('aria-label', title);
@@ -743,14 +796,15 @@ for (const theme of ['dark', 'light']) {
     await page.locator('#scenarios').fill(''); await page.locator('#probabilities').focus();
     await expect(page.locator('#scenarios')).not.toBeFocused();
     const measurements = await colourContrast(page, '#scenarios', true); expect(measurements).toHaveLength(1);
-    expect(measurements[0].ancestorOpacities.every(x => x === 1)).toBe(true);
-    expect(measurements[0].contrast).toBeGreaterThanOrEqual(3);
+    const measurement = required(measurements[0], 'textarea contrast measurement');
+    expect(measurement.ancestorOpacities.every(x => x === 1)).toBe(true);
+    expect(measurement.contrast).toBeGreaterThanOrEqual(3);
     await info.attach(`textarea-${theme}-contrast`, { body: Buffer.from(JSON.stringify(measurements)), contentType: 'application/json' });
   });
 }
 
 for (const viewport of VIEWPORTS.filter(v => v.width <= 768)) {
-  test(`ISS-011: compact chart text is at least 11 CSS px with finite unclipped geometry at ${viewport.width}`, async ({ page }) => {
+  test(`ISS-011: compact chart text is at least 11 CSS px with finite unclipped geometry at ${String(viewport.width)}`, async ({ page }) => {
     await page.setViewportSize(viewport); await open(page, 'overview');
     for (const mode of ['power', 'revenue', 'prices']) {
       await page.locator(`[data-chart="${mode}"]`).click();
@@ -761,7 +815,7 @@ for (const viewport of VIEWPORTS.filter(v => v.width <= 768)) {
 }
 
 test('ISS-011: wide desktop chart parameters remain 800×238 and 720×210', async ({ page }) => {
-  await page.setViewportSize(VIEWPORTS[0]); await open(page, 'overview');
+  await page.setViewportSize(required(VIEWPORTS[0], 'desktop viewport')); await open(page, 'overview');
   expect(await page.locator('#overview-plot').evaluate(el => el.clientWidth)).toBeGreaterThanOrEqual(600);
   await expect(page.locator('#overview-plot svg')).toHaveAttribute('viewBox', '0 0 800 238');
   await expect(page.locator('#overview-plot .grid-line').first()).toHaveAttribute('x1', '50');
@@ -779,7 +833,10 @@ test('Repeated Custom selection validates edited dates before committing state',
   await page.locator('#to-date').fill('2024-12-15');
   await page.locator('[data-period="custom"]').click();
   await expect(page.locator('#filter-error')).toBeVisible();
-  expect(await page.evaluate(() => (window as any).ZephyrApp.getVisibleMetrics().rows)).toBe(24);
+  expect(await page.evaluate(() => {
+    if (!window.ZephyrApp) throw new Error('Application diagnostic contract is missing');
+    return window.ZephyrApp.getVisibleMetrics().rows;
+  })).toBe(24);
 });
 
 test('Deleting the last saved scenario restores focus to Save scenario', async ({ page }) => {
@@ -822,7 +879,10 @@ test('Saved scenario lifecycle is isolated, persists, loads with focus, and hand
     await clicked;
     await expect(page.locator('#saved-list .saved-item')).toHaveCount(accept ? 0 : 1);
   }
-  expect(await page.evaluate(() => JSON.parse(localStorage.getItem('zephyr-scenarios-v1') || 'null'))).toEqual([]);
+  expect(await page.evaluate(() => {
+    const stored: unknown = JSON.parse(localStorage.getItem('zephyr-scenarios-v1') || 'null');
+    return stored;
+  })).toEqual([]);
 });
 
 test('Guide closes via Escape, Close guide and Open the workspace; Escape restores opener focus', async ({ page }) => {
@@ -852,12 +912,14 @@ test('Scenario JSON and curve CSV contain complete assumptions and independently
   await open(page, 'lab');
   const scenario = await download(page, '#export-scenario', info);
   expect(scenario.name).toBe('ZephyrTrade-scenario.json');
-  const document = JSON.parse(scenario.text);
+  const document = jsonRecord(scenario.text);
+  const calculated = record(document.calculated, 'Calculated scenario');
+  const expected = finiteNumber(calculated.expected_revenue_dkk, 'Expected scenario revenue');
   expect(document.schema_version).toBe(1); expect(document.application).toBe('ZephyrTrade Champion');
   expect(document.data_kind).toBe('user_assumptions_not_live'); expect(document.input).toEqual(DEFAULT_INPUT);
-  expect(document.calculated.offer_mw).toBe(9);
-  expect(Math.abs(document.calculated.expected_revenue_dkk - expectedRevenue(DEFAULT_INPUT, 9))).toBeLessThan(1e-8);
-  expect(document.calculated.critical_quantile).toBeCloseTo(110 / 300, 12);
+  expect(calculated.offer_mw).toBe(9);
+  expect(Math.abs(expected - expectedRevenue(DEFAULT_INPUT, 9))).toBeLessThan(1e-8);
+  expect(calculated.critical_quantile).toBeCloseTo(110 / 300, 12);
   const curve = await download(page, '#export-curve', info);
   expect(curve.name).toBe('ZephyrTrade-revenue-curve.csv');
   const rows = csv(curve.text), offers = rows.map(row => value(row, 'offer_mw'));
@@ -866,7 +928,7 @@ test('Scenario JSON and curve CSV contain complete assumptions and independently
     expect(row.data_kind).toBe('user_assumptions'); expect(value(row, 'interval_hours')).toBe(1);
     expect(Math.abs(value(row, 'expected_revenue_dkk') - expectedRevenue(DEFAULT_INPUT, value(row, 'offer_mw')))).toBeLessThan(1e-8);
   }
-  expect(Math.max(...rows.map(row => value(row, 'expected_revenue_dkk')))).toBeCloseTo(document.calculated.expected_revenue_dkk, 8);
+  expect(Math.max(...rows.map(row => value(row, 'expected_revenue_dkk')))).toBeCloseTo(expected, 8);
 });
 
 test('ISS-012: privacy disclosure, provenance bytes and served script inventory agree', async ({ page, audit }, info) => {
@@ -880,16 +942,22 @@ test('ISS-012: privacy disclosure, provenance bytes and served script inventory 
   expect(audit.requests.filter(request => /cloudflareinsights|beacon\.min\.js/i.test(request.url))).toEqual([]);
   const exported = await download(page, '#export-provenance', info);
   expect(exported.name).toBe('ZephyrTrade-provenance.json');
-  const document = JSON.parse(exported.text);
+  const document = jsonRecord(exported.text);
+  const quality = record(document.quality, 'Dataset quality');
+  const sources: unknown = document.sources;
+  if (!Array.isArray(sources)) throw new Error('Provenance sources must be an array');
   expect(document.data_kind).toBe('Supplied synthetic research backtest');
-  expect(Number.isFinite(Date.parse(document.source_generated_at))).toBe(true);
-  expect(document.quality.rows).toBe(3888); expect(document.quality.excluded_hours_between_endpoints).toBe(53);
-  expect(document.quality.revenue_values_checked).toBe(34992); expect(document.sources).toHaveLength(2);
-  for (const source of document.sources) {
-    expect(source.path).toMatch(/^artifacts\/phase[23]\/.*\.csv\.gz$/);
-    expect(source.sha256).toMatch(/^[a-f0-9]{64}$/);
-    await expect(page.locator('#page-content')).toContainText(source.path);
-    await expect(page.locator('#page-content')).toContainText(source.sha256);
+  expect(Number.isFinite(Date.parse(stringValue(document.source_generated_at, 'Generation timestamp')))).toBe(true);
+  expect(quality.rows).toBe(3888); expect(quality.excluded_hours_between_endpoints).toBe(53);
+  expect(quality.revenue_values_checked).toBe(34992); expect(sources).toHaveLength(2);
+  for (const item of sources) {
+    const source = record(item, 'Provenance source');
+    const path = stringValue(source.path, 'Source path');
+    const digest = stringValue(source.sha256, 'Source digest');
+    expect(path).toMatch(/^artifacts\/phase[23]\/.*\.csv\.gz$/);
+    expect(digest).toMatch(/^[a-f0-9]{64}$/);
+    await expect(page.locator('#page-content')).toContainText(path);
+    await expect(page.locator('#page-content')).toContainText(digest);
   }
 });
 

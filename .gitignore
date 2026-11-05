@@ -60,3 +60,12 @@ __pycache__/
 /.cloudflare/
 tests/browser/audit/test-results/
 tests/browser/audit/playwright-report/
+
+# Development tools and generated verification output
+.mypy_cache/
+hardening-artifacts/
+.security-tools/
+
+/test-results/
+
+/playwright-report/

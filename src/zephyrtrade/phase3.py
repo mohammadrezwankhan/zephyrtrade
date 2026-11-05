@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import sys
 from dataclasses import asdict, dataclass
 from pathlib import Path
 from typing import Any
@@ -11,6 +12,7 @@ from typing import Any
 import matplotlib
 import numpy as np
 import pandas as pd
+from numpy.typing import NDArray
 from sklearn.ensemble import (
     HistGradientBoostingClassifier,
     HistGradientBoostingRegressor,
@@ -36,7 +38,7 @@ from zephyrtrade.phase2 import load_phase2_data
 from zephyrtrade.preprocessing import FEATURE_COLUMNS, PRICE_COLUMNS, TARGET_COLUMN
 
 matplotlib.use("Agg")
-from matplotlib import pyplot as plt  # noqa: E402
+from matplotlib import pyplot as plt
 
 STRATEGY_LABELS = {
     "perfect_foresight": "Perfect foresight",
@@ -66,7 +68,7 @@ class Phase3Config:
     random_state: int = 42
 
 
-def _market_vectors(frame: pd.DataFrame) -> dict[str, np.ndarray]:
+def _market_vectors(frame: pd.DataFrame) -> dict[str, NDArray[np.float64]]:
     """Extract aligned target, price, and capacity vectors from a split."""
     return {
         "actual": frame[TARGET_COLUMN].to_numpy(dtype=float),
@@ -77,7 +79,7 @@ def _market_vectors(frame: pd.DataFrame) -> dict[str, np.ndarray]:
     }
 
 
-def _perfect_targets(frame: pd.DataFrame) -> np.ndarray:
+def _perfect_targets(frame: pd.DataFrame) -> NDArray[np.float64]:
     """Construct perfect-foresight labels with the exact deterministic LP rule."""
     market = _market_vectors(frame)
     return perfect_foresight_offers(
@@ -89,14 +91,15 @@ def _perfect_targets(frame: pd.DataFrame) -> np.ndarray:
     )
 
 
-def _economic_sample_weights(frame: pd.DataFrame) -> np.ndarray:
+def _economic_sample_weights(frame: pd.DataFrame) -> NDArray[np.float64]:
     """Weight training examples by the observed imbalance-price spread."""
-    spread = frame[PRICE_COLUMNS[1]].to_numpy(dtype=float) - frame[
+    spread: NDArray[np.float64] = frame[PRICE_COLUMNS[1]].to_numpy(dtype=float) - frame[
         PRICE_COLUMNS[2]
     ].to_numpy(dtype=float)
     if (spread <= 0.0).any() or not np.isfinite(spread).all():
         raise ValueError("Economic sample weights require positive finite spreads.")
-    return spread / spread.mean()
+    weights: NDArray[np.float64] = spread / spread.mean()
+    return weights
 
 
 def _regressor(
@@ -139,10 +142,10 @@ def _classifier(
 
 
 def _score_offer(
-    offer_mw: np.ndarray,
+    offer_mw: NDArray[np.float64],
     frame: pd.DataFrame,
-    target_mw: np.ndarray,
-) -> dict[str, float]:
+    target_mw: NDArray[np.float64],
+) -> dict[str, float | None]:
     """Return strategy error and realized-revenue metrics for an offer vector."""
     market = _market_vectors(frame)
     strategy = regression_metrics(target_mw, offer_mw)
@@ -158,8 +161,8 @@ def _score_offer(
 
 
 def _select_regression(
-    x_train: np.ndarray,
-    target: np.ndarray,
+    x_train: NDArray[np.float64],
+    target: NDArray[np.float64],
     train_frame: pd.DataFrame,
     config: Phase3Config,
 ) -> tuple[dict[str, Any], pd.DataFrame]:
@@ -216,8 +219,8 @@ def _select_regression(
 
 
 def _select_classification(
-    x_train: np.ndarray,
-    target: np.ndarray,
+    x_train: NDArray[np.float64],
+    target: NDArray[np.float64],
     train_frame: pd.DataFrame,
     config: Phase3Config,
 ) -> tuple[dict[str, Any], pd.DataFrame]:
@@ -280,7 +283,7 @@ def _select_classification(
 def _load_indirect_offer(
     test_frame: pd.DataFrame,
     phase2_prediction_path: Path,
-) -> np.ndarray:
+) -> NDArray[np.float64]:
     """Load and rigorously align the Phase 2 winning offer to Phase 3 test rows."""
     path = Path(phase2_prediction_path)
     if not path.exists():
@@ -329,7 +332,9 @@ def _load_indirect_offer(
     return aligned["locally_weighted_offer_mw"].to_numpy(dtype=float)
 
 
-def _explicit_lp_audit(train_frame: pd.DataFrame, target: np.ndarray) -> dict[str, Any]:
+def _explicit_lp_audit(
+    train_frame: pd.DataFrame, target: NDArray[np.float64]
+) -> dict[str, Any]:
     """Verify analytical perfect-foresight labels against sampled explicit LPs."""
     price_strict = (
         train_frame[PRICE_COLUMNS[0]] > train_frame[PRICE_COLUMNS[2]] + 1e-9
@@ -363,13 +368,13 @@ def _explicit_lp_audit(train_frame: pd.DataFrame, target: np.ndarray) -> dict[st
 
 def _strategy_comparison(
     test_frame: pd.DataFrame,
-    perfect_target: np.ndarray,
-    offers: dict[str, np.ndarray],
-) -> tuple[pd.DataFrame, dict[str, np.ndarray]]:
+    perfect_target: NDArray[np.float64],
+    offers: dict[str, NDArray[np.float64]],
+) -> tuple[pd.DataFrame, dict[str, NDArray[np.float64]]]:
     """Compare direct and indirect strategies on the untouched test period."""
     market = _market_vectors(test_frame)
     rows: list[dict[str, Any]] = []
-    interval_revenues: dict[str, np.ndarray] = {}
+    interval_revenues: dict[str, NDArray[np.float64]] = {}
     for strategy, offer in offers.items():
         metrics = _score_offer(offer, test_frame, perfect_target)
         rows.append(
@@ -403,8 +408,8 @@ def _strategy_comparison(
 def _plot_results(
     comparison: pd.DataFrame,
     predictions: pd.DataFrame,
-    confusion: np.ndarray,
-    class_representatives: np.ndarray,
+    confusion: NDArray[np.float64],
+    class_representatives: NDArray[np.float64],
     figure_dir: Path,
 ) -> dict[str, Path]:
     """Create publication-ready direct-strategy comparison figures."""
@@ -693,10 +698,14 @@ def run_phase3(config: Phase3Config) -> dict[str, Path]:
         json.dumps(_json_ready(summary), indent=2, allow_nan=False),
         encoding="utf-8",
     )
-    print("Phase 3 complete.")
-    print("Selected direct regression:", regression_selection)
-    print("Selected direct classification:", classification_selection)
-    print(comparison.to_string(index=False))
+    sys.stdout.write("Phase 3 complete." + "\n")
+    sys.stdout.write(
+        "Selected direct regression:" + " " + str(regression_selection) + "\n"
+    )
+    sys.stdout.write(
+        "Selected direct classification:" + " " + str(classification_selection) + "\n"
+    )
+    sys.stdout.write(str(comparison.to_string(index=False)) + "\n")
     return paths | {f"figure_{key}": value for key, value in figure_paths.items()}
 
 

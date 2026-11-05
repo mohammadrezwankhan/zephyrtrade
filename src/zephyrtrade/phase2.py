@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import sys
 from dataclasses import asdict, dataclass
 from pathlib import Path
 from typing import Any, Literal
@@ -11,6 +12,7 @@ from typing import Any, Literal
 import matplotlib
 import numpy as np
 import pandas as pd
+from numpy.typing import NDArray
 from sklearn.linear_model import Lasso, Ridge
 from sklearn.metrics import mean_squared_error
 from sklearn.model_selection import TimeSeriesSplit
@@ -29,7 +31,7 @@ from zephyrtrade.optimize import optimize_offers_from_residuals
 from zephyrtrade.preprocessing import FEATURE_COLUMNS, PRICE_COLUMNS, TARGET_COLUMN
 
 matplotlib.use("Agg")
-from matplotlib import pyplot as plt  # noqa: E402
+from matplotlib import pyplot as plt
 
 MODEL_LABELS = {
     "persistence_24h": "24-hour persistence",
@@ -94,8 +96,8 @@ def load_phase2_data(
 
 
 def _gradient_descent_equivalence(
-    train_features: np.ndarray,
-    train_target: np.ndarray,
+    train_features: NDArray[np.float64],
+    train_target: NDArray[np.float64],
     sample_size: int,
 ) -> dict[str, Any]:
     """Compare batch gradient descent with OLS on evenly spaced observations."""
@@ -146,24 +148,44 @@ def _gradient_descent_equivalence(
 
 
 def _polynomial_cv_folds(
-    train_features: np.ndarray,
-    train_target: np.ndarray,
+    train_features: NDArray[np.float64],
+    train_target: NDArray[np.float64],
     degree: int,
     split_count: int,
-) -> list[tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]]:
+) -> list[
+    tuple[
+        NDArray[np.float64],
+        NDArray[np.float64],
+        NDArray[np.float64],
+        NDArray[np.float64],
+    ]
+]:
     """Precompute leakage-safe standardized polynomial folds for alpha search."""
     splitter = TimeSeriesSplit(n_splits=split_count)
-    folds: list[tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]] = []
+    folds: list[
+        tuple[
+            NDArray[np.float64],
+            NDArray[np.float64],
+            NDArray[np.float64],
+            NDArray[np.float64],
+        ]
+    ] = []
     for fit_indices, score_indices in splitter.split(train_features):
         polynomial = PolynomialFeatures(degree=degree, include_bias=False)
         fit_polynomial = polynomial.fit_transform(train_features[fit_indices])
         score_polynomial = polynomial.transform(train_features[score_indices])
         scaler = StandardScaler().fit(fit_polynomial)
+        fit_scaled = scaler.transform(fit_polynomial)
+        score_scaled = scaler.transform(score_polynomial)
+        if not isinstance(fit_scaled, np.ndarray) or not isinstance(
+            score_scaled, np.ndarray
+        ):
+            raise TypeError("Dense polynomial folds must produce dense scaled arrays.")
         folds.append(
             (
-                scaler.transform(fit_polynomial),
+                fit_scaled,
                 train_target[fit_indices],
-                scaler.transform(score_polynomial),
+                score_scaled,
                 train_target[score_indices],
             )
         )
@@ -172,8 +194,15 @@ def _polynomial_cv_folds(
 
 def _search_regularization_alpha(
     penalty: Literal["ridge", "lasso"],
-    alphas: np.ndarray,
-    folds: list[tuple[np.ndarray, np.ndarray, np.ndarray, np.ndarray]],
+    alphas: NDArray[np.float64],
+    folds: list[
+        tuple[
+            NDArray[np.float64],
+            NDArray[np.float64],
+            NDArray[np.float64],
+            NDArray[np.float64],
+        ]
+    ],
     random_state: int,
 ) -> tuple[float, pd.DataFrame]:
     """Evaluate an alpha grid with expanding-window time-series validation."""
@@ -210,13 +239,16 @@ def _search_regularization_alpha(
         )
         rows.append(row)
     results = pd.DataFrame(rows).sort_values("alpha").reset_index(drop=True)
-    best_row = results.loc[results["mean_cv_rmse_mw"].idxmin()]
+    best_index = results["mean_cv_rmse_mw"].idxmin()
+    if not isinstance(best_index, (int, np.integer)):
+        raise ValueError("The regularization search requires an integer row index.")
+    best_row = results.iloc[int(best_index)]
     return float(best_row["alpha"]), results
 
 
 def _select_cluster_count(
-    train_features: np.ndarray,
-    train_target: np.ndarray,
+    train_features: NDArray[np.float64],
+    train_target: NDArray[np.float64],
     cluster_feature_indices: tuple[int, ...],
     random_state: int,
 ) -> tuple[int, pd.DataFrame]:
@@ -246,15 +278,21 @@ def _select_cluster_count(
             }
         )
     results = pd.DataFrame(rows)
-    best_cluster_count = int(
-        results.loc[results["inner_holdout_rmse_mw"].idxmin(), "n_clusters"]
-    )
+    best_index = results["inner_holdout_rmse_mw"].idxmin()
+    if not isinstance(best_index, (int, np.integer)):
+        raise ValueError("The cluster search requires an integer row index.")
+    best_cluster_count = int(results.iloc[int(best_index)]["n_clusters"])
     return best_cluster_count, results
 
 
-def _clip_power(prediction: np.ndarray, capacity_mw: float) -> np.ndarray:
+def _clip_power(
+    prediction: NDArray[np.float64], capacity_mw: float
+) -> NDArray[np.float64]:
     """Enforce physical production limits on a model prediction."""
-    return np.clip(np.asarray(prediction, dtype=float), 0.0, capacity_mw)
+    clipped: NDArray[np.float64] = np.clip(
+        np.asarray(prediction, dtype=float), 0.0, capacity_mw
+    )
+    return clipped
 
 
 def _fit_phase2_models(
@@ -262,8 +300,8 @@ def _fit_phase2_models(
     schema: dict[str, Any],
     config: Phase2Config,
 ) -> tuple[
-    dict[str, np.ndarray],
-    dict[str, np.ndarray],
+    dict[str, NDArray[np.float64]],
+    dict[str, NDArray[np.float64]],
     dict[str, Any],
     pd.DataFrame,
     pd.DataFrame,
@@ -350,8 +388,8 @@ def _fit_phase2_models(
             cluster_feature_indices=regime_indices,
         ),
     }
-    validation_predictions: dict[str, np.ndarray] = {}
-    test_predictions: dict[str, np.ndarray] = {}
+    validation_predictions: dict[str, NDArray[np.float64]] = {}
+    test_predictions: dict[str, NDArray[np.float64]] = {}
 
     lag_mean = schema["scaling"]["training_feature_means"]["actual_power_lag_24h_mw"]
     lag_scale = schema["scaling"]["training_feature_scales"]["actual_power_lag_24h_mw"]
@@ -366,7 +404,7 @@ def _fit_phase2_models(
     )
 
     for model_name, model in models.items():
-        print(f"Fitting {MODEL_LABELS[model_name]}...")
+        sys.stdout.write(str(f"Fitting {MODEL_LABELS[model_name]}...") + "\n")
         model.fit(x_train, y_train)
         validation_predictions[model_name] = _clip_power(
             model.predict(x_validation),
@@ -440,8 +478,8 @@ def _coefficient_analysis(
 
 def _evaluate_predictions_and_revenue(
     splits: dict[str, pd.DataFrame],
-    validation_predictions: dict[str, np.ndarray],
-    test_predictions: dict[str, np.ndarray],
+    validation_predictions: dict[str, NDArray[np.float64]],
+    test_predictions: dict[str, NDArray[np.float64]],
 ) -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame]:
     """Compute test forecast metrics and LP-based realized revenue for every model."""
     validation = splits["validation"]
@@ -703,9 +741,9 @@ def run_phase2(config: Phase2Config) -> dict[str, Path]:
         json.dumps(_json_ready(summary), indent=2),
         encoding="utf-8",
     )
-    print("Phase 2 complete.")
-    print(prediction_metrics.to_string(index=False))
-    print(revenue_table.to_string(index=False))
+    sys.stdout.write("Phase 2 complete." + "\n")
+    sys.stdout.write(str(prediction_metrics.to_string(index=False)) + "\n")
+    sys.stdout.write(str(revenue_table.to_string(index=False)) + "\n")
     return paths | {f"figure_{name}": path for name, path in figure_paths.items()}
 
 
@@ -743,7 +781,7 @@ def main(argv: list[str] | None = None) -> int:
         )
     )
     for name, path in paths.items():
-        print(f"{name}: {path}")
+        sys.stdout.write(str(f"{name}: {path}") + "\n")
     return 0
 
 

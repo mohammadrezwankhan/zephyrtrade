@@ -4,6 +4,7 @@ from __future__ import annotations
 
 import argparse
 import json
+import sys
 from dataclasses import asdict, dataclass
 from datetime import UTC, datetime
 from pathlib import Path
@@ -11,6 +12,7 @@ from typing import Any
 
 import numpy as np
 import pandas as pd
+from numpy.typing import NDArray
 
 PRICE_COLUMNS = (
     "day_ahead_price_dkk_mwh",
@@ -112,7 +114,7 @@ def _ar1_noise(
     length: int,
     persistence: float,
     innovation_scale: float,
-) -> np.ndarray:
+) -> NDArray[np.float64]:
     """Generate a stationary-looking autoregressive noise sequence."""
     values = np.zeros(length, dtype=float)
     innovations = rng.normal(0.0, innovation_scale, length)
@@ -144,7 +146,7 @@ def _generate_weather_drivers(
     timestamps: pd.DatetimeIndex,
     rng: np.random.Generator,
     timezone_name: str,
-) -> dict[str, np.ndarray]:
+) -> dict[str, NDArray[np.float64]]:
     """Generate correlated regional weather drivers for Bornholm."""
     local_time = timestamps.tz_convert(timezone_name)
     day_of_year = np.asarray(local_time.day_of_year, dtype=float)
@@ -186,7 +188,7 @@ def _generate_weather_drivers(
     }
 
 
-def _power_curve_fraction(wind_speed_ms: np.ndarray) -> np.ndarray:
+def _power_curve_fraction(wind_speed_ms: NDArray[np.float64]) -> NDArray[np.float64]:
     """Map hub-height wind speed to a generic normalized turbine power curve."""
     cut_in = 3.0
     rated = 12.0
@@ -203,7 +205,7 @@ def _power_curve_fraction(wind_speed_ms: np.ndarray) -> np.ndarray:
 
 def _generate_farm_tables(
     timestamps: pd.DatetimeIndex,
-    drivers: dict[str, np.ndarray],
+    drivers: dict[str, NDArray[np.float64]],
     rng: np.random.Generator,
 ) -> tuple[pd.DataFrame, pd.DataFrame, pd.DataFrame]:
     """Create farm metadata, weather observations, and wind-power observations."""
@@ -294,8 +296,8 @@ def _generate_farm_tables(
 
 def _generate_market_prices(
     timestamps: pd.DatetimeIndex,
-    drivers: dict[str, np.ndarray],
-    mean_site_wind: np.ndarray,
+    drivers: dict[str, NDArray[np.float64]],
+    mean_site_wind: NDArray[np.float64],
     rng: np.random.Generator,
     config: SyntheticDataConfig,
 ) -> pd.DataFrame:
@@ -364,13 +366,13 @@ def filter_negative_price_intervals(
     if missing:
         raise ValueError(f"Market-price columns are missing: {sorted(missing)}")
 
-    keep_mask = market_prices.loc[:, PRICE_COLUMNS].ge(0.0).all(axis=1)
+    keep_mask = market_prices.loc[:, list(PRICE_COLUMNS)].ge(0.0).all(axis=1)
     filtered = market_prices.loc[keep_mask].reset_index(drop=True)
-    total_rows = int(len(market_prices))
+    total_rows = len(market_prices)
     removed_rows = int((~keep_mask).sum())
     summary: dict[str, float | int] = {
         "rows_before_filter": total_rows,
-        "rows_after_filter": int(len(filtered)),
+        "rows_after_filter": len(filtered),
         "negative_price_rows_removed": removed_rows,
         "negative_price_share_removed": removed_rows / total_rows,
     }
@@ -534,13 +536,16 @@ def main(argv: list[str] | None = None) -> int:
     )
     bundle = generate_synthetic_data(config)
     paths = write_data_bundle(bundle, config)
-    print(
-        "Generated four-farm source data; removed "
-        f"{bundle.price_filter_summary['negative_price_rows_removed']} "
-        "negative-price intervals."
+    sys.stdout.write(
+        str(
+            "Generated four-farm source data; removed "
+            f"{bundle.price_filter_summary['negative_price_rows_removed']} "
+            "negative-price intervals."
+        )
+        + "\n"
     )
     for name, path in paths.items():
-        print(f"{name}: {path}")
+        sys.stdout.write(str(f"{name}: {path}") + "\n")
     return 0
 
 

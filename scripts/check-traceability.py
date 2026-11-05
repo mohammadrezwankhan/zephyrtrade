@@ -14,7 +14,9 @@ import urllib.request
 from collections.abc import Callable
 from html import unescape
 from html.parser import HTMLParser
+from http.client import HTTPMessage
 from pathlib import Path
+from typing import IO, ClassVar
 
 ROOT = Path(__file__).resolve().parents[1]
 CONFIG_PATH = ROOT / "traceability.json"
@@ -46,6 +48,7 @@ def _reject_duplicate_keys(pairs: list[tuple[str, object]]) -> dict[str, object]
 
 
 def load_config(path: Path = CONFIG_PATH) -> dict[str, str]:
+    """Read the exact repository mapping and reject duplicate or altered fields."""
     try:
         value = json.loads(
             path.read_text(encoding="utf-8"), object_pairs_hook=_reject_duplicate_keys
@@ -55,12 +58,20 @@ def load_config(path: Path = CONFIG_PATH) -> dict[str, str]:
     errors = validate_config(value)
     if errors:
         raise ValueError("invalid traceability mapping: " + "; ".join(errors))
-    return value  # type: ignore[return-value]
+    if not isinstance(value, dict):
+        raise ValueError("traceability.json must contain one JSON object")
+    mapping: dict[str, str] = {}
+    for key, item in value.items():
+        if not isinstance(key, str) or not isinstance(item, str):
+            raise ValueError("traceability mapping keys and values must be text")
+        mapping[key] = item
+    return mapping
 
 
 def validate_config(
     value: object, *, expected: dict[str, str] | None = None
 ) -> list[str]:
+    """Report every mismatch with the pinned public or private app identity."""
     pinned = EXPECTED if expected is None else expected
     if not isinstance(value, dict):
         return ["traceability.json must contain one JSON object"]
@@ -72,7 +83,8 @@ def validate_config(
     for key, expected_value in pinned.items():
         if value.get(key) != expected_value:
             errors.append(
-                f"traceability.json {key} must exactly match this repository's pinned mapping"
+                f"traceability.json {key} must exactly match this repository's"
+                " pinned mapping"
             )
     if value.get("source_visibility") not in {"public", "private"}:
         errors.append("source_visibility must be exactly public or private")
@@ -124,7 +136,7 @@ def _css_hidden(attributes: dict[str, str | None]) -> bool:
 class _VisibleMarkup(HTMLParser):
     """Collect visible HTML text and nonempty visible anchor destinations."""
 
-    VOID = {
+    VOID: ClassVar[set[str]] = {
         "area",
         "base",
         "br",
@@ -140,7 +152,13 @@ class _VisibleMarkup(HTMLParser):
         "track",
         "wbr",
     }
-    HIDDEN_TAGS = {"head", "script", "style", "template", "noscript"}
+    HIDDEN_TAGS: ClassVar[set[str]] = {
+        "head",
+        "script",
+        "style",
+        "template",
+        "noscript",
+    }
 
     def __init__(self) -> None:
         super().__init__(convert_charrefs=True)
@@ -153,13 +171,11 @@ class _VisibleMarkup(HTMLParser):
         for index, entry in enumerate(self.stack):
             if entry["hidden"]:
                 return True
-            if entry["closed_details"]:
-                # The summary of a closed details element is visible; its other
-                # content is not present until a user opens the disclosure.
-                if not any(
-                    item["tag"] == "summary" for item in self.stack[index + 1 :]
-                ):
-                    return True
+            # The summary remains visible while the other details content is closed.
+            if entry["closed_details"] and not any(
+                item["tag"] == "summary" for item in self.stack[index + 1 :]
+            ):
+                return True
         return False
 
     def handle_starttag(self, tag: str, attrs: list[tuple[str, str | None]]) -> None:
@@ -200,7 +216,7 @@ class _VisibleMarkup(HTMLParser):
                 for entry in reversed(removed):
                     anchor = entry.get("anchor")
                     if anchor is not None and anchor in self.open_anchors:
-                        self.open_anchors.remove(anchor)  # type: ignore[arg-type]
+                        self.open_anchors.remove(anchor)
                 break
 
     def handle_data(self, data: str) -> None:
@@ -252,6 +268,7 @@ _MARKDOWN_LINK_RE = re.compile(
 
 
 def has_exact_visible_link(markup: str, url: str) -> bool:
+    """Find an exact destination with a visible nonempty link label."""
     visible_text, html_hrefs = _visible_markdown_text(markup)
     if url in html_hrefs:
         return True
@@ -266,29 +283,68 @@ def has_exact_visible_link(markup: str, url: str) -> bool:
 
 
 def check_readme(readme: str, config: dict[str, str]) -> list[str]:
+    """Require visible links to the configured portal and app overview."""
     errors: list[str] = []
     if not has_exact_visible_link(readme, config["portal_url"]):
         errors.append(
-            "README is missing an exact visible Markdown or HTML link to the MKLab portal"
+            "README is missing an exact visible Markdown or HTML link to"
+            " the MKLab portal"
         )
     if not has_exact_visible_link(readme, config["overview_url"]):
         errors.append(
-            "README is missing an exact visible Markdown or HTML link to this app overview"
+            "README is missing an exact visible Markdown or HTML link to"
+            " this app overview"
         )
     return errors
 
 
+class _NoRedirect(urllib.request.HTTPRedirectHandler):
+    """Reject redirects before urllib constructs or dispatches a second request."""
+
+    def redirect_request(
+        self,
+        _request: urllib.request.Request,
+        _response: IO[bytes],
+        _code: int,
+        _message: str,
+        _headers: HTTPMessage,
+        _new_url: str,
+    ) -> None:
+        """Leave every redirect to urllib's HTTP error handler without following it."""
+
+
+def _validate_pinned_url(url: str) -> None:
+    """Require one exact configured HTTPS endpoint before building a request."""
+    permitted_urls = {
+        EXPECTED[key]
+        for key in ("portal_url", "overview_url", "runtime_url", "metadata_url")
+    } | {REPOSITORY_URL}
+    if url not in permitted_urls:
+        raise ValueError("endpoint must exactly match a pinned HTTPS URL")
+
+
+class _PinnedRequest(urllib.request.Request):
+    """Construct a public request only after enforcing the endpoint allowlist."""
+
+    def __init__(self, url: str) -> None:
+        _validate_pinned_url(url)
+        super().__init__(
+            url,
+            headers={
+                "Accept": "text/html,application/json;q=0.9,*/*;q=0.8",
+                "Accept-Encoding": "identity",
+                "User-Agent": "mklab-traceability-checker/1.0",
+            },
+        )
+
+
 def _http_get(url: str) -> tuple[int, str]:
-    request = urllib.request.Request(
-        url,
-        headers={
-            "Accept": "text/html,application/json;q=0.9,*/*;q=0.8",
-            "Accept-Encoding": "identity",
-            "User-Agent": "mklab-traceability-checker/1.0",
-        },
-    )
+    _validate_pinned_url(url)
+    request = _PinnedRequest(url)
     try:
-        with urllib.request.urlopen(request, timeout=TIMEOUT_SECONDS) as response:
+        with urllib.request.build_opener(_NoRedirect()).open(
+            request, timeout=TIMEOUT_SECONDS
+        ) as response:
             if response.geturl() != url:
                 raise RuntimeError(
                     f"endpoint redirected away from its exact configured URL: {url}"
@@ -309,6 +365,8 @@ def _http_get(url: str) -> tuple[int, str]:
 
 
 def _github_repo_get(repository: str, token: str) -> dict[str, object]:
+    if repository != EXPECTED["repository"]:
+        raise ValueError("repository must exactly match the pinned GitHub repository")
     encoded = urllib.parse.quote(repository, safe="/")
     request = urllib.request.Request(
         "https://api.github.com/repos/" + encoded,
@@ -319,7 +377,9 @@ def _github_repo_get(repository: str, token: str) -> dict[str, object]:
             "X-GitHub-Api-Version": "2022-11-28",
         },
     )
-    with urllib.request.urlopen(request, timeout=TIMEOUT_SECONDS) as response:
+    with urllib.request.build_opener(_NoRedirect()).open(
+        request, timeout=TIMEOUT_SECONDS
+    ) as response:
         value = json.load(response, object_pairs_hook=_reject_duplicate_keys)
     if not isinstance(value, dict):
         raise RuntimeError("GitHub repository API returned a non-object response")
@@ -327,6 +387,7 @@ def _github_repo_get(repository: str, token: str) -> dict[str, object]:
 
 
 def validate_github_metadata(metadata: object, config: dict[str, str]) -> list[str]:
+    """Check repository ownership, homepage, branch, and source visibility."""
     if not isinstance(metadata, dict):
         return ["GitHub repository metadata must be a JSON object"]
     errors: list[str] = []
@@ -340,7 +401,8 @@ def validate_github_metadata(metadata: object, config: dict[str, str]) -> list[s
     expected_private = config["source_visibility"] == "private"
     if metadata.get("private") is not expected_private:
         errors.append(
-            f"GitHub repository visibility must be {'private' if expected_private else 'public'}"
+            "GitHub repository visibility must be "
+            f"{'private' if expected_private else 'public'}"
         )
     return errors
 
@@ -381,7 +443,8 @@ def check_live(
             responses["app overview"], REPOSITORY_URL
         ):
             errors.append(
-                f"app overview is missing an exact visible source anchor: {REPOSITORY_URL}"
+                "app overview is missing an exact visible source anchor: "
+                f"{REPOSITORY_URL}"
             )
     else:
         private_reference_forms = {
@@ -416,7 +479,7 @@ def check_live(
                 ]
                 if not runtime_fields:
                     # Older private editions identify only the overview in JSON.
-                    # Bind their configured runtime through a named visible overview link.
+                    # Bind their runtime through a named visible overview link.
                     parser = _VisibleMarkup()
                     parser.feed(responses.get("app overview", ""))
                     parser.close()
@@ -429,13 +492,14 @@ def check_live(
                     )
                     if not linked:
                         errors.append(
-                            "metadata omits runtime; overview must visibly link the pinned runtime URL"
+                            "metadata omits runtime; overview must visibly link the"
+                            " pinned runtime URL"
                         )
-                for key in runtime_fields:
-                    if app_metadata[key] != config["runtime_url"]:
-                        errors.append(
-                            f"app.json {key} must exactly equal {config['runtime_url']!r}"
-                        )
+                errors.extend(
+                    f"app.json {key} must exactly equal {config['runtime_url']!r}"
+                    for key in runtime_fields
+                    if app_metadata[key] != config["runtime_url"]
+                )
                 public_source = app_metadata.get("publicSource")
                 if is_public and public_source != REPOSITORY_URL:
                     errors.append(
@@ -443,11 +507,13 @@ def check_live(
                     )
                 elif not is_public and public_source not in (None, ""):
                     errors.append(
-                        "app.json must not publish a publicSource URL for a private mapping"
+                        "app.json must not publish a publicSource URL for a private"
+                        " mapping"
                     )
     if not token:
         errors.append(
-            "GH_TOKEN is required for authenticated read-only repository metadata checks"
+            "GH_TOKEN is required for authenticated read-only repository"
+            " metadata checks"
         )
     else:
         get_repo = get_repo or _github_repo_get
@@ -455,7 +521,8 @@ def check_live(
             metadata = get_repo(config["repository"], token)
         except Exception as exc:
             errors.append(
-                f"GitHub repository metadata request failed for {config['repository']}: {exc}"
+                "GitHub repository metadata request failed for "
+                f"{config['repository']}: {exc}"
             )
         else:
             errors.extend(validate_github_metadata(metadata, config))
@@ -470,6 +537,7 @@ def _has_html_anchor(markup: str, url: str) -> bool:
 
 
 def run(*, live: bool = False, config_path: Path = CONFIG_PATH) -> list[str]:
+    """Validate the local mapping and optionally its bounded live endpoints."""
     try:
         config = load_config(config_path)
     except ValueError as exc:
@@ -485,6 +553,7 @@ def run(*, live: bool = False, config_path: Path = CONFIG_PATH) -> list[str]:
 
 
 def main(argv: list[str] | None = None) -> int:
+    """Run the requested traceability checks and report truthful exit status."""
     parser = argparse.ArgumentParser(description=__doc__)
     parser.add_argument(
         "--live",
@@ -495,15 +564,18 @@ def main(argv: list[str] | None = None) -> int:
     errors = run(live=args.live)
     if errors:
         for error in errors:
-            print("FAIL: " + error, file=sys.stderr)
+            sys.stderr.write(str("FAIL: " + error) + "\n")
         return 1
-    print(
-        "Traceability checks passed."
-        + (
-            " Live endpoints and GitHub metadata verified."
-            if args.live
-            else " Local README and mapping verified."
+    sys.stdout.write(
+        str(
+            "Traceability checks passed."
+            + (
+                " Live endpoints and GitHub metadata verified."
+                if args.live
+                else " Local README and mapping verified."
+            )
         )
+        + "\n"
     )
     return 0
 

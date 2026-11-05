@@ -1,6 +1,5 @@
 """The compiled observation snapshot must reject misleading source artifacts."""
 
-import runpy
 import shutil
 from pathlib import Path
 
@@ -8,12 +7,13 @@ import numpy as np
 import pandas as pd
 import pytest
 
+from scripts.build_app import make_snapshot
+
 ROOT = Path(__file__).resolve().parents[1]
-make_snapshot = runpy.run_path(str(ROOT / "scripts/build_app.py"))["make_snapshot"]
 
 
 @pytest.fixture
-def source(tmp_path):
+def source(tmp_path: Path) -> Path:
     for relative in [
         "artifacts/phase2/test_predictions.csv.gz",
         "artifacts/phase3/test_direct_predictions.csv.gz",
@@ -26,7 +26,7 @@ def source(tmp_path):
     return tmp_path
 
 
-def test_snapshot_reconciles_all_models():
+def test_snapshot_reconciles_all_models() -> None:
     snap = make_snapshot(ROOT)
     assert snap["quality"]["revenue_values_checked"] == 34992
     assert len(snap["models"]) == 9
@@ -43,7 +43,9 @@ def test_snapshot_reconciles_all_models():
         "wrong_metadata",
     ],
 )
-def test_snapshot_refuses_invalid_or_mislabelled_sources(source, defect):
+def test_snapshot_refuses_invalid_or_mislabelled_sources(
+    source: Path, defect: str
+) -> None:
     paths = [
         source / "artifacts/phase2/test_predictions.csv.gz",
         source / "artifacts/phase3/test_direct_predictions.csv.gz",
@@ -62,7 +64,7 @@ def test_snapshot_refuses_invalid_or_mislabelled_sources(source, defect):
             elif defect == "bad_price_order":
                 frame.loc[0, "up_reg_price_dkk_mwh"] = -100
             elif defect == "duplicate_time":
-                frame.loc[0, "timestamp_utc"] = frame.loc[1, "timestamp_utc"]
+                frame.loc[0, "timestamp_utc"] = str(frame.loc[1, "timestamp_utc"])
     for path, frame in zip(paths, frames, strict=True):
         frame.to_csv(path, index=False)
     with pytest.raises(ValueError):

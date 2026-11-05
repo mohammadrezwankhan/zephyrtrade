@@ -165,7 +165,9 @@ def run_pipeline(config: PipelineConfig) -> dict[str, Path]:
         json.dumps(_json_ready(manifest), indent=2),
         encoding="utf-8",
     )
-    print(f"Complete ZephyrTrade pipeline finished. Manifest: {manifest_path}")
+    sys.stdout.write(
+        str(f"Complete ZephyrTrade pipeline finished. Manifest: {manifest_path}") + "\n"
+    )
     return {"manifest": manifest_path}
 
 

@@ -2,6 +2,7 @@
 
 import http.client
 import json
+from collections.abc import Iterator
 from threading import Thread
 
 import pytest
@@ -10,7 +11,7 @@ from zephyrtrade.app import LocalServer, optimize_payload
 
 
 @pytest.fixture(scope="module")
-def server():
+def server() -> Iterator[LocalServer]:
     service = LocalServer(0)
     worker = Thread(target=service.serve_forever, daemon=True)
     worker.start()
@@ -20,7 +21,13 @@ def server():
     worker.join(timeout=5)
 
 
-def request(server, method="GET", path="/api/health", body=None, headers=None):
+def request(
+    server: LocalServer,
+    method: str = "GET",
+    path: str = "/api/health",
+    body: str | bytes | None = None,
+    headers: dict[str, str] | None = None,
+) -> tuple[int, dict[str, str], bytes]:
     connection = http.client.HTTPConnection("127.0.0.1", server.server_port, timeout=5)
     connection.request(method, path, body, headers or {})
     response = connection.getresponse()
@@ -29,7 +36,7 @@ def request(server, method="GET", path="/api/health", body=None, headers=None):
     return result
 
 
-def assumptions():
+def assumptions() -> dict[str, object]:
     return {
         "capacity": 30,
         "hours": 1,
@@ -41,7 +48,7 @@ def assumptions():
     }
 
 
-def test_health_and_loopback_binding(server):
+def test_health_and_loopback_binding(server: LocalServer) -> None:
     status, headers, body = request(server)
     assert status == 200
     assert json.loads(body)["service"] == "zephyrtrade-local"
@@ -54,7 +61,7 @@ def test_health_and_loopback_binding(server):
 @pytest.mark.parametrize(
     "path", ["/", "/styles.css", "/app.js", "/engine.js", "/snapshot.js"]
 )
-def test_packaged_assets(server, path):
+def test_packaged_assets(server: LocalServer, path: str) -> None:
     status, headers, body = request(server, path=path)
     assert status == 200
     assert len(body) > 100
@@ -71,24 +78,24 @@ def test_packaged_assets(server, path):
         "/artifacts/model.joblib",
     ],
 )
-def test_filesystem_not_exposed(server, path):
+def test_filesystem_not_exposed(server: LocalServer, path: str) -> None:
     assert request(server, path=path)[0] == 404
 
 
-def test_head_has_no_body(server):
+def test_head_has_no_body(server: LocalServer) -> None:
     status, headers, body = request(server, method="HEAD", path="/")
     assert status == 200 and len(body) == 0
     assert int(headers["Content-Length"]) > 100
 
 
-def test_rebinding_host_is_rejected(server):
+def test_rebinding_host_is_rejected(server: LocalServer) -> None:
     assert request(server, headers={"Host": "attacker.example"})[0] == 403
 
 
 @pytest.mark.parametrize(
     "origin", ["null", "https://attacker.example", "http://localhost:1"]
 )
-def test_cross_origin_posts_rejected(server, origin):
+def test_cross_origin_posts_rejected(server: LocalServer, origin: str) -> None:
     assert (
         request(
             server,
@@ -101,10 +108,10 @@ def test_cross_origin_posts_rejected(server, origin):
     )
 
 
-def test_real_http_solver_and_duration(server):
+def test_real_http_solver_and_duration(server: LocalServer) -> None:
     payload = assumptions()
     payload["hours"] = 0.5
-    status, headers, body = request(
+    status, _headers, body = request(
         server,
         "POST",
         "/api/optimize",
@@ -126,8 +133,8 @@ def test_real_http_solver_and_duration(server):
 @pytest.mark.parametrize(
     "body", ["{", '{"capacity":NaN}', '{"da":1,"da":2}', '"text"', "null", "[]"]
 )
-def test_bad_json_is_truthful_client_error(server, body):
-    status, headers, response = request(
+def test_bad_json_is_truthful_client_error(server: LocalServer, body: str) -> None:
+    status, _headers, response = request(
         server, "POST", "/api/optimize", body, {"Content-Type": "application/json"}
     )
     assert status == 400
@@ -135,7 +142,7 @@ def test_bad_json_is_truthful_client_error(server, body):
     assert b"Traceback" not in response
 
 
-def test_wrong_media_type_and_oversize(server):
+def test_wrong_media_type_and_oversize(server: LocalServer) -> None:
     assert (
         request(server, "POST", "/api/optimize", "x", {"Content-Type": "text/plain"})[0]
         == 415
@@ -152,7 +159,7 @@ def test_wrong_media_type_and_oversize(server):
     )
 
 
-def test_busy_solver_returns_recoverable_failure(server):
+def test_busy_solver_returns_recoverable_failure(server: LocalServer) -> None:
     with server.solver:
         result = request(
             server,
@@ -184,19 +191,19 @@ def test_busy_solver_returns_recoverable_failure(server):
         ("probabilities", "abc"),
     ],
 )
-def test_payload_validation(key, value):
+def test_payload_validation(key: str, value: object) -> None:
     payload = assumptions()
     payload[key] = value
     with pytest.raises(ValueError):
         optimize_payload(payload)
 
 
-def test_small_probability_rounding_is_normalized():
+def test_small_probability_rounding_is_normalized() -> None:
     payload = assumptions()
     payload.update(scenarios=[7], probabilities=[1.00000001])
     assert optimize_payload(payload)["offer_mw"] == pytest.approx(7)
 
 
-def test_unknown_fields_rejected():
+def test_unknown_fields_rejected() -> None:
     with pytest.raises(ValueError, match="unsupported"):
         optimize_payload({**assumptions(), "execute_order": True})
