@@ -104,13 +104,31 @@ def main() -> int:
                 raise RuntimeError("The scanner lock requires Python 3.12")
             environment = destination / "venv"
             venv.EnvBuilder(with_pip=True).create(environment)
-            command = [
+            installed_metadata = environment / "lib/python3.12/site-packages"
+            if any(installed_metadata.glob("semgrep-*.dist-info")):
+                raise RuntimeError(
+                    "The previous Semgrep distribution requires a fresh destination"
+                )
+            command_prefix = [
                 str(environment / "bin/python"),
                 "-m",
                 "pip",
                 "install",
                 "--disable-pip-version-check",
                 "--require-hashes",
+            ]
+            bootstrap_command = [
+                *command_prefix,
+                "--only-binary=:all:",
+                "-r",
+                str(HERE / "requirements-bootstrap.txt"),
+            ]
+            subprocess.run(  # noqa: S603 -- fixed, hash-verified build tooling
+                bootstrap_command, check=True, timeout=900
+            )
+            command = [
+                *command_prefix,
+                "--no-build-isolation",
                 "-r",
                 str(HERE / "requirements.txt"),
             ]
@@ -125,6 +143,37 @@ def main() -> int:
                     "python": platform.python_version(),
                 }
             )
+            if args.mode in {"sast", "all"}:
+                build_requirements = [
+                    *command_prefix,
+                    "--only-binary=:all:",
+                    "-r",
+                    str(HERE / "requirements-build.txt"),
+                ]
+                subprocess.run(  # noqa: S603 -- fixed, hash-verified CMake wheel
+                    build_requirements, check=True, timeout=900
+                )
+                native_command = [
+                    str(environment / "bin/python"),
+                    str(HERE / "native_scanner.py"),
+                    "build",
+                    "--destination",
+                    str(destination),
+                    "--output",
+                    str(receipt_dir.resolve() / "native-scanner"),
+                ]
+                # The native builder bounds every build phase; the SAST job also
+                # has an explicit budget based on recorded cold-build timings.
+                subprocess.run(  # noqa: S603 -- local reviewed builder, fixed argv
+                    native_command, check=True
+                )
+                receipt["verified_installations"].append(
+                    json.loads(
+                        (
+                            receipt_dir / "native-scanner/native-scanner-status.json"
+                        ).read_text()
+                    )
+                )
         receipt["status"] = "passed"
         LOGGER.info("Installed verified %s scanner environment", args.mode)
         return 0
