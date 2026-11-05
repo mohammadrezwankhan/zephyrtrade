@@ -5,6 +5,7 @@ from __future__ import annotations
 import argparse
 import json
 import sys
+import warnings
 from dataclasses import asdict, dataclass
 from pathlib import Path
 from typing import Any, Literal
@@ -13,6 +14,7 @@ import matplotlib
 import numpy as np
 import pandas as pd
 from numpy.typing import NDArray
+from sklearn.exceptions import ConvergenceWarning
 from sklearn.linear_model import Lasso, Ridge
 from sklearn.metrics import mean_squared_error
 from sklearn.model_selection import TimeSeriesSplit
@@ -192,6 +194,22 @@ def _polynomial_cv_folds(
     return folds
 
 
+def _fit_lasso_with_retry(
+    estimator: Lasso,
+    fit_features: NDArray[np.float64],
+    fit_target: NDArray[np.float64],
+) -> Lasso:
+    """Retry an unconverged CV fit once without changing successful fits."""
+    with warnings.catch_warnings():
+        warnings.simplefilter("error", ConvergenceWarning)
+        try:
+            estimator.fit(fit_features, fit_target)
+        except ConvergenceWarning:
+            estimator = Lasso(**(estimator.get_params() | {"max_iter": 1_000_000}))
+            estimator.fit(fit_features, fit_target)
+    return estimator
+
+
 def _search_regularization_alpha(
     penalty: Literal["ridge", "lasso"],
     alphas: NDArray[np.float64],
@@ -220,7 +238,10 @@ def _search_regularization_alpha(
                     selection="cyclic",
                     random_state=random_state,
                 )
-            estimator.fit(fit_features, fit_target)
+            if isinstance(estimator, Lasso):
+                estimator = _fit_lasso_with_retry(estimator, fit_features, fit_target)
+            else:
+                estimator.fit(fit_features, fit_target)
             prediction = estimator.predict(score_features)
             fold_rmse.append(
                 float(np.sqrt(mean_squared_error(score_target, prediction)))
