@@ -2,7 +2,8 @@ name: CodeQL security analysis
 
 on:
   push:
-    branches: [main]
+    # Full analysis on this repair branch also checks existing vendored findings.
+    branches: [main, codex/zephyr-uuid-entropy-20261105]
   pull_request:
   merge_group:
   workflow_dispatch:
