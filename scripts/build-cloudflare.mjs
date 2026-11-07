@@ -97,7 +97,7 @@ const json = value => {
   if (encoded === undefined) throw Error('Structured data must be JSON serializable');
   return encoded.replace(/</g, '\\u003c');
 };
-/** @param {import('node:crypto').BinaryLike} buffer */
+/** @param {string | NodeJS.ArrayBufferView} buffer */
 const sha = buffer => createHash('sha256').update(buffer).digest('hex');
 const canonical = new URL(config.canonical).href;
 const siteOrigin = new URL(canonical).origin;

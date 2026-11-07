@@ -76,7 +76,7 @@ const json=value=>{
  if(encoded===undefined)throw Error('Structured data must be JSON serializable');
  return encoded.replace(/</g,'\\u003c');
 };
-/** @param {import('node:crypto').BinaryLike} v */
+/** @param {string | NodeJS.ArrayBufferView} v */
 const sha=v=>createHash('sha256').update(v).digest('hex');
 /** @param {string} file @param {string} content */
 const write=(file,content)=>{fs.mkdirSync(path.dirname(path.join(out,file)),{recursive:true});fs.writeFileSync(path.join(out,file),content);};
