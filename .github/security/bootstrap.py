@@ -47,12 +47,11 @@ def install_binary(
         and re.fullmatch(r"/repos/[^/]+/[^/]+/releases/assets/[0-9]+", url.path)
     ):
         request.add_unredirected_header("Authorization", f"Bearer {token}")
-    # This exact fetch is reviewed: HTTPS is required and bytes cannot be executed
-    # unless their SHA-256 matches the checked release manifest. Contract tests
-    # reject HTTP URLs, tampered archives and symbolic executable members.
-    # nosemgrep: python.lang.security.audit.dynamic-urllib-use-detected.dynamic-urllib-use-detected  # noqa: E501 -- exact scanner rule ID
     for attempt in range(3):
         try:
+            # Reviewed fetch: HTTPS and the pinned SHA-256 are required.
+            # Contract tests reject HTTP URLs, tampered archives and symbolic members.
+            # nosemgrep: python.lang.security.audit.dynamic-urllib-use-detected.dynamic-urllib-use-detected  # noqa: E501 -- exact scanner rule ID
             with urllib.request.urlopen(request, timeout=120) as response:  # noqa: S310
                 blob = response.read()
             break
