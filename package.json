@@ -17,7 +17,7 @@
     "@types/three": "0.187.0",
     "@webgpu/types": "0.1.74",
     "eslint": "9.39.5",
-    "globals": "16.4.0",
+    "globals": "17.14.0",
     "parse5": "8.1.0",
     "prettier": "3.9.10",
     "typescript": "5.9.3",
