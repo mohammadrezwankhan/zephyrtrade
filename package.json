@@ -12,11 +12,11 @@
     "quality:browser": "node --test tests/browser/*.test.mjs"
   },
   "devDependencies": {
-    "@eslint/js": "9.39.1",
+    "@eslint/js": "9.39.5",
     "@types/node": "26.6.6",
     "@types/three": "0.186.0",
     "@webgpu/types": "0.1.74",
-    "eslint": "10.14.0",
+    "eslint": "9.39.5",
     "globals": "16.4.0",
     "parse5": "8.1.0",
     "prettier": "3.9.10",
