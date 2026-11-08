@@ -56,6 +56,22 @@ updates:
   open-pull-requests-limit: 5
   cooldown:
     default-days: 7
+  # Keep routine tooling updates compatible with Node >=22 and TypeScript 5.9.
+  # Update-type filters keep security updates eligible.
+  ignore:
+  - dependency-name: eslint
+    update-types:
+    - version-update:semver-major
+  - dependency-name: "@eslint/js"
+    update-types:
+    - version-update:semver-major
+  - dependency-name: typescript
+    update-types:
+    - version-update:semver-major
+  - dependency-name: typescript-eslint
+    update-types:
+    - version-update:semver-minor
+    - version-update:semver-major
   groups:
     development-tooling:
       dependency-type: development
