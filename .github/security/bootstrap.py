@@ -8,8 +8,10 @@ import hashlib
 import io
 import json
 import logging
+import os
 import pathlib
 import platform
+import re
 import subprocess
 import tarfile
 import urllib.parse
@@ -25,7 +27,8 @@ def install_binary(
     name: str, spec: dict[str, str], destination: pathlib.Path
 ) -> dict[str, str]:
     """Download an HTTPS release and extract only its expected regular executable."""
-    if urllib.parse.urlsplit(spec["url"]).scheme != "https":
+    url = urllib.parse.urlsplit(spec["url"])
+    if url.scheme != "https":
         raise ValueError("Scanner release URLs must use HTTPS")
     request = urllib.request.Request(  # noqa: S310 -- HTTPS checked immediately above
         spec["url"],
@@ -35,6 +38,13 @@ def install_binary(
             "X-GitHub-Api-Version": "2022-11-28",
         },
     )
+    token = os.environ.get("SCANNER_GITHUB_TOKEN")
+    if (
+        token
+        and url.netloc == "api.github.com"
+        and re.fullmatch(r"/repos/[^/]+/[^/]+/releases/assets/[0-9]+", url.path)
+    ):
+        request.add_unredirected_header("Authorization", f"Bearer {token}")
     # This exact fetch is reviewed: HTTPS is required and bytes cannot be executed
     # unless their SHA-256 matches the checked release manifest. Contract tests
     # reject HTTP URLs, tampered archives and symbolic executable members.

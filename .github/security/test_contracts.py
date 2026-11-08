@@ -11,6 +11,7 @@ import subprocess
 import tarfile
 import tempfile
 import unittest
+import urllib.request
 from typing import Any
 from unittest import mock
 
@@ -332,6 +333,36 @@ class BootstrapContractTests(unittest.TestCase):
                 download.call_args.args[0].get_header("Accept"),
                 "application/octet-stream",
             )
+
+    def test_release_api_credentials_do_not_follow_redirects(self) -> None:
+        """Attach the read token only to the initial GitHub release API request."""
+        blob = scanner_archive()
+        for host in ("api.github.com", "example.invalid"):
+            spec = {
+                "url": f"https://{host}/repos/example/repo/releases/assets/1",
+                "version": "test",
+                "sha256": hashlib.sha256(blob).hexdigest(),
+            }
+            with (
+                self.subTest(host=host),
+                tempfile.TemporaryDirectory() as directory,
+                mock.patch.dict(
+                    os.environ, {"SCANNER_GITHUB_TOKEN": "test-credential"}
+                ),
+                mock.patch(
+                    "urllib.request.urlopen", return_value=io.BytesIO(blob)
+                ) as download,
+            ):
+                bootstrap.install_binary("scanner", spec, pathlib.Path(directory))
+                request = download.call_args.args[0]
+                expected = (
+                    "Bearer test-credential" if host == "api.github.com" else None
+                )
+                self.assertEqual(expected, request.get_header("Authorization"))
+                redirected = urllib.request.HTTPRedirectHandler().redirect_request(
+                    request, None, 302, "Found", {}, "https://example.invalid/archive"
+                )
+                self.assertIsNone(redirected.get_header("Authorization"))
 
     def test_verified_archive_extracts_only_regular_expected_binary(self) -> None:
         """Ignore traversal entries rather than extracting a complete archive."""
