@@ -8,10 +8,14 @@ import hashlib
 import io
 import json
 import logging
+import os
 import pathlib
 import platform
+import re
 import subprocess
 import tarfile
+import time
+import urllib.error
 import urllib.parse
 import urllib.request
 import venv
@@ -25,17 +29,37 @@ def install_binary(
     name: str, spec: dict[str, str], destination: pathlib.Path
 ) -> dict[str, str]:
     """Download an HTTPS release and extract only its expected regular executable."""
-    if urllib.parse.urlsplit(spec["url"]).scheme != "https":
+    url = urllib.parse.urlsplit(spec["url"])
+    if url.scheme != "https":
         raise ValueError("Scanner release URLs must use HTTPS")
     request = urllib.request.Request(  # noqa: S310 -- HTTPS checked immediately above
-        spec["url"], headers={"User-Agent": "Rezwan-security-bootstrap"}
+        spec["url"],
+        headers={
+            "User-Agent": "Rezwan-security-bootstrap",
+            "Accept": "application/octet-stream",
+            "X-GitHub-Api-Version": "2022-11-28",
+        },
     )
-    # This exact fetch is reviewed: HTTPS is required and bytes cannot be executed
-    # unless their SHA-256 matches the checked release manifest. Contract tests
-    # reject HTTP URLs, tampered archives and symbolic executable members.
-    # nosemgrep: python.lang.security.audit.dynamic-urllib-use-detected.dynamic-urllib-use-detected  # noqa: E501 -- exact scanner rule ID
-    with urllib.request.urlopen(request, timeout=120) as response:  # noqa: S310
-        blob = response.read()
+    token = os.environ.get("SCANNER_GITHUB_TOKEN")
+    if (
+        token
+        and url.netloc == "api.github.com"
+        and re.fullmatch(r"/repos/[^/]+/[^/]+/releases/assets/[0-9]+", url.path)
+    ):
+        request.add_unredirected_header("Authorization", f"Bearer {token}")
+    for attempt in range(3):
+        try:
+            # Reviewed fetch: HTTPS and the pinned SHA-256 are required.
+            # Contract tests reject HTTP URLs, tampered archives and symbolic members.
+            # nosemgrep: python.lang.security.audit.dynamic-urllib-use-detected.dynamic-urllib-use-detected  # noqa: E501 -- exact scanner rule ID
+            with urllib.request.urlopen(request, timeout=120) as response:  # noqa: S310
+                blob = response.read()
+            break
+        except urllib.error.HTTPError as error:
+            if error.code not in {502, 503, 504} or attempt == 2:
+                raise
+            error.close()
+            time.sleep(2**attempt)
     actual = hashlib.sha256(blob).hexdigest()
     if actual != spec["sha256"]:
         raise RuntimeError(f"{name}: release digest mismatch; refusing to execute")

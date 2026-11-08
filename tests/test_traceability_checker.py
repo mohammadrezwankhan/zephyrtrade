@@ -4,6 +4,7 @@ import importlib.util
 import json
 import unittest
 from pathlib import Path
+from unittest.mock import patch
 
 ROOT = Path(__file__).resolve().parents[1]
 SPEC = importlib.util.spec_from_file_location(
@@ -143,7 +144,10 @@ class MappingTests(unittest.TestCase):
 
         def get_url(url: str) -> tuple[int, str]:
             requested.append(url)
-            return 200, bodies[url]
+            status = next(repository_statuses) if url == checker.REPOSITORY_URL else 200
+            if isinstance(status, TimeoutError):
+                raise status
+            return status, bodies[url]
 
         metadata = {
             "full_name": CONFIG["repository"],
@@ -151,14 +155,39 @@ class MappingTests(unittest.TestCase):
             "homepage": CONFIG["overview_url"],
             "private": False,
         }
-        errors = checker.check_live(
-            CONFIG,
-            get_url=get_url,
-            get_repo=lambda _repo, _token: metadata,
-            token="test-token",  # noqa: S106 -- dummy token; both transports are injected
-        )
-        self.assertEqual([], errors)
-        self.assertEqual(set(bodies), set(requested))
+        timeout = TimeoutError("The read operation timed out")
+        for statuses, expected_error in (
+            ((200,), None),
+            ((504, 200), None),
+            ((timeout, 200), None),
+            (
+                (504, 504),
+                f"public repository HTML returned HTTP 504: {checker.REPOSITORY_URL}",
+            ),
+            (
+                (403,),
+                f"public repository HTML returned HTTP 403: {checker.REPOSITORY_URL}",
+            ),
+            (
+                (timeout, timeout),
+                f"public repository HTML request failed for {checker.REPOSITORY_URL}: "
+                f"{timeout}",
+            ),
+        ):
+            with self.subTest(statuses=statuses):
+                requested.clear()
+                repository_statuses = iter(statuses)
+
+                with patch("time.sleep"):
+                    errors = checker.check_live(
+                        CONFIG,
+                        get_url=get_url,
+                        get_repo=lambda _repo, _token: metadata,
+                        token="test-token",  # noqa: S106 -- both transports are injected
+                    )
+                self.assertEqual(set(bodies), set(requested))
+                self.assertEqual(len(statuses), requested.count(checker.REPOSITORY_URL))
+                self.assertEqual([expected_error] if expected_error else [], errors)
 
     def test_live_check_rejects_hidden_anchor_and_app_json_spoof(self) -> None:
         bodies = {
