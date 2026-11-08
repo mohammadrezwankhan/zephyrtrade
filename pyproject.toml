@@ -75,7 +75,7 @@ dev = [
   "mypy==2.4.1",
   "pytest==9.2.0",
   "pytest-cov==7.1.0",
-  "hypothesis==6.170.13",
+  "hypothesis==6.170.14",
   "pandas-stubs==3.1.0.261029",
   "scipy-stubs==1.18.1.1",
   "scikit-learn-stubs==0.0.3",
