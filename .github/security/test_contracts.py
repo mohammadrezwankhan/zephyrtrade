@@ -3,6 +3,7 @@
 from __future__ import annotations
 
 import hashlib
+import http.client
 import io
 import json
 import os
@@ -11,6 +12,7 @@ import subprocess
 import tarfile
 import tempfile
 import unittest
+import urllib.error
 import urllib.request
 from typing import Any
 from unittest import mock
@@ -360,9 +362,82 @@ class BootstrapContractTests(unittest.TestCase):
                 )
                 self.assertEqual(expected, request.get_header("Authorization"))
                 redirected = urllib.request.HTTPRedirectHandler().redirect_request(
-                    request, None, 302, "Found", {}, "https://example.invalid/archive"
+                    request,
+                    io.BytesIO(),
+                    302,
+                    "Found",
+                    http.client.HTTPMessage(),
+                    "https://example.invalid/archive",
                 )
+                if redirected is None:
+                    self.fail("The release redirect was not followed")
                 self.assertIsNone(redirected.get_header("Authorization"))
+
+    def test_transient_server_failure_retries_without_skipping_digest(self) -> None:
+        """An intermittent 503 can recover only to the exact locked archive."""
+        blob = scanner_archive()
+        spec = {
+            "url": "https://example.invalid/scanner.tar.gz",
+            "version": "test",
+            "sha256": hashlib.sha256(blob).hexdigest(),
+        }
+        error = urllib.error.HTTPError(
+            spec["url"], 503, "unavailable", http.client.HTTPMessage(), None
+        )
+        with tempfile.TemporaryDirectory() as directory, mock.patch(
+            "urllib.request.urlopen", side_effect=[error, io.BytesIO(blob)]
+        ), mock.patch("time.sleep"):
+            bootstrap.install_binary("scanner", spec, pathlib.Path(directory))
+            self.assertEqual(
+                (pathlib.Path(directory) / "scanner").read_bytes(),
+                b"fixture executable bytes",
+            )
+
+    def test_persistent_server_failure_never_installs(self) -> None:
+        """An unavailable release is a failed scan, not an empty success."""
+        url = "https://example.invalid/scanner.tar.gz"
+        spec = {"url": url, "version": "test", "sha256": "0" * 64}
+        error = urllib.error.HTTPError(
+            url, 503, "unavailable", http.client.HTTPMessage(), None
+        )
+        with tempfile.TemporaryDirectory() as directory:
+            with mock.patch("urllib.request.urlopen", side_effect=error), mock.patch(
+                "time.sleep"
+            ), self.assertRaises(urllib.error.HTTPError):
+                bootstrap.install_binary("scanner", spec, pathlib.Path(directory))
+            self.assertFalse((pathlib.Path(directory) / "scanner").exists())
+
+    def test_access_denial_is_not_retried_as_a_service_failure(self) -> None:
+        """A 403 must fail even if a later response would succeed."""
+        blob = scanner_archive()
+        url = "https://example.invalid/scanner.tar.gz"
+        spec = {
+            "url": url, "version": "test", "sha256": hashlib.sha256(blob).hexdigest()
+        }
+        error = urllib.error.HTTPError(
+            url, 403, "denied", http.client.HTTPMessage(), None
+        )
+        with tempfile.TemporaryDirectory() as directory:
+            with mock.patch(
+                "urllib.request.urlopen", side_effect=[error, io.BytesIO(blob)]
+            ), mock.patch("time.sleep"), self.assertRaises(urllib.error.HTTPError):
+                bootstrap.install_binary("scanner", spec, pathlib.Path(directory))
+            self.assertFalse((pathlib.Path(directory) / "scanner").exists())
+
+    def test_retry_does_not_accept_a_tampered_archive(self) -> None:
+        """A later HTTP success still cannot bypass the pinned digest."""
+        url = "https://example.invalid/scanner.tar.gz"
+        spec = {"url": url, "version": "test", "sha256": "0" * 64}
+        error = urllib.error.HTTPError(
+            url, 503, "unavailable", http.client.HTTPMessage(), None
+        )
+        with tempfile.TemporaryDirectory() as directory:
+            with mock.patch(
+                "urllib.request.urlopen",
+                side_effect=[error, io.BytesIO(scanner_archive())],
+            ), mock.patch("time.sleep"), self.assertRaises(RuntimeError):
+                bootstrap.install_binary("scanner", spec, pathlib.Path(directory))
+            self.assertFalse((pathlib.Path(directory) / "scanner").exists())
 
     def test_verified_archive_extracts_only_regular_expected_binary(self) -> None:
         """Ignore traversal entries rather than extracting a complete archive."""

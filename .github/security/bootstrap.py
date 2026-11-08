@@ -14,6 +14,8 @@ import platform
 import re
 import subprocess
 import tarfile
+import time
+import urllib.error
 import urllib.parse
 import urllib.request
 import venv
@@ -49,8 +51,16 @@ def install_binary(
     # unless their SHA-256 matches the checked release manifest. Contract tests
     # reject HTTP URLs, tampered archives and symbolic executable members.
     # nosemgrep: python.lang.security.audit.dynamic-urllib-use-detected.dynamic-urllib-use-detected  # noqa: E501 -- exact scanner rule ID
-    with urllib.request.urlopen(request, timeout=120) as response:  # noqa: S310
-        blob = response.read()
+    for attempt in range(3):
+        try:
+            with urllib.request.urlopen(request, timeout=120) as response:  # noqa: S310
+                blob = response.read()
+            break
+        except urllib.error.HTTPError as error:
+            if error.code not in {502, 503, 504} or attempt == 2:
+                raise
+            error.close()
+            time.sleep(2**attempt)
     actual = hashlib.sha256(blob).hexdigest()
     if actual != spec["sha256"]:
         raise RuntimeError(f"{name}: release digest mismatch; refusing to execute")
