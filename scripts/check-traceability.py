@@ -8,6 +8,7 @@ import json
 import os
 import re
 import sys
+import time
 import urllib.error
 import urllib.parse
 import urllib.request
@@ -431,6 +432,9 @@ def check_live(
     for label, url in urls:
         try:
             status, body = get_url(url)
+            if url == REPOSITORY_URL and status == 504:
+                time.sleep(5)
+                status, body = get_url(url)
         except Exception as exc:
             errors.append(f"{label} request failed for {url}: {exc}")
             continue
