@@ -145,6 +145,8 @@ class MappingTests(unittest.TestCase):
         def get_url(url: str) -> tuple[int, str]:
             requested.append(url)
             status = next(repository_statuses) if url == checker.REPOSITORY_URL else 200
+            if isinstance(status, TimeoutError):
+                raise status
             return status, bodies[url]
 
         metadata = {
@@ -153,7 +155,25 @@ class MappingTests(unittest.TestCase):
             "homepage": CONFIG["overview_url"],
             "private": False,
         }
-        for statuses in ((200,), (504, 200), (504, 504), (403,)):
+        timeout = TimeoutError("The read operation timed out")
+        for statuses, expected_error in (
+            ((200,), None),
+            ((504, 200), None),
+            ((timeout, 200), None),
+            (
+                (504, 504),
+                f"public repository HTML returned HTTP 504: {checker.REPOSITORY_URL}",
+            ),
+            (
+                (403,),
+                f"public repository HTML returned HTTP 403: {checker.REPOSITORY_URL}",
+            ),
+            (
+                (timeout, timeout),
+                f"public repository HTML request failed for {checker.REPOSITORY_URL}: "
+                f"{timeout}",
+            ),
+        ):
             with self.subTest(statuses=statuses):
                 requested.clear()
                 repository_statuses = iter(statuses)
@@ -167,15 +187,7 @@ class MappingTests(unittest.TestCase):
                     )
                 self.assertEqual(set(bodies), set(requested))
                 self.assertEqual(len(statuses), requested.count(checker.REPOSITORY_URL))
-                expected = (
-                    []
-                    if statuses[-1] == 200
-                    else [
-                        f"public repository HTML returned HTTP {statuses[-1]}: "
-                        f"{checker.REPOSITORY_URL}"
-                    ]
-                )
-                self.assertEqual(expected, errors)
+                self.assertEqual([expected_error] if expected_error else [], errors)
 
     def test_live_check_rejects_hidden_anchor_and_app_json_spoof(self) -> None:
         bodies = {

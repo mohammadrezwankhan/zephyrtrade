@@ -408,6 +408,20 @@ def validate_github_metadata(metadata: object, config: dict[str, str]) -> list[s
     return errors
 
 
+def _get_public_repository_html(
+    get_url: Callable[[str], tuple[int, str]],
+) -> tuple[int, str]:
+    try:
+        status, body = get_url(REPOSITORY_URL)
+    except TimeoutError:
+        pass
+    else:
+        if status != 504:
+            return status, body
+    time.sleep(5)
+    return get_url(REPOSITORY_URL)
+
+
 def check_live(
     config: dict[str, str],
     *,
@@ -431,10 +445,11 @@ def check_live(
         urls.append(("public repository HTML", REPOSITORY_URL))
     for label, url in urls:
         try:
-            status, body = get_url(url)
-            if url == REPOSITORY_URL and status == 504:
-                time.sleep(5)
-                status, body = get_url(url)
+            status, body = (
+                _get_public_repository_html(get_url)
+                if url == REPOSITORY_URL
+                else get_url(url)
+            )
         except Exception as exc:
             errors.append(f"{label} request failed for {url}: {exc}")
             continue
