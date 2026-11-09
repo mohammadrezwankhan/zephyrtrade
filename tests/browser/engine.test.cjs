@@ -1,8 +1,18 @@
 const test = require('node:test');
 const assert = require('node:assert/strict');
 const E = require('../../src/zephyrtrade/web/engine.js');
+const settlement = require('../fixtures/settlement-quarter-hour-v1.json');
 const base = {capacity:30,da:400,up:600,down:200,hours:1,scenarios:[2,8,20],probabilities:[.2,.5,.3]};
 const close = (a,b) => assert.ok(Math.abs(a-b)<1e-7,`${a} != ${b}`);
+
+test('hand-checked quarter-hour settlement agrees with the shared fixture',()=>{
+ // 2.5 MWh offered earns 1000 DKK; 0.75 MWh shortfall costs 450 DKK,
+ // while 0.5 MWh surplus earns 100 DKK. Weighted revenue is 880 DKK.
+ const c=settlement;
+ const values=c.actual_mw.map(actual=>E.revenue(c.offer_mw,actual,c.day_ahead_dkk_per_mwh,c.up_dkk_per_mwh,c.down_dkk_per_mwh,c.interval_hours));
+ values.forEach((value,i)=>close(value,c.scenario_revenue_dkk[i]));
+ close(values.reduce((sum,value,i)=>sum+value*c.probabilities[i],0),c.expected_revenue_dkk);
+});
 
 test('surplus, shortfall and interval settlement are explicit',()=>{
  close(E.revenue(8,2,400,600,200),-400);
