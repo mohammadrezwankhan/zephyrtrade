@@ -251,6 +251,12 @@ def main(argv: list[str] | None = None) -> None:
         page.get_by_role("button", name="Calculate optimal offer").click()
         expect(page.locator("#optimal-offer")).to_contain_text("8.00")
         expect(page.locator("#expected-revenue")).to_contain_text("3,200.00")
+        comparison = page.locator("#scenario-comparison tbody tr")
+        expect(comparison).to_have_count(2)
+        expect(comparison.nth(0)).to_contain_text("8.00")
+        expect(comparison.nth(0)).to_contain_text("3,200.00")
+        expect(comparison.nth(1)).to_contain_text("10.40")
+        expect(comparison.nth(1)).to_contain_text("3,008.00")
         expect(page.locator("#lab-stale")).to_be_hidden()
         record(
             "Dirty assumptions, draft navigation retention, invalid prices and recovery"
@@ -259,6 +265,9 @@ def main(argv: list[str] | None = None) -> None:
         page.locator("#hours").fill("0.25")
         page.get_by_role("button", name="Calculate optimal offer").click()
         expect(page.locator("#expected-revenue")).to_contain_text("800.00")
+        expect(page.locator("#scenario-comparison tbody tr").nth(1)).to_contain_text(
+            "752.00"
+        )
         record("Quarter-hour settlement scaling in UI")
         page.locator("#save-scenario").click()
         expect(page.locator("#save-dialog")).to_be_visible()

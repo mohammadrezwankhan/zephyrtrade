@@ -21,3 +21,27 @@ WebKit logged one CSP inline-style refusal per load, two in total. Both
 still displayed **How to enable the Python cross-check**: the preview does not
 provide the local Python solver. The CSP policy and its unresolved visual
 impact are unchanged.
+
+## Manifest-driven offer comparison
+
+A later change adds a comparison inside Strategy lab, driven by the imported
+scenario. It compares the optimal offer with an offer equal to expected
+production, using the existing engine's expected revenues. It does not apply
+the dashboard's historical strategies to the scenario or change Model arena.
+
+On 9 November 2026, with the local preview built from this change on top of
+`c4f6da3863acd5f861d2c37384643a5821d572ab`, Firefox 157.0 and WebKit 27.2
+on Windows imported the committed manifest at `http://127.0.0.1:4173/`.
+At 1440 × 900 both comparison rows showed 7.00 MW and 2,540.00 DKK per
+one-hour interval; the equal values are expected for these symmetric
+assumptions. Reload returned the unsaved scenario to the default 9 MW offer.
+Neither engine had a page error or page-level overflow at 1440 or 390 CSS px.
+Firefox logged no console errors. WebKit logged three CSP inline-style
+refusals across the journey and reload; the optional-health 404 did not recur.
+
+The Chromium UI harness also checked an unequal case: scenarios 2, 8 and
+20 MW with weights 0.2, 0.5 and 0.3 and prices 400/600/200 DKK/MWh.
+For one hour the optimal row showed 8 MW and 3,200 DKK; the expected-production
+row showed 10.4 MW and 3,008 DKK. At 0.25 hours the latter was 752 DKK.
+These are hypothetical interval values, not trade instructions or a general
+browser compatibility certification.
