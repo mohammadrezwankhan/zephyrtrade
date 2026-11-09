@@ -9,3 +9,15 @@ On 9 November 2026, source commit `4c3034aaeeea6e3e07f0a1180565d01eb8659e86` was
 The browser run asserted identical text in every comparison-table cell, the scenario result and reload state. There were no uncaught page errors or page-level horizontal overflow on either route. Firefox logged no console errors; WebKit logged one CSP inline-style refusal and one optional `/api/health` 404 per load, four messages across initial load and reload. The [prior note](strategy-lab-cross-browser-partial.md) records a minimal native-select reproduction; visual impact is unknown.
 
 The comparison table is not recalculated from the scenario manifest: importing affects Strategy lab only. Therefore this sequence records the requested surfaces and their actual boundary; it does not establish a manifest-driven strategy comparison or general browser compatibility. The baseline `python -m pytest -W error tests/test_direct.py tests/test_evaluate.py` passed seven tests locally.
+
+## Standalone health response follow-up
+
+A later preview-server change gives `/api/health` a distinct
+`zephyrtrade-preview` identity. Repeating the same journey on 9 November
+2026 with Firefox 157.0 and WebKit 27.2 yielded the same nine comparison
+rows, 7 MW / 2,540 DKK scenario and 9 MW reload boundary. Neither browser
+logged the earlier optional-health 404. Firefox logged no console errors;
+WebKit logged one CSP inline-style refusal per load, two in total. Both
+still displayed **How to enable the Python cross-check**: the preview does not
+provide the local Python solver. The CSP policy and its unresolved visual
+impact are unchanged.
