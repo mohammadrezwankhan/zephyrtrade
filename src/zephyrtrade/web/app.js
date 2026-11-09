@@ -342,7 +342,9 @@ function renderView(target, markup) {
       opts={ylabel:'MW',max:D.capacity_mw,title:'Actual synthetic wind output and selected strategy offer',gaps:g.gaps};note=g.daily?'Daily means of retained hours. Metrics use every hourly record.':'Hourly output and offers. Excluded hours are left as gaps.';
     }
     const legend=chartMode==='revenue'?'<span><i class="actual"></i>Perfect foresight</span><span><i class="offer"></i>Selected strategy</span>':chartMode==='prices'?'<span><i class="actual"></i>Day-ahead</span><span><i class="offer"></i>Down-regulation</span><span><i class="gold"></i>Up-regulation</span>':'<span><i class="actual"></i>Actual output</span><span><i class="offer"></i>Selected offer</span>';
-    return `<div class="legend">${legend}</div>${lineChart(series,labels,{...opts,width})}<div class="chart-note"><span>${note}</span><span>UTC · ${num(ids.length,0)} records</span></div>`;
+    const headings=chartMode==='revenue'?['Perfect foresight (DKK)','Selected strategy (DKK)']:chartMode==='prices'?['Day-ahead (DKK/MWh)','Down-regulation (DKK/MWh)','Up-regulation (DKK/MWh)']:['Actual output (MW)','Selected offer (MW)'];
+    const rows=labels.map((label,i)=>`<tr><th scope="row">${esc(label)}</th>${series.map(s=>`<td class="number">${num(at(s.values,i),2)}</td>`).join('')}</tr>`).join('');
+    return `<div class="legend">${legend}</div>${lineChart(series,labels,{...opts,width})}<div class="chart-note"><span>${note}</span><span>UTC · ${num(ids.length,0)} records</span></div><details><summary>View chart data table</summary><div class="table-wrap"><table><caption class="sr-only">${esc(opts.title)} (rounded values)</caption><thead><tr><th scope="col">UTC interval</th>${headings.map(h=>`<th scope="col">${esc(h)}</th>`).join('')}</tr></thead><tbody>${rows}</tbody></table></div></details>`;
   }
   function turbineGlyph() {return `<svg class="wind-glyph" viewBox="0 0 240 105" role="img" aria-label="Wind turbine diagram"><defs><linearGradient id="tg" x2="0" y2="1"><stop stop-color="currentColor" stop-opacity=".2"/><stop offset="1" stop-color="currentColor" stop-opacity="0"/></linearGradient></defs><path d="M7 94H235M20 98h195" stroke="currentColor" stroke-opacity=".2"/><g fill="none" stroke="currentColor" stroke-width="1.2"><path d="M107 38 103 92h11l-4-54M174 47l-3 45h7l-3-45M57 58l-2 34h5l-2-34"/><path d="M109 38 105 3c8 3 9 17 4 35ZM109 38l31 16c-1 6-22-2-31-16ZM109 38 87 62c-6-3 7-20 22-24Z"/><circle cx="109" cy="38" r="3"/><path d="m174 47 0-25c5 2 5 15 0 25ZM174 47l22 13c-2 4-16-2-22-13ZM174 47l-16 18c-5-4 7-16 16-18Z"/><circle cx="174" cy="47" r="2"/><path d="M57 58V39c4 1 4 12 0 19Zm0 0 17 10c-2 3-12-1-17-10Zm0 0L45 72c-4-3 5-12 12-14Z"/><circle cx="57" cy="58" r="1.5"/></g><path d="M30 20h36M15 30h53M186 10h36M198 19h25" stroke="currentColor" stroke-opacity=".25" stroke-linecap="round"/></svg>`;}
   /** @param {number[]} ids */
@@ -404,7 +406,11 @@ function renderView(target, markup) {
       const plot=findElement(id);if(!plot || !plot.isConnected || plot.clientWidth<=0)return;
       const width=Math.max(160,Math.floor(plot.clientWidth));
       if(plot.dataset.chartWidth===String(width))return;
+      const detail=plot.querySelector('details'),wasOpen=detail?.open,wasFocused=detail?.contains(document.activeElement);
       plot.dataset.chartWidth=String(width);renderView(plot, draw(width));
+      const replacement=plot.querySelector('details');
+      if(replacement && wasOpen)replacement.open=true;
+      if(wasFocused)replacement?.querySelector('summary')?.focus({preventScroll:true});
     };
     redraw('overview-plot',width=>powerPlot(selectedModel(),indices(),width));
     const result=currentLab;

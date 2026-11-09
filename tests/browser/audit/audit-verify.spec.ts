@@ -735,6 +735,56 @@ test('All three chart measures render the correct accessible chart and finite ou
   }
 });
 
+test('Overview chart data remains readable by keyboard and matches the source', async ({ page }) => {
+  await open(page, 'overview');
+  const firstDailyMean = await page.evaluate(() => {
+    const data = (window as unknown as { ZEPHYR_DATA: { timestamps: string[]; actual: number[] } }).ZEPHYR_DATA;
+    const day = data.timestamps[0]?.slice(0, 10);
+    const values = data.actual.filter((_, i) => data.timestamps[i]?.startsWith(day ?? '') ?? false);
+    if (!day || !values.length) throw new Error('Missing first day');
+    return values.reduce((sum, value) => sum + value, 0) / values.length;
+  });
+  await page.locator('#overview-plot details > summary').focus(); await page.keyboard.press('Enter');
+  const dailyCell = await page.locator('#overview-plot table tbody tr').first().locator('td').first().innerText();
+  expect(numeric(dailyCell)).toBeCloseTo(firstDailyMean, 2);
+  await customDate(page);
+  const source = await page.evaluate(() => {
+    const data = (window as unknown as { ZEPHYR_DATA: {
+      timestamps: string[]; actual: number[]; day_ahead: number[]; up: number[]; down: number[];
+      models: { id: string; offers: number[] }[];
+    } }).ZEPHYR_DATA;
+    const i = data.timestamps.indexOf('2024-12-15T00:00:00Z');
+    const model = data.models.find(item => item.id === 'direct_regression');
+    if (i < 0 || !model) throw new Error('Missing source interval or strategy');
+    const values = { actual: data.actual[i] ?? NaN, offer: model.offers[i] ?? NaN,
+      da: data.day_ahead[i] ?? NaN, up: data.up[i] ?? NaN, down: data.down[i] ?? NaN };
+    if (!Object.values(values).every(Number.isFinite)) throw new Error('Invalid source interval');
+    return values;
+  });
+  const revenue = source.offer * source.da + Math.max(source.actual-source.offer, 0) * source.down
+    - Math.max(source.offer-source.actual, 0) * source.up;
+  for (const [mode, expected] of [
+    ['power', [source.actual, source.offer]],
+    ['revenue', [source.actual*source.da, revenue]],
+    ['prices', [source.da, source.down, source.up]],
+  ] as const) {
+    const button = page.locator(`[data-chart="${mode}"]`);
+    await button.focus(); await page.keyboard.press('Enter');
+    await expect(button).toBeFocused();
+    const summary = page.locator('#overview-plot details > summary');
+    await summary.focus(); await page.keyboard.press('Enter');
+    await expect(page.locator('#overview-plot details')).toHaveAttribute('open', '');
+    const cells = await page.locator('#overview-plot table tbody tr').first().locator('th,td').allTextContents();
+    expect(cells).toHaveLength(expected.length + 1);
+    expected.forEach((value, index) => {
+      expect(numeric(required(cells[index+1], 'table value'))).toBeCloseTo(value, 2);
+    });
+    await page.setViewportSize({ width: 1000, height: 900 });
+    await expect(page.locator('#overview-plot details')).toHaveAttribute('open', '');
+    await expect(page.locator('#overview-plot details > summary')).toBeFocused();
+  }
+});
+
 test('Overview shortcuts and brand navigation open their intended routes', async ({ page }) => {
   await open(page, 'overview');
   for (const route of ['lab', 'models'] as Route[]) {
