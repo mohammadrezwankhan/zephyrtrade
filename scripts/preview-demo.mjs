@@ -7,7 +7,14 @@ const port = Number(process.env.PORT ?? 4173);
 if (!Number.isInteger(port) || port < 0 || port > 65535) throw new Error('PORT must be an integer from 0 to 65535');
 const server = createServer((req, res) => {
   if (!['GET','HEAD'].includes(req.method ?? '')) { res.writeHead(405, {Allow:'GET, HEAD'}); res.end(); return; }
-  if (!['/','/index.html'].includes((req.url ?? '/').split('?')[0] ?? '')) { res.writeHead(404); res.end(); return; }
+  const path = (req.url ?? '/').split('?')[0] ?? '';
+  if (path === '/api/health') {
+    const health = JSON.stringify({service:'zephyrtrade-preview'});
+    res.writeHead(200, {'Content-Type':'application/json', 'Cache-Control':'no-store', 'X-Content-Type-Options':'nosniff'});
+    res.end(req.method === 'HEAD' ? undefined : health);
+    return;
+  }
+  if (!['/','/index.html'].includes(path)) { res.writeHead(404); res.end(); return; }
   res.writeHead(200, {'Content-Type':'text/html; charset=utf-8','Content-Length':page.length,'Cache-Control':'no-store','X-Content-Type-Options':'nosniff','Referrer-Policy':'no-referrer'});
   res.end(req.method === 'HEAD' ? undefined : page);
 });
