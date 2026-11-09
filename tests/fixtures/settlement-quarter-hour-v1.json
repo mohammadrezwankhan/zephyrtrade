@@ -1,0 +1,12 @@
+{
+  "version": 1,
+  "interval_hours": 0.25,
+  "offer_mw": 10,
+  "actual_mw": [7, 12],
+  "probabilities": [0.4, 0.6],
+  "day_ahead_dkk_per_mwh": 400,
+  "up_dkk_per_mwh": 600,
+  "down_dkk_per_mwh": 200,
+  "scenario_revenue_dkk": [550, 1100],
+  "expected_revenue_dkk": 880
+}

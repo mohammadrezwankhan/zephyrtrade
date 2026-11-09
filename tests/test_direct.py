@@ -2,6 +2,9 @@
 
 from __future__ import annotations
 
+import json
+from pathlib import Path
+
 import numpy as np
 import pytest
 
@@ -10,7 +13,43 @@ from zephyrtrade.direct import (
     probability_quantile_classes,
     probability_quantile_offers,
 )
-from zephyrtrade.optimize import perfect_foresight_offers
+from zephyrtrade.optimize import expected_scenario_revenue, perfect_foresight_offers
+
+
+def test_hand_checked_quarter_hour_settlement() -> None:
+    """Check a synthetic interval against independently calculated revenue."""
+    case = json.loads(
+        (Path(__file__).parent / "fixtures/settlement-quarter-hour-v1.json").read_text(
+            encoding="utf-8"
+        )
+    )
+    # 10 MW offered is 2.5 MWh. For 7 MW actual, 0.75 MWh
+    # shortfall costs 450 DKK: 1000 - 450 = 550 DKK. For 12 MW,
+    # 0.5 MWh surplus earns 100 DKK: 1000 + 100 = 1100 DKK.
+    # The 40%/60% weighted result is 0.4*550 + 0.6*1100 = 880 DKK.
+    for actual, expected in zip(
+        case["actual_mw"], case["scenario_revenue_dkk"], strict=True
+    ):
+        hourly = expected_scenario_revenue(
+            case["offer_mw"],
+            [actual],
+            [1.0],
+            case["day_ahead_dkk_per_mwh"],
+            case["up_dkk_per_mwh"],
+            case["down_dkk_per_mwh"],
+        )
+        assert hourly * case["interval_hours"] == pytest.approx(expected)
+    hourly_expected = expected_scenario_revenue(
+        case["offer_mw"],
+        case["actual_mw"],
+        case["probabilities"],
+        case["day_ahead_dkk_per_mwh"],
+        case["up_dkk_per_mwh"],
+        case["down_dkk_per_mwh"],
+    )
+    assert hourly_expected * case["interval_hours"] == pytest.approx(
+        case["expected_revenue_dkk"]
+    )
 
 
 def test_perfect_foresight_offer_equals_known_production() -> None:
