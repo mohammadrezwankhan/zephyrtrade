@@ -1,7 +1,7 @@
 <!doctype html>
 <html lang="en" data-theme="dark">
 <head>
-<meta http-equiv="Content-Security-Policy" content="default-src 'none'; base-uri 'none'; object-src 'none'; form-action 'none'; script-src 'self' 'sha256-CE90uTg3tj8zrDZlmCkfsZatVl3bl4oQ7s6VXqTCxwg=' 'sha256-HnBWjY1nbpni3rc+skcD3fRje52Upu11BEIfwIy2URE=' 'sha256-EJq2N9piW86ynf6PFOywCVjou33Wxq0t5QTjLzIAbic='; script-src-attr 'none'; style-src 'self' 'sha256-g0BJO0H8XJkxpXEVC6J52oOVKBVfdEdejwROgvoOCx8='; style-src-attr 'none'; img-src 'self' data: blob:; font-src 'self'; media-src 'self'; frame-src 'self'; connect-src 'self'; worker-src 'self'; manifest-src 'self'">
+<meta http-equiv="Content-Security-Policy" content="default-src 'none'; base-uri 'none'; object-src 'none'; form-action 'none'; script-src 'self' 'sha256-CE90uTg3tj8zrDZlmCkfsZatVl3bl4oQ7s6VXqTCxwg=' 'sha256-HnBWjY1nbpni3rc+skcD3fRje52Upu11BEIfwIy2URE=' 'sha256-EJq2N9piW86ynf6PFOywCVjou33Wxq0t5QTjLzIAbic='; script-src-attr 'none'; style-src 'self' 'sha256-+/JyXgwmDEYNj842DdqGrYWMJH8wqRX1W9URnMbMqpY='; style-src-attr 'none'; img-src 'self' data: blob:; font-src 'self'; media-src 'self'; frame-src 'self'; connect-src 'self'; worker-src 'self'; manifest-src 'self'">
 <meta charset="utf-8">
 <meta name="viewport" content="width=device-width, initial-scale=1">
 <meta name="color-scheme" content="dark light">
@@ -29,6 +29,12 @@ html[data-theme=light]{--bg:#f2f6f7;--sidebar:#fff;--surface:#fff;--raised:#edf3
 @media(max-width:760px){.chart text{font-size:18px}.chart{min-height:150px}}
 /* Compact charts use a measured viewBox so text remains 12 CSS pixels at supported widths. */
 .chart.chart-compact text{font-size:12px}
+
+/* Keep the overview chart controls easy to activate on compact screens. */
+@media(max-width:760px){
+  .chart-toolbar button{min-height:44px}
+  #overview-plot summary{min-height:44px;padding-block:11px}
+}
 
 </style>
 </head>
