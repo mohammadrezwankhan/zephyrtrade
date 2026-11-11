@@ -18,3 +18,9 @@ html[data-theme=light]{--bg:#f2f6f7;--sidebar:#fff;--surface:#fff;--raised:#edf3
 @media(max-width:760px){.chart text{font-size:18px}.chart{min-height:150px}}
 /* Compact charts use a measured viewBox so text remains 12 CSS pixels at supported widths. */
 .chart.chart-compact text{font-size:12px}
+
+/* Keep the overview chart controls easy to activate on compact screens. */
+@media(max-width:760px){
+  .chart-toolbar button{min-height:44px}
+  #overview-plot summary{min-height:44px;padding-block:11px}
+}
