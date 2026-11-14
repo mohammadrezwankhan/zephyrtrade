@@ -1,4 +1,4 @@
-![ZephyrTrade Wind-Market Lab: original vector system illustration](assets/hero-25d.svg)
+![ZephyrTrade Wind-Market Lab: original vector system illustration](assets/brand-uniformity/hero-25d.svg)
 
 ZephyrTrade links synthetic wind forecasts, offer optimization, backtests, and a local browser/Python research app. The companion begins with a generic gross-versus-net calculation before the source’s asymmetric settlement model.
 
