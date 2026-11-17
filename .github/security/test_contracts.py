@@ -867,5 +867,30 @@ class ScannerEvidenceTests(unittest.TestCase):
             report_validation.inspect_trivy(report, set())
 
 
+class WorkflowScannerTokenContractTests(unittest.TestCase):
+    """Keep authenticated release downloads limited to binary scanner modes."""
+
+    def test_binary_scanner_modes_receive_github_release_token(self) -> None:
+        """Prevent rate-limited anonymous API asset downloads in CI."""
+        workflow = (
+            pathlib.Path(__file__).resolve().parent.parent
+            / "workflows/hardened-ci.yml"
+        ).read_text()
+        bindings = [
+            line.strip()
+            for line in workflow.splitlines()
+            if line.lstrip().startswith("SCANNER_GITHUB_TOKEN:")
+        ]
+        self.assertEqual(len(bindings), 1)
+        binding = bindings[0]
+        self.assertIn("github.token", binding)
+        for mode in ("workflow", "secrets", "trivy"):
+            with self.subTest(mode=mode):
+                self.assertIn(f"matrix.mode == '{mode}'", binding)
+        for mode in ("sast", "dependencies"):
+            with self.subTest(mode=mode):
+                self.assertNotIn(f"matrix.mode == '{mode}'", binding)
+
+
 if __name__ == "__main__":
     unittest.main()
