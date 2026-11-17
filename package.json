@@ -18,7 +18,7 @@
     "@webgpu/types": "0.1.74",
     "eslint": "9.39.5",
     "globals": "17.14.0",
-    "parse5": "8.1.0",
+    "parse5": "8.1.1",
     "prettier": "3.9.10",
     "typescript": "5.9.3",
     "typescript-eslint": "8.55.0"
