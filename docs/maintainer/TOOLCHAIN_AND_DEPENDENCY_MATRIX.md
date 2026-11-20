@@ -1,0 +1,37 @@
+# Toolchain, dependency and rights matrix
+
+## Declared support versus observed environment
+
+| Component | Declared contract | This authoring observation |
+| --- | --- | --- |
+| Python | `>=3.11`; ordinary CI 3.11/3.12; pinned Linux reference 3.13.5 | 3.12.14; 255 tests and 54 subtests passed after disabling unrelated host plugin autoload |
+| Scientific libraries | NumPy 2.4.6, pandas 3.1.1, SciPy 1.17.1, scikit-learn 1.9.1, joblib 1.6.0, Matplotlib 3.11.2, threadpoolctl 3.8.0 in reference file | Those seven exact versions installed in isolated target; this does not turn Python 3.12 into the full 3.13.5 reference environment |
+| Project package | Version 1.1.0; setuptools>=77, wheel | sdist and wheel built locally with setuptools 84.2.1 / wheel 0.48.0; not uploaded or installed into a fresh separate environment |
+| Node/npm | Package requires Node>=22; workflows use Node 22/24 | Node 24.22.3/npm11.9.0 |
+| TypeScript / lint / format | Locked TypeScript 5.9.3, ESLint 9.39.5, Prettier 3.9.10 | Declared project type check, complete-dependency lint and five-file format scope passed |
+| Browser audit | Python and nested JS audit declare Playwright 1.65.0 | Nested package installed 1.65.0; attempted Python harness used host 1.62.0 and Chromium launch was denied before page load |
+| Tests | pytest>=9.0.3,<10; dev group pytest 9.2.0, coverage 7.1.0; Ruff 0.17.4 | Actual pytest 9.2.0/Ruff 0.17.4; initial plugin failure preserved |
+| Documentation renderer | Isolated stdlib Python helper invokes Pandoc for Markdown/MathML | Renderer version and deterministic output are captured in final docs validation; no new dependency manifest or deployment service |
+
+Sources: [pyproject.toml](https://github.com/mohammadrezwankhan/zephyrtrade/blob/29abf5d8bd6f05b1f0c027d8753f4837840215dc/pyproject.toml) [requirements-tested.txt](https://github.com/mohammadrezwankhan/zephyrtrade/blob/29abf5d8bd6f05b1f0c027d8753f4837840215dc/requirements-tested.txt) [package.json](https://github.com/mohammadrezwankhan/zephyrtrade/blob/29abf5d8bd6f05b1f0c027d8753f4837840215dc/package.json) [package-lock.json](https://github.com/mohammadrezwankhan/zephyrtrade/blob/29abf5d8bd6f05b1f0c027d8753f4837840215dc/package-lock.json) [tests/browser/audit/package.json](https://github.com/mohammadrezwankhan/zephyrtrade/blob/29abf5d8bd6f05b1f0c027d8753f4837840215dc/tests/browser/audit/package.json) [.github/workflows/ci.yml](https://github.com/mohammadrezwankhan/zephyrtrade/blob/29abf5d8bd6f05b1f0c027d8753f4837840215dc/.github/workflows/ci.yml).
+
+The broad package ranges are an installation contract, not evidence of exhaustive testing of every permitted version. Scientific pins are a Linux reference, not a cross-platform lock. Security scanner and quality environments have their own hash/lock requirements under `.github/security`; do not collapse them into the application runtime or change them in a documentation PR. [.github/security/quality.py](https://github.com/mohammadrezwankhan/zephyrtrade/blob/29abf5d8bd6f05b1f0c027d8753f4837840215dc/.github/security/quality.py) [.github/security/requirements.txt](https://github.com/mohammadrezwankhan/zephyrtrade/blob/29abf5d8bd6f05b1f0c027d8753f4837840215dc/.github/security/requirements.txt) [.github/security/requirements-bootstrap.txt](https://github.com/mohammadrezwankhan/zephyrtrade/blob/29abf5d8bd6f05b1f0c027d8753f4837840215dc/.github/security/requirements-bootstrap.txt)
+
+## Installation boundaries
+
+The portable Champion HTML carries its calculation engine and snapshot, so the native dashboard does not need a Python server for scenario calculation. The optional server uses SciPy locally. Model training requires the scientific Python stack and newly generated raw/processed tables. Browser auditing needs a working browser process and the nested audit install; Node numerical tests do not require browser graphics. The handbook is scriptless static HTML with MathML and CSS; offline relative links work when the relevant pages/assets are copied together. [src/zephyrtrade/web/index.html](https://github.com/mohammadrezwankhan/zephyrtrade/blob/29abf5d8bd6f05b1f0c027d8753f4837840215dc/src/zephyrtrade/web/index.html) [scripts/build_app.py](https://github.com/mohammadrezwankhan/zephyrtrade/blob/29abf5d8bd6f05b1f0c027d8753f4837840215dc/scripts/build_app.py) [scripts/build-browser.mjs](https://github.com/mohammadrezwankhan/zephyrtrade/blob/29abf5d8bd6f05b1f0c027d8753f4837840215dc/scripts/build-browser.mjs) [src/zephyrtrade/app.py](https://github.com/mohammadrezwankhan/zephyrtrade/blob/29abf5d8bd6f05b1f0c027d8753f4837840215dc/src/zephyrtrade/app.py)
+
+`npm ci --ignore-scripts` for root quality tools does not install `tests/browser/audit/node_modules`. The source quality driver separately discovers and installs nested Node projects. Dependency network access is installation-time capability, not an application runtime claim. [.github/security/quality.py:141–174](https://github.com/mohammadrezwankhan/zephyrtrade/blob/29abf5d8bd6f05b1f0c027d8753f4837840215dc/.github/security/quality.py#L141-L174)
+
+## Data, licensing and citation
+
+| Material | Known rights/provenance | Handling rule |
+| --- | --- | --- |
+| Repository source | MIT license; preserve license text and existing notices | Do not replace authorship or add unsupported commercial assurances. [LICENSE](https://github.com/mohammadrezwankhan/zephyrtrade/blob/29abf5d8bd6f05b1f0c027d8753f4837840215dc/LICENSE) |
+| Citation | CFF 1.2.0, contributor organization name, preview-2026.09.30, release date2026-09-30, MIT | Preserve metadata; validate schema without inventing a DOI or individual author. [CITATION.cff](https://github.com/mohammadrezwankhan/zephyrtrade/blob/29abf5d8bd6f05b1f0c027d8753f4837840215dc/CITATION.cff) |
+| Synthetic wind/weather/prices | Generated by native seeded code; provenance records references, timestamp and filtered counts | Public reference links are not fetched measured datasets or their license grants. [data/raw/provenance.json](https://github.com/mohammadrezwankhan/zephyrtrade/blob/29abf5d8bd6f05b1f0c027d8753f4837840215dc/data/raw/provenance.json) [src/zephyrtrade/data_loader.py:413–504](https://github.com/mohammadrezwankhan/zephyrtrade/blob/29abf5d8bd6f05b1f0c027d8753f4837840215dc/src/zephyrtrade/data_loader.py#L413-L504) |
+| Retained predictions/figures | Historical experiment derivatives in `artifacts` and `docs/figures` | Preserve bytes and label source revision; freshly computed lab values do not rewrite old observations |
+| Vendored engineering hero | Third-party Three.js license accompanies its vendor subtree | Preserve vendor source and separate notice; source indexing is not a semantic audit of that library. [assets/engineering-hero/v1/vendor/three/LICENSE](https://github.com/mohammadrezwankhan/zephyrtrade/blob/29abf5d8bd6f05b1f0c027d8753f4837840215dc/assets/engineering-hero/v1/vendor/three/LICENSE) |
+| Browser scenario imports/exports | User assumptions stored on device or exported files | Use fictional data; browser storage is not encrypted shared storage or cloud backup. [SECURITY.md](https://github.com/mohammadrezwankhan/zephyrtrade/blob/29abf5d8bd6f05b1f0c027d8753f4837840215dc/SECURITY.md) |
+
+A future measured-data adapter requires explicit access rights, schema/version/time provenance and redistribution assessment before data is added. This proposal does not claim a current connector, credentials or calibration. See [roadmap](../../ROADMAP.md).

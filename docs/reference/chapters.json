@@ -1,0 +1,128 @@
+{
+  "repository": "mohammadrezwankhan/zephyrtrade",
+  "source_sha": "29abf5d8bd6f05b1f0c027d8753f4837840215dc",
+  "reviewed": "2026-11-19",
+  "title": "ZephyrTrade reference handbook",
+  "chapters": [
+    {
+      "path": "README.md",
+      "label": "Project overview",
+      "group": "Start here"
+    },
+    {
+      "path": "CONTRIBUTING.md",
+      "label": "Contributing",
+      "group": "Start here"
+    },
+    {
+      "path": "CHANGELOG.md",
+      "label": "Change history",
+      "group": "Start here"
+    },
+    {
+      "path": "CITATION.cff",
+      "label": "Citation",
+      "group": "Start here"
+    },
+    {
+      "path": "SECURITY.md",
+      "label": "Security policy",
+      "group": "Start here"
+    },
+    {
+      "path": "ROADMAP.md",
+      "label": "Twelve-month roadmap",
+      "group": "Start here"
+    },
+    {
+      "path": "docs/INDEX.md",
+      "label": "Reading map",
+      "group": "Start here"
+    },
+    {
+      "path": "docs/developer/ARCHITECTURE.md",
+      "label": "Architecture",
+      "group": "Develop and use"
+    },
+    {
+      "path": "docs/developer/SETUP_AND_REPRODUCIBILITY.md",
+      "label": "Setup and reproducibility",
+      "group": "Develop and use"
+    },
+    {
+      "path": "docs/developer/API_CLI_AND_INTERFACES.md",
+      "label": "APIs, CLI and interfaces",
+      "group": "Develop and use"
+    },
+    {
+      "path": "docs/developer/WORKED_EXAMPLES_AND_LABS.md",
+      "label": "Worked examples and labs",
+      "group": "Develop and use"
+    },
+    {
+      "path": "docs/developer/TROUBLESHOOTING.md",
+      "label": "Troubleshooting",
+      "group": "Develop and use"
+    },
+    {
+      "path": "docs/math-and-physics/EQUATIONS_AND_DERIVATIONS.md",
+      "label": "Equations and derivations",
+      "group": "Models and units"
+    },
+    {
+      "path": "docs/math-and-physics/PARAMETERS_AND_SYMBOLS.md",
+      "label": "Parameters and symbols",
+      "group": "Models and units"
+    },
+    {
+      "path": "docs/math-and-physics/ASSUMPTIONS_AND_LIMITS.md",
+      "label": "Assumptions and limits",
+      "group": "Models and units"
+    },
+    {
+      "path": "docs/maintainer/VERIFICATION_EVIDENCE_LEDGER.md",
+      "label": "Verification evidence ledger",
+      "group": "Maintain and verify"
+    },
+    {
+      "path": "docs/maintainer/CI_CD_AND_RELEASE_PLAYBOOK.md",
+      "label": "CI, release and publication",
+      "group": "Maintain and verify"
+    },
+    {
+      "path": "docs/maintainer/TOOLCHAIN_AND_DEPENDENCY_MATRIX.md",
+      "label": "Toolchain and dependency matrix",
+      "group": "Maintain and verify"
+    },
+    {
+      "path": "docs/maintainer/FAILURE_MODES_AND_TECH_DEBT.md",
+      "label": "Failure modes and tech debt",
+      "group": "Maintain and verify"
+    },
+    {
+      "path": "docs/maintainer/DOCS_MAINTENANCE_RUNBOOK.md",
+      "label": "Docs maintenance runbook",
+      "group": "Maintain and verify"
+    },
+    {
+      "path": "docs/owner/ADR/ADR-0000-INDEX.md",
+      "label": "Decision index",
+      "group": "Own and recover"
+    },
+    {
+      "path": "docs/owner/GOVERNANCE_AND_SCOPE.md",
+      "label": "Governance and scope",
+      "group": "Own and recover"
+    },
+    {
+      "path": "docs/owner/BUS_FACTOR_RECOVERY_RUNBOOK.md",
+      "label": "Bus factor recovery runbook",
+      "group": "Own and recover"
+    },
+    {
+      "path": "docs/owner/PORTFOLIO_INTEGRATION.md",
+      "label": "Portfolio integration",
+      "group": "Own and recover"
+    }
+  ]
+}

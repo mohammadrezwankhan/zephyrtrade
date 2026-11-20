@@ -42,3 +42,9 @@ The project follows semantic versioning.
 - The indirect backtest uses realized prices ex post.
 - The perfect-foresight direct target equals realized production under the
   maintained single-scenario price ordering.
+
+## Unreleased documentation snapshot · 2026-11-19
+
+Added a source-pinned developer/science/maintainer/owner reference package, numerical examples, explicit API/browser/teaching boundaries, verification limits, recovery guidance and a proposed twelve-month roadmap. Added a static handbook reading view through existing documentation navigation. Preserved the original application, numerical algorithms, result data, workflows, dependencies, license, citation authorship and security policy.
+
+The local documentation effort records new source checks and bounded examples; it does not recreate the historical full training experiment. The recorded Chromium attempt was blocked before page load. Commit, independent review, candidate CI, merge and publication receipts remain separate integration records. This entry does not create a release/tag, change package 1.1.0 or replace the existing CFF preview identity. See the [evidence ledger](docs/maintainer/VERIFICATION_EVIDENCE_LEDGER.md).
