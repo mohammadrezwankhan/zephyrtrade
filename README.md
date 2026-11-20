@@ -277,3 +277,8 @@ package with its precompiled web snapshot, not a standalone Windows executable.
 [Open ZephyrTrade in MKLab](https://mktrade.co.business/)
 [Traceability checks and source-observation scope](docs/MKLAB_TRACEABILITY.md)
 <!-- mklab-traceability:end -->
+
+
+## Source-backed reference handbook — November 2026
+
+The [24-path documentation index](docs/INDEX.md) links source-specific architecture, setup, CLI/API contracts, settlement equations, synthetic worked examples, maintainer checks and owner recovery guidance. These new pages document source commit `29abf5d8bd6f05b1f0c027d8753f4837840215dc`; they do not change numerical behavior, announce a release, validate live trading or provide a new deployment receipt. The existing [historical quality report](QUALITY_REPORT.md) continues to identify its own tested source revision.
