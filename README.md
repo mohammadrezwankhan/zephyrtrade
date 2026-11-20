@@ -277,3 +277,11 @@ package with its precompiled web snapshot, not a standalone Windows executable.
 [Open ZephyrTrade in MKLab](https://mktrade.co.business/)
 [Traceability checks and source-observation scope](docs/MKLAB_TRACEABILITY.md)
 <!-- mklab-traceability:end -->
+
+## Source-pinned reference package · 19 November 2026
+
+The [complete documentation index](docs/INDEX.md) and [reference handbook](docs/reference/index.html) add developer, maintainer and owner guidance for source `29abf5d8bd6f05b1f0c027d8753f4837840215dc`. Read the [native interfaces and controls](docs/developer/API_CLI_AND_INTERFACES.md), [worked examples](docs/developer/WORKED_EXAMPLES_AND_LABS.md), [equations and units](docs/math-and-physics/EQUATIONS_AND_DERIVATIONS.md), [verification ledger](docs/maintainer/VERIFICATION_EVIDENCE_LEDGER.md) and [twelve-month proposals](ROADMAP.md).
+
+The dated local observations include 255 Python tests plus 54 subtests, 58 distinct native JavaScript tests, 120 numerical parity cases, a new bounded research smoke, static export checks and four numerical labs. Initial test/lint environment failures are retained; Chromium could not launch, so no fresh visual/browser acceptance is claimed. Historical counts, screenshots and results above remain their original observations. Source CI, candidate checks, merge and publication are separate outcomes.
+
+The native wind model uses synthetic MW/MWh and DKK settlement; the companion remains a separate USD/basis-point teaching proxy. Neither proves live profitability or submits orders. A demonstrated low-level probability-mass inconsistency is documented as debt; normalized UI/API behavior and all numerical code remain unchanged.

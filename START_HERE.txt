@@ -22,3 +22,12 @@ Save scenario JSON backups. Browser storage is not a cloud backup.
 Normal-browser file opening and native persistence need your acceptance check.
 Read README.md and docs/champion/AUDIT_AND_RELEASE.md for verified results,
 blocked checks, training warnings and the release checklist.
+
+DATED SOURCE-CHECKOUT NOTE — 2026-11-19
+The original ZIP-oriented instructions above are preserved. The pinned Git tree
+29abf5d8bd6f05b1f0c027d8753f4837840215dc contains the portable HTML and selected
+research artifacts, but no checked-in wheel or full original training tables.
+A locally built wheel is a new build, not evidence that a downloaded ZIP has one.
+Read docs/INDEX.md or docs/reference/index.html for exact setup, source contracts,
+bounded examples and the current verification limits. Chromium could not launch
+in the documentation worker; native-origin browser acceptance remains separate.
