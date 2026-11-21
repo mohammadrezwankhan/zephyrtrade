@@ -38,7 +38,7 @@ Read the [reference handbook](reference/index.html) for a single scriptless read
 - [Interactive teaching companion](index.html): four modules of a USD/basis-point synthetic model; no native wind settlement or backtest execution.
 - [Native lessons](native-lessons.html) and [source reading paths](portfolio/index.html): existing learning/navigation aids with historical source provenance.
 - [Research README](../README_RESEARCH.md), [academic report](report.md) and [architecture map](architecture/system-overview.md): preserved research narrative and original results; current-source qualifications live in the canonical package above.
-- [Champion audit/release notes](champion/AUDIT_AND_RELEASE.md), [existing quality report](../QUALITY_REPORT.md) and [Cloudflare build guide](CLOUDFLARE.md): their dated evidence is preserved; none substitutes for a later candidate or deployment check.
+- [Current research release scope](champion/RESEARCH_RELEASE_SCOPE.md) and [historical champion audit/release notes](champion/AUDIT_AND_RELEASE.md): the dated CI and scientific limitations are not interchangeable with live-market validity. See also the [existing quality report](../QUALITY_REPORT.md) and [Cloudflare build guide](CLOUDFLARE.md).
 - [License](../LICENSE), [code of conduct](../CODE_OF_CONDUCT.md), [support](../SUPPORT.md) and [repository instructions](../AGENTS.md): existing project policies.
 
 ## Suggested reading routes
