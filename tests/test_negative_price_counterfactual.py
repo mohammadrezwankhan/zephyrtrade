@@ -48,9 +48,7 @@ def test_negative_price_exclusion_changes_the_evaluation_population() -> None:
 
     # The single non-oracle synthetic case demonstrates positive-only selection bias.
     offers = np.array([3.0, 4.0, 8.0, 0.0])
-    revenue = realized_market_revenue(
-        offers, actual, prices_da, prices_up, prices_down
-    )
+    revenue = realized_market_revenue(offers, actual, prices_da, prices_up, prices_down)
     np.testing.assert_array_equal(revenue, [140.0, -560.0, 1600.0, 0.0])
     assert float(revenue.sum()) == 1180.0
     assert float(revenue[retained].sum()) == 1740.0

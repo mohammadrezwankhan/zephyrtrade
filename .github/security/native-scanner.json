@@ -642,7 +642,7 @@
       "name": "opam",
       "kind": "executable",
       "destination": "tools/opam",
-      "url": "https://api.github.com/repos/ocaml/opam/releases/assets/470873882",
+      "url": "https://github.com/ocaml/opam/releases/download/2.5.2/opam-2.5.2-x86_64-linux",
       "sha256": "edfca2630c373b44b7ee1c2f81cd8dcf67468d0db57d6c02158de553ac63dbd4",
       "audit": {
         "commit": "ad0564f20c6306bc83085fe663cab903fe887208"
