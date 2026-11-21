@@ -284,7 +284,7 @@ def _load_indirect_offer(
     test_frame: pd.DataFrame,
     phase2_prediction_path: Path,
 ) -> NDArray[np.float64]:
-    """Load and rigorously align the Phase 2 winning offer to Phase 3 test rows."""
+    """Load the fixed locally weighted Phase 2 comparator on aligned test rows."""
     path = Path(phase2_prediction_path)
     if not path.exists():
         raise FileNotFoundError(f"Phase 2 test predictions not found: {path}")

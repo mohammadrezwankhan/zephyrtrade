@@ -20,7 +20,7 @@ export default defineConfig({
     },
   }),
   testDir: '.',
-  testMatch: 'audit-verify.spec.ts',
+  testMatch: ['audit-verify.spec.ts', 'file-origin.spec.ts'],
   timeout: 45_000,
   expect: { timeout: 10_000 },
   fullyParallel: true,
