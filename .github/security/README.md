@@ -66,6 +66,17 @@ organization/project identifiers, authorized credentials and quality-gate settin
 an analysis can run. No external project activation, successful analysis, or quality-gate pass is
 claimed. Supply the registered identifiers to the scanner; never fabricate account/project IDs.
 
+
+The pinned opam 2.5.2 Linux bootstrap binary is retrieved through its official
+GitHub **release-download** URL, rather than the REST release-asset endpoint,
+which returned an HTTP error in a real SAST runner on 21 November 2026.
+GitHub's release-asset metadata identifies the two URLs as the same asset
+(ID 470873882) with SHA-256
+`edfca2630c373b44b7ee1c2f81cd8dcf67468d0db57d6c02158de553ac63dbd4`.
+The native download stage still compares the exact downloaded binary against
+that pinned hash **before execution**. Any mismatch or unavailable download
+fails SAST; no insecure fallback or skipped verification is added.
+
 ## Mandatory language and numerical quality
 
 Hardened CI runs Python Ruff, strict Mypy, branch-enabled pytest coverage, ESLint,
@@ -117,6 +128,19 @@ and dependency audits. No vulnerability IDs or scanner findings are suppressed.
 Remove this exact-parent override once an upstream parent release naturally
 resolves a version fixed for the advisory, then regenerate the lock and rerun
 those compatibility and security checks.
+
+## CVE-2026-132276 OpenGrep wheel metadata compatibility
+
+OpenGrep 1.33.1 declares `wcmatch~=8.3` in its Python wheel metadata, while
+`.github/security/requirements.in` and the hashed lock now require fixed
+`wcmatch==11.2`. The pinned source bootstrap verifies archive hashes before
+extraction. Immediately before building the scanner's local wheel, the native
+builder replaces **only** the single expected upstream `wcmatch~=8.3` metadata
+string with `wcmatch==11.2`. Unexpected or duplicate source declarations
+fail closed; targeted tests guard this behavior. The normal hash-verified wheel
+installation, `pip check`, native SAST execution, and dependency vulnerability
+audit remain mandatory. This is a scoped compatibility exception, not a claim
+that all changed glob-matching semantics have been independently audited.
 
 ## Scanner dependency remediation
 

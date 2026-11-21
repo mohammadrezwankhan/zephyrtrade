@@ -7,7 +7,7 @@ a trading optimization problem with a direct workflow that predicts the bid
 itself.
 
 The four-phase repository is complete. It includes a deterministic four-farm
-data pipeline, leakage-safe features, a stochastic trading linear program, six
+data pipeline, chronologically shifted features (not day-ahead-vintage verified), a stochastic trading linear program, six
 wind-power models plus a persistence baseline, revenue backtesting,
 regularization and clustering analysis, direct continuous and discrete offer
 learning, automated tests, continuous integration, and a final academic report.
@@ -27,8 +27,8 @@ learning, automated tests, continuous integration, and a final academic report.
 - **Model 1 - indirect trading:** climate and lagged production features feed
   linear, nonlinear, locally weighted, Ridge, Lasso, and clustered regressors.
   Their wind forecasts feed a day-ahead/balancing-market linear program.
-- **Model 2 - direct trading:** the same information set, augmented only by
-  variables available at bid time, predicts either a continuous offer or a
+- **Model 2 - direct trading:** the same historical synthetic features, which are not verified to be
+  available at a real day-ahead bid deadline, predicts either a continuous offer or a
   discrete bid bracket learned from perfect-foresight optimal decisions.
 - **Evaluation:** models are compared on RMSE, MAE, R-squared, realized revenue,
   revenue regret, and operational feasibility.
@@ -164,6 +164,13 @@ python -m pytest -W error
 python -m ruff check src tests
 python -m ruff format --check src tests
 ```
+
+**Information-availability qualification.** Historical hourly lags and trailing
+statistics are computed relative to delivery intervals, not a verified previous-day
+market gate closure. Same-timestamp synthetic weather values are forecast-time
+proxies without forecast issuance/vintage timestamps, and the offer backtest
+uses realised test-period prices ex post. Model rankings and revenue estimates
+are retrospective synthetic results, not validated prospective bidding outcomes.
 
 ## Phase 2 indirect-model experiment
 

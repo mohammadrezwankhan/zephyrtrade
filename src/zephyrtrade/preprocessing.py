@@ -1,4 +1,4 @@
-"""Engineer leakage-safe wind features and chronological model splits."""
+"""Engineer retrospective wind features and chronological model splits."""
 
 from __future__ import annotations
 
@@ -123,7 +123,7 @@ def engineer_features(
     market_prices: pd.DataFrame,
     config: PreprocessingConfig,
 ) -> pd.DataFrame:
-    """Build a point-in-time-correct feature matrix for one selected wind farm."""
+    """Build delivery-time synthetic features; issuance vintages are not certified."""
     _validate_selected_farm(wind_power, climate, config.farm_id)
     farm_power = (
         wind_power.loc[wind_power["farm_id"] == config.farm_id]

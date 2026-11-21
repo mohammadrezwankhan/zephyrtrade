@@ -118,8 +118,11 @@ def solve_single_period_offer_lp(
     )
     if scenarios.size != probabilities.size:
         raise ValueError("Scenarios and probabilities must have the same length.")
-    if (probabilities < 0.0).any() or not np.isclose(probabilities.sum(), 1.0):
+    probability_total = float(probabilities.sum())
+    if (probabilities < 0.0).any() or not np.isclose(probability_total, 1.0):
         raise ValueError("Scenario probabilities must be nonnegative and sum to one.")
+    # Convert tolerated roundoff to a valid probability measure before the LP.
+    probabilities = probabilities / probability_total
     if not np.isfinite(capacity_mw) or capacity_mw <= 0.0:
         raise ValueError("capacity_mw must be finite and positive.")
     if (scenarios < 0.0).any() or (scenarios > capacity_mw).any():
@@ -228,14 +231,17 @@ def expected_scenario_revenue(
         scenario_probabilities,
         "scenario_probabilities",
     )
+    probability_total = float(probabilities.sum())
     if (
         scenarios.size != probabilities.size
         or (probabilities < 0.0).any()
-        or not np.isclose(probabilities.sum(), 1.0)
+        or not np.isclose(probability_total, 1.0)
     ):
         raise ValueError(
             "Scenario probabilities must be nonnegative, align and sum to one."
         )
+    # Apply the same accepted probability-mass contract as the LP.
+    probabilities = probabilities / probability_total
     if not np.isfinite(offer_mw) or offer_mw < 0.0:
         raise ValueError("offer_mw must be finite and nonnegative.")
     if (scenarios < 0.0).any():
