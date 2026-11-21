@@ -118,6 +118,19 @@ Remove this exact-parent override once an upstream parent release naturally
 resolves a version fixed for the advisory, then regenerate the lock and rerun
 those compatibility and security checks.
 
+## CVE-2026-132276 OpenGrep wheel metadata compatibility
+
+OpenGrep 1.33.1 declares `wcmatch~=8.3` in its Python wheel metadata, while
+`.github/security/requirements.in` and the hashed lock now require fixed
+`wcmatch==11.2`. The pinned source bootstrap verifies archive hashes before
+extraction. Immediately before building the scanner's local wheel, the native
+builder replaces **only** the single expected upstream `wcmatch~=8.3` metadata
+string with `wcmatch==11.2`. Unexpected or duplicate source declarations
+fail closed; targeted tests guard this behavior. The normal hash-verified wheel
+installation, `pip check`, native SAST execution, and dependency vulnerability
+audit remain mandatory. This is a scoped compatibility exception, not a claim
+that all changed glob-matching semantics have been independently audited.
+
 ## Scanner dependency remediation
 
 The historical Semgrep 1.183.0 distribution requires vulnerable MCP and

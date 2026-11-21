@@ -29,6 +29,19 @@ HOSTED_SANDBOX = Path("/usr/libexec/rezwan-native-sandbox/bin/bwrap")
 HOSTED_POLICY = Path("/etc/apparmor.d/rezwan-native-bwrap")
 
 
+def pin_opengrep_wcmatch(setup: Path) -> None:
+    """Replace only OpenGrep's incompatible vulnerable scanner dependency metadata.
+
+    Upstream source bytes are verified before extraction; refuse unexpected layout.
+    The installed wheel still undergoes the normal pip check after installation.
+    """
+    source = setup.read_text(encoding="utf-8")
+    upstream = '"wcmatch~=8.3"'
+    if source.count(upstream) != 1:
+        raise RuntimeError("Expected exactly one upstream OpenGrep wcmatch requirement")
+    setup.write_text(source.replace(upstream, '"wcmatch==11.2"'), encoding="utf-8")
+
+
 def verify_blob(blob: bytes, expected: str) -> None:
     """Require an explicit SHA-256 before downloaded bytes can be used."""
     if re.fullmatch(r"[0-9a-f]{64}", expected) is None:
@@ -465,7 +478,7 @@ def input_identity() -> str:
 
 
 class Builder:
-    """Build upstream targets from locked inputs without changing their constraints."""
+    """Build locked upstream targets with one explicit security metadata override."""
 
     def __init__(
         self, destination: Path, output: Path, manifest: dict[str, Any]
@@ -900,6 +913,7 @@ class Builder:
         validate_scanner_libraries(linked)
         wheel_output = self.work / "wheel-output"
         wheel_output.mkdir()
+        pin_opengrep_wcmatch(self.source / "cli/setup.py")
         self.command(
             "opengrep-wheel",
             [

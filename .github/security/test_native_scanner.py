@@ -375,6 +375,32 @@ class CachedBuildIntegrityTests(unittest.TestCase):
             )
 
 
+class OpenGrepPackagingTests(unittest.TestCase):
+    """Security override must be exact, minimal and fail closed on drift."""
+
+    def test_only_known_upstream_dependency_is_rewritten(self) -> None:
+        with tempfile.TemporaryDirectory() as temporary:
+            setup = Path(temporary) / "setup.py"
+            setup.write_text('install_requires = ["wcmatch~=8.3", "attrs>=21.3"]\n')
+            native_scanner.pin_opengrep_wcmatch(setup)
+            self.assertEqual(
+                setup.read_text(),
+                'install_requires = ["wcmatch==11.2", "attrs>=21.3"]\n',
+            )
+            with self.assertRaisesRegex(RuntimeError, "upstream OpenGrep"):
+                native_scanner.pin_opengrep_wcmatch(setup)
+
+    def test_unknown_or_duplicated_upstream_requirement_is_rejected(self) -> None:
+        for value in ('install_requires = ["wcmatch>=11.2"]\n',
+                      'install_requires = ["wcmatch~=8.3", "wcmatch~=8.3"]\n'):
+            with self.subTest(source=value), tempfile.TemporaryDirectory() as temporary:
+                setup = Path(temporary) / "setup.py"
+                setup.write_text(value)
+                with self.assertRaisesRegex(RuntimeError, "upstream OpenGrep"):
+                    native_scanner.pin_opengrep_wcmatch(setup)
+                self.assertEqual(setup.read_text(), value)
+
+
 class BuildFailureEvidenceTests(unittest.TestCase):
     """Failed external build steps must retain a truthful terminal receipt."""
 
