@@ -379,6 +379,7 @@ class OpenGrepPackagingTests(unittest.TestCase):
     """Security override must be exact, minimal and fail closed on drift."""
 
     def test_only_known_upstream_dependency_is_rewritten(self) -> None:
+        """The source-metadata override must preserve unrelated dependencies."""
         with tempfile.TemporaryDirectory() as temporary:
             setup = Path(temporary) / "setup.py"
             setup.write_text('install_requires = ["wcmatch~=8.3", "attrs>=21.3"]\n')
@@ -391,9 +392,15 @@ class OpenGrepPackagingTests(unittest.TestCase):
                 native_scanner.pin_opengrep_wcmatch(setup)
 
     def test_unknown_or_duplicated_upstream_requirement_is_rejected(self) -> None:
-        for value in ('install_requires = ["wcmatch>=11.2"]\n',
-                      'install_requires = ["wcmatch~=8.3", "wcmatch~=8.3"]\n'):
-            with self.subTest(source=value), tempfile.TemporaryDirectory() as temporary:
+        """Unexpected upstream declarations must fail without modifying source."""
+        for value in (
+            'install_requires = ["wcmatch>=11.2"]\n',
+            'install_requires = ["wcmatch~=8.3", "wcmatch~=8.3"]\n',
+        ):
+            with (
+                self.subTest(source=value),
+                tempfile.TemporaryDirectory() as temporary,
+            ):
                 setup = Path(temporary) / "setup.py"
                 setup.write_text(value)
                 with self.assertRaisesRegex(RuntimeError, "upstream OpenGrep"):
