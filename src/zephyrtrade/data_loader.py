@@ -368,7 +368,7 @@ def filter_negative_price_intervals(
 
     prices = market_prices.loc[:, list(PRICE_COLUMNS)]
     if not np.isfinite(prices.to_numpy(dtype=float)).all():
-        raise ValueError("Market prices must be finite before negative-price filtering.")
+        raise ValueError("Market prices must be finite before filtering.")
     keep_mask = prices.ge(0.0).all(axis=1)
     filtered = market_prices.loc[keep_mask].reset_index(drop=True)
     total_rows = len(market_prices)

@@ -70,9 +70,7 @@ def test_negative_price_filter_rejects_nonfinite_source_prices(
     """Missing/infinite prices must not be counted as negative or retained."""
     prices = pd.DataFrame(
         {
-            "timestamp_utc": pd.date_range(
-                "2024-07-01", periods=3, freq="h", tz="UTC"
-            ),
+            "timestamp_utc": pd.date_range("2024-07-01", periods=3, freq="h", tz="UTC"),
             "day_ahead_price_dkk_mwh": [100.0, bad_price, -50.0],
             "up_reg_price_dkk_mwh": [110.0, 120.0, 60.0],
             "down_reg_price_dkk_mwh": [90.0, 100.0, 40.0],
