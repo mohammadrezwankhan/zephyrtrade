@@ -88,7 +88,10 @@ def illustrative_issued_offers(
         if not eligible:
             raise ValueError(f"No timely issued forecast for {delivery.isoformat()}")
         eligible.sort(key=lambda vintage: (vintage[0], vintage[1]))
-        if len(eligible) > 1 and eligible[-1][:2] == eligible[-2][:2]:
+        # An issuance timestamp identifies one source version, regardless of
+        # when identical-timestamp records became available. Never choose an
+        # arbitrary version from contradictory issue-time records.
+        if len(eligible) > 1 and eligible[-1][0] == eligible[-2][0]:
             raise ValueError("Conflicting or duplicate newest forecast vintage")
         offers.append(min(max(eligible[-1][2], 0.0), capacity_mw))
     return tuple(offers)
