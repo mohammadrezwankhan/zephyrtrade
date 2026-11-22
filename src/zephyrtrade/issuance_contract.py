@@ -8,7 +8,7 @@ from __future__ import annotations
 
 from collections.abc import Sequence
 from dataclasses import dataclass
-from datetime import datetime, time, timedelta, timezone
+from datetime import UTC, datetime, time, timedelta
 from math import isfinite
 from zoneinfo import ZoneInfo
 
@@ -30,7 +30,7 @@ def _aware_utc(value: datetime, field: str) -> datetime:
     """Normalize an aware timestamp to UTC; never guess an absent timezone."""
     if value.tzinfo is None or value.utcoffset() is None:
         raise ValueError(f"{field} must be timezone-aware")
-    return value.astimezone(timezone.utc)
+    return value.astimezone(UTC)
 
 
 def illustrative_gate_utc(delivery_utc: datetime) -> datetime:
@@ -38,7 +38,7 @@ def illustrative_gate_utc(delivery_utc: datetime) -> datetime:
     delivery = _aware_utc(delivery_utc, "delivery_utc")
     previous_day = delivery.astimezone(_COPENHAGEN).date() - timedelta(days=1)
     local_gate = datetime.combine(previous_day, time(12), tzinfo=_COPENHAGEN)
-    return local_gate.astimezone(timezone.utc)
+    return local_gate.astimezone(UTC)
 
 
 def illustrative_issued_offers(
