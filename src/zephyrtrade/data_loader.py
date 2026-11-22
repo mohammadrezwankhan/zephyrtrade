@@ -368,6 +368,15 @@ def filter_negative_price_intervals(
     if market_prices.empty:
         raise ValueError("Market-price table must contain at least one interval.")
 
+    # A duplicate delivery time can create contradictory prices and bias masks.
+    # Check timestamps before dropping any rows so anomalies cannot disappear.
+    if "timestamp_utc" in market_prices.columns:
+        timestamps = market_prices["timestamp_utc"]
+        if timestamps.isna().any():
+            raise ValueError("Market-price timestamps must not be missing.")
+        if timestamps.duplicated().any():
+            raise ValueError("Market-price timestamps must be unique before filtering.")
+
     prices = market_prices.loc[:, list(PRICE_COLUMNS)]
     if not np.isfinite(prices.to_numpy(dtype=float)).all():
         raise ValueError("Market prices must be finite before filtering.")
