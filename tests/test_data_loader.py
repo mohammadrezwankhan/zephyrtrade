@@ -65,6 +65,19 @@ def test_writer_emits_complete_source_contract(tmp_path: Path) -> None:
     assert all(path.exists() and path.stat().st_size > 0 for path in paths.values())
 
 
+def test_negative_price_filter_rejects_fully_excluded_population() -> None:
+    """Reject a zero-row evaluation population after valid negative-price filtering."""
+    prices = pd.DataFrame(
+        {
+            "day_ahead_price_dkk_mwh": [-1.0, -2.0],
+            "up_reg_price_dkk_mwh": [5.0, 6.0],
+            "down_reg_price_dkk_mwh": [3.0, 4.0],
+        }
+    )
+    with pytest.raises(ValueError, match="No nonnegative price intervals remain"):
+        filter_negative_price_intervals(prices)
+
+
 def test_negative_price_filter_rejects_empty_table() -> None:
     """Empty source rows must not cause an uninformative zero-division error."""
     prices = pd.DataFrame(columns=PRICE_COLUMNS)

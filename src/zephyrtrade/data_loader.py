@@ -372,6 +372,8 @@ def filter_negative_price_intervals(
     if not np.isfinite(prices.to_numpy(dtype=float)).all():
         raise ValueError("Market prices must be finite before filtering.")
     keep_mask = prices.ge(0.0).all(axis=1)
+    if not keep_mask.any():
+        raise ValueError("No nonnegative price intervals remain after filtering.")
     filtered = market_prices.loc[keep_mask].reset_index(drop=True)
     total_rows = len(market_prices)
     removed_rows = int((~keep_mask).sum())
