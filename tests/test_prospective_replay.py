@@ -197,9 +197,16 @@ def test_schedule_is_decision_time_only_and_outcomes_only_change_scores() -> Non
         availability=1.0,
     )
     assert score["common_interval_count"] == changed_score["common_interval_count"] == 4
-    assert score["baselines"]["previous_day_same_interval"]["mae_eur_mwh"] == 10.0
-    changed = changed_score["baselines"]["previous_day_same_interval"]["mae_eur_mwh"]
-    assert changed == 900.0
+    baseline_scores = score["baselines"]
+    changed_baselines = changed_score["baselines"]
+    assert isinstance(baseline_scores, dict)
+    assert isinstance(changed_baselines, dict)
+    baseline = baseline_scores["previous_day_same_interval"]
+    changed_baseline = changed_baselines["previous_day_same_interval"]
+    assert isinstance(baseline, dict)
+    assert isinstance(changed_baseline, dict)
+    assert baseline["mae_eur_mwh"] == 10.0
+    assert changed_baseline["mae_eur_mwh"] == 900.0
 
 
 def test_two_price_baselines_use_the_same_utc_intersection() -> None:
@@ -228,11 +235,13 @@ def test_two_price_baselines_use_the_same_utc_intersection() -> None:
     assert result["common_delivery_starts_utc"] == [
         point.isoformat().replace("+00:00", "Z") for point in deliveries[1:3]
     ]
-    assert set(result["baselines"]) == {
+    baselines = result["baselines"]
+    assert isinstance(baselines, dict)
+    assert set(baselines) == {
         "previous_day_same_interval",
         "previous_day_area_mean",
     }
     assert all(
-        score["n"] == result["common_interval_count"]
-        for score in result["baselines"].values()
+        isinstance(entry, dict) and entry["n"] == result["common_interval_count"]
+        for entry in baselines.values()
     )

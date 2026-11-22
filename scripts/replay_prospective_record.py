@@ -439,7 +439,12 @@ def replay(
         delivery_date=delivery_date,
         timezone_name=manifest["timezone"],
     )
-    mask = price_score.pop("common_delivery_starts_utc")
+    mask_value = price_score.pop("common_delivery_starts_utc")
+    if not isinstance(mask_value, list) or not all(
+        isinstance(item, str) for item in mask_value
+    ):
+        raise ValueError("scored shared mask must be a list of UTC timestamp strings")
+    mask = [item for item in mask_value if isinstance(item, str)]
     mask_hash = hashlib.sha256(("\n".join(mask) + "\n").encode("utf-8")).hexdigest()
     if {point.delivery_utc for point in schedule} != set(clearing_by_target):
         raise ValueError("proxy schedule and auction outcomes do not share a full mask")

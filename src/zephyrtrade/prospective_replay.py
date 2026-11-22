@@ -338,13 +338,13 @@ def score_price_forecasts(
         forecast_by_delivery[target] = value
 
     outcome_by_delivery: dict[datetime, float] = {}
-    for point in outcomes:
-        if point.area != area:
+    for outcome in outcomes:
+        if outcome.area != area:
             continue
-        target = _require_quarter_hour(point.delivery_utc, "outcome.delivery_utc")
+        target = _require_quarter_hour(outcome.delivery_utc, "outcome.delivery_utc")
         if target.astimezone(zone).date() != delivery_date:
             continue
-        value = float(point.price_eur_mwh)
+        value = float(outcome.price_eur_mwh)
         if not isfinite(value):
             raise ValueError("auction outcome must be finite")
         if target in outcome_by_delivery:
