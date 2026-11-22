@@ -1,0 +1,82 @@
+{
+  "schema_version": 1,
+  "classification": "single_day_prospective_shadow_diagnostic",
+  "delivery_date_local": "2026-11-23",
+  "timezone": "Europe/Copenhagen",
+  "market_area": "DK2",
+  "gate": {
+    "local": "2026-11-22T12:00:00+01:00",
+    "utc": "2026-11-22T11:00:00Z",
+    "source": "https://www.nordpoolgroup.com/48e2df/globalassets/download-center/rules-and-regulations/product-specifications-nordic-and-baltic-january-2026.pdf"
+  },
+  "proxy": {
+    "name": "Ronne educational geographic proxy",
+    "latitude": 55.1,
+    "longitude": 14.706,
+    "capacity_mw": 30.0,
+    "wake_efficiency": 0.94,
+    "availability": 1.0,
+    "power_curve_ms": {
+      "cut_in": 3.0,
+      "rated": 12.0,
+      "cut_out": 25.0
+    }
+  },
+  "inputs": {
+    "weather": {
+      "provider": "Open-Meteo Single Runs API",
+      "model": "ECMWF IFS",
+      "model_run_utc": "2026-11-22T00:00:00Z",
+      "observed_by_utc": "2026-11-22T07:59Z",
+      "observed_lower_bound_utc": "2026-11-22T07:59:00Z",
+      "observed_upper_bound_utc": "2026-11-22T08:00:00Z",
+      "observation_precision": "minute; conservative exclusive upper bound 2026-11-22T08:00:00Z",
+      "request_url": "https://single-runs-api.open-meteo.com/v1/forecast?latitude=55.1&longitude=14.706&hourly=wind_speed_100m%2Cwind_direction_100m&wind_speed_unit=ms&timezone=Europe%2FCopenhagen&forecast_days=3&run=2026-11-22T00%3A00&models=ecmwf_ifs",
+      "body_sha256": "fbab99212481ead38dcf87d9bd7d956ab5f759a95dea123f58da7e04603e1460",
+      "snapshot_sha256": "525bf9f48e56b4c5a7db16870f79cd9726dd8d32361ae388a5305d29201ccfd6",
+      "attribution": "Weather forecast data by Open-Meteo, based on ECMWF IFS. API data licensed under CC BY 4.0."
+    },
+    "price_input": {
+      "provider": "Nord Pool",
+      "source_version": 2,
+      "source_updated_at_utc": "2026-11-21T12:06:21.2499222Z",
+      "observed_at_utc": "2026-11-22T07:59:25.819862Z",
+      "source_url": "https://dataportal-api.nordpoolgroup.com/api/DayAheadPrices?date=2026-11-22&market=DayAhead&deliveryArea=DK1,DK2&currency=EUR",
+      "raw_response_sha256": "7dc2a497f54a6f6ac6c6c5fbdd28c2677bb1ba93e6445828b4ea82d9b9d38334",
+      "observation_receipt_sha256": "21f2ac63ddcb84c0ed4400be97ec76c443055bf25d97a7070ef0a56453d03f89",
+      "derived_input_csv_sha256": "358928afaa26d0b20635c4b522ae2395442a5f2a34b959b883c846b236cfff36",
+      "rule": "Use each observed 22 November DK2 price as a same-local-quarter-hour persistence feature for 23 November. This is a simple price baseline, not an exchange-issued forecast."
+    },
+    "auction_outcome": {
+      "provider": "Nord Pool",
+      "market": "DayAhead",
+      "source_version": 2,
+      "source_updated_at_utc": "2026-11-22T12:12:36.5130211Z",
+      "observed_at_utc": "2026-11-22T12:38:01.069269Z",
+      "source_url": "https://dataportal-api.nordpoolgroup.com/api/DayAheadPrices?date=2026-11-23&market=DayAhead&deliveryArea=DK1,DK2&currency=EUR",
+      "response_sha256": "b730d711b311add0a60ac9028f51f925d1bebc5a966f334d59f4acb9d83d921a",
+      "observation_receipt_sha256": "666f79110c0b94b003cd56ddf6ec6d58985b77b537471bb0379e8c34afa9bcc4",
+      "use": "Outcome only; both source update and observation occurred after the gate."
+    }
+  },
+  "recorded_output": {
+    "scheduled_intervals": 96,
+    "schedule_csv_sha256": "d7a7547666c86908e5cb2cd92c681633d6dab51000b9925cbecd7348dbad5285",
+    "schedule_observed_at_utc": "2026-11-22T08:01:20Z",
+    "source": "https://github.com/mohammadrezwankhan/zephyrtrade/issues/92#issuecomment-7076260266"
+  },
+  "reproducibility": {
+    "script": "scripts/replay_prospective_record.py",
+    "inputs_vendored": false,
+    "input_rights_note": "Raw Nord Pool price rows are not included in this repository because redistribution rights are not established. Supply the archived files you are authorized to use; the replay verifies their recorded hashes.",
+    "price_input_receipt": "https://github.com/mohammadrezwankhan/voltrl/issues/42#issuecomment-7076242486",
+    "price_outcome_receipt": "https://github.com/mohammadrezwankhan/voltrl/issues/42#issuecomment-7079283975"
+  },
+  "limitations": [
+    "The forecast is an authentic single ECMWF IFS model run observed before the recorded gate; it is not a historical as-issued vintage for the retained synthetic study.",
+    "The site and 30 MW power curve are educational proxy assumptions; no real plant was identified.",
+    "No metered generation, accepted order, imbalance settlement, or farm revenue was recorded.",
+    "The replay scores only same-day price persistence on matched UTC intervals and computes a forecast-volume mark at auction prices; neither is a farm-level or fitted-strategy backtest.",
+    "The record does not provide independent scientific review or human UAT."
+  ]
+}
