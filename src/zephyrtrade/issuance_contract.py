@@ -58,6 +58,13 @@ def illustrative_issued_offers(
     deliveries = [_aware_utc(value, "delivery_utc") for value in deliveries_utc]
     if not deliveries:
         raise ValueError("At least one delivery interval is required")
+    # Hourly settlement inputs must be aligned to the UTC hour, including
+    # singleton sequences (which cannot fail a contiguity-only check).
+    if any(
+        delivery.minute or delivery.second or delivery.microsecond
+        for delivery in deliveries
+    ):
+        raise ValueError("Delivery intervals must start on a whole UTC hour")
     if any(
         deliveries[i + 1] - deliveries[i] != _INTERVAL
         for i in range(len(deliveries) - 1)

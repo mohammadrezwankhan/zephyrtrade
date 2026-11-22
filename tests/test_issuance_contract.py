@@ -75,6 +75,22 @@ def test_missing_hour_and_duplicates_rejected_even_across_dst() -> None:
     )
 
 
+@pytest.mark.parametrize(
+    "deliveries",
+    [
+        [moment("2024-04-01T00:30:00Z")],
+        [moment("2024-04-01T00:00:00.000001Z")],
+        [moment("2024-04-01T00:30:00Z"), moment("2024-04-01T01:30:00Z")],
+    ],
+)
+def test_subhour_delivery_boundaries_rejected_even_when_contiguous(
+    deliveries: list[datetime],
+) -> None:
+    """A UTC-hourly contract cannot accept half-hour or fractional-hour keys."""
+    with pytest.raises(ValueError, match="whole UTC hour"):
+        illustrative_issued_offers(deliveries, [], capacity_mw=10.0)
+
+
 def test_naive_datetime_and_conflicting_same_issue_are_rejected() -> None:
     delivery = moment("2024-04-01T00:00:00Z")
     issued = illustrative_gate_utc(delivery) - timedelta(hours=2)
