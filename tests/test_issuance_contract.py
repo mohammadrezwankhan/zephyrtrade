@@ -105,6 +105,7 @@ def test_duplicate_issue_time_with_different_availability_is_rejected() -> None:
     with pytest.raises(ValueError, match="duplicate"):
         illustrative_issued_offers([delivery], [first, contradictory], capacity_mw=10.0)
 
+
 def test_realized_future_outcomes_are_not_control_inputs() -> None:
     delivery = moment("2024-04-01T00:00:00Z")
     issued = illustrative_gate_utc(delivery) - timedelta(hours=2)
