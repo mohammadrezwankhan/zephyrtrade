@@ -95,6 +95,18 @@ def test_naive_datetime_and_conflicting_same_issue_are_rejected() -> None:
         )
 
 
+def test_duplicate_issue_time_with_different_availability_is_rejected() -> None:
+    delivery = moment("2024-04-01T00:00:00Z")
+    issued = illustrative_gate_utc(delivery) - timedelta(hours=2)
+    first = vintage(delivery, issued, 4.0)
+    contradictory = replace(
+        first, available_at_utc=issued + timedelta(minutes=6), power_mw=5.0
+    )
+    with pytest.raises(ValueError, match="duplicate"):
+        illustrative_issued_offers(
+            [delivery], [first, contradictory], capacity_mw=10.0
+        )
+
 def test_realized_future_outcomes_are_not_control_inputs() -> None:
     delivery = moment("2024-04-01T00:00:00Z")
     issued = illustrative_gate_utc(delivery) - timedelta(hours=2)
