@@ -2,6 +2,7 @@
 
 from __future__ import annotations
 
+from dataclasses import replace
 from pathlib import Path
 
 import pandas as pd
@@ -13,6 +14,7 @@ from zephyrtrade.data_loader import (
     SyntheticDataConfig,
     filter_negative_price_intervals,
     generate_synthetic_data,
+    validate_data_bundle,
     write_data_bundle,
 )
 
@@ -111,3 +113,29 @@ def test_negative_price_filter_keeps_finite_zero_and_drops_negative() -> None:
     retained, summary = filter_negative_price_intervals(prices)
     assert retained["day_ahead_price_dkk_mwh"].tolist() == [0.0]
     assert summary["negative_price_rows_removed"] == 1
+
+
+@pytest.mark.parametrize(
+    ("frame_name", "column"),
+    [
+        ("farm_metadata", "capacity_mw"),
+        ("wind_power", "availability_fraction"),
+        ("climate", "temperature_2m_c"),
+        ("market_prices", "day_ahead_price_dkk_mwh"),
+    ],
+)
+def test_bundle_validator_rejects_infinite_numeric_values(
+    frame_name: str, column: str
+) -> None:
+    """An infinity must not pass as a valid observation or market price."""
+    bundle = generate_synthetic_data(
+        SyntheticDataConfig(
+            start="2024-01-01", end="2024-01-10", seed=5,
+            negative_price_probability=0.0,
+        )
+    )
+    altered = getattr(bundle, frame_name).copy()
+    altered.loc[altered.index[0], column] = float("inf")
+    invalid = replace(bundle, **{frame_name: altered})
+    with pytest.raises(ValueError, match=f"Nonfinite numeric values found in {frame_name}"):
+        validate_data_bundle(invalid)

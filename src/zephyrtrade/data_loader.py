@@ -403,6 +403,18 @@ def validate_data_bundle(bundle: DataBundle) -> None:
         if frame.isna().any().any():
             raise ValueError(f"Missing values found in {frame_name}.")
 
+    # Missing-value checks do not catch +/-infinity in numeric source cells.
+    # Refuse nonfinite values before they can contaminate model inputs or prices.
+    for frame_name, frame in (
+        ("farm_metadata", bundle.farm_metadata),
+        ("wind_power", bundle.wind_power),
+        ("climate", bundle.climate),
+        ("market_prices", bundle.market_prices),
+    ):
+        numeric = frame.select_dtypes(include="number")
+        if not np.isfinite(numeric.to_numpy(dtype=float)).all():
+            raise ValueError(f"Nonfinite numeric values found in {frame_name}.")
+
     if (bundle.wind_power["actual_power_mw"] < 0.0).any():
         raise ValueError("Wind production cannot be negative.")
     if (
