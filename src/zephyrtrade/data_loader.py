@@ -365,6 +365,8 @@ def filter_negative_price_intervals(
     missing = set(PRICE_COLUMNS).difference(market_prices.columns)
     if missing:
         raise ValueError(f"Market-price columns are missing: {sorted(missing)}")
+    if market_prices.empty:
+        raise ValueError("Market-price table must contain at least one interval.")
 
     prices = market_prices.loc[:, list(PRICE_COLUMNS)]
     if not np.isfinite(prices.to_numpy(dtype=float)).all():
@@ -415,6 +417,9 @@ def validate_data_bundle(bundle: DataBundle) -> None:
 
 def generate_synthetic_data(config: SyntheticDataConfig) -> DataBundle:
     """Generate, filter, validate, and return a deterministic Phase 1 data bundle."""
+    probability = config.negative_price_probability
+    if not np.isfinite(probability) or not 0.0 <= probability < 1.0:
+        raise ValueError("Negative-price probability must be finite and in [0, 1).")
     timestamps = _build_timestamps(config)
     rng = np.random.default_rng(config.seed)
     drivers = _generate_weather_drivers(timestamps, rng, config.timezone_name)

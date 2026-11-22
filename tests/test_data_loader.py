@@ -63,6 +63,25 @@ def test_writer_emits_complete_source_contract(tmp_path: Path) -> None:
     assert all(path.exists() and path.stat().st_size > 0 for path in paths.values())
 
 
+def test_negative_price_filter_rejects_empty_table() -> None:
+    """Empty source rows must not cause an uninformative zero-division error."""
+    prices = pd.DataFrame(columns=PRICE_COLUMNS)
+    with pytest.raises(ValueError, match="at least one interval"):
+        filter_negative_price_intervals(prices)
+
+
+@pytest.mark.parametrize(
+    "probability", [-0.01, 1.0, float("nan"), float("inf"), float("-inf")]
+)
+def test_generator_rejects_invalid_programmatic_probability(
+    probability: float,
+) -> None:
+    """Library callers must meet the same parameter bounds as the CLI."""
+    config = SyntheticDataConfig(negative_price_probability=probability)
+    with pytest.raises(ValueError, match="Negative-price probability"):
+        generate_synthetic_data(config)
+
+
 @pytest.mark.parametrize("bad_price", [float("nan"), float("inf"), float("-inf")])
 def test_negative_price_filter_rejects_nonfinite_source_prices(
     bad_price: float,
