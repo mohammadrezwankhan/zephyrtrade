@@ -55,7 +55,7 @@ def _score(
 def test_naive_source_timestamp_is_rejected() -> None:
     with pytest.raises(ValueError, match="timezone-aware"):
         same_local_interval_next_day_utc(
-            datetime(2026, 11, 22, 23, 0), DAY, timezone_name=ZONE
+            START.replace(tzinfo=None), DAY, timezone_name=ZONE
         )
 
 
