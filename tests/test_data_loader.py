@@ -86,6 +86,32 @@ def test_negative_price_filter_rejects_empty_table() -> None:
 
 
 @pytest.mark.parametrize(
+    ("second_timestamp", "message"),
+    [
+        (pd.Timestamp("2024-07-01T00:00:00Z"), "must be unique"),
+        (pd.NaT, "must not be missing"),
+    ],
+)
+def test_price_filter_rejects_invalid_delivery_keys_before_exclusions(
+    second_timestamp: pd.Timestamp, message: str
+) -> None:
+    """Duplicate/missing timestamps must not vanish behind a negative-price mask."""
+    prices = pd.DataFrame(
+        {
+            "timestamp_utc": [
+                pd.Timestamp("2024-07-01T00:00:00Z"),
+                second_timestamp,
+            ],
+            "day_ahead_price_dkk_mwh": [100.0, -50.0],
+            "up_reg_price_dkk_mwh": [110.0, 40.0],
+            "down_reg_price_dkk_mwh": [90.0, 20.0],
+        }
+    )
+    with pytest.raises(ValueError, match=message):
+        filter_negative_price_intervals(prices)
+
+
+@pytest.mark.parametrize(
     "probability", [-0.01, 1.0, float("nan"), float("inf"), float("-inf")]
 )
 def test_generator_rejects_invalid_programmatic_probability(
