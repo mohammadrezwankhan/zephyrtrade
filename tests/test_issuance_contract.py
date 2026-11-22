@@ -66,12 +66,13 @@ def test_missing_hour_and_duplicates_rejected_even_across_dst() -> None:
         illustrative_issued_offers([delivery, delivery], [], capacity_mw=10.0)
     delivery_hours = [delivery + timedelta(hours=i) for i in range(3)]
     forecasts = [
-        vintage(hour, moment("2024-10-26T09:00:00Z"), 3.0)
-        for hour in delivery_hours
+        vintage(hour, moment("2024-10-26T09:00:00Z"), 3.0) for hour in delivery_hours
     ]
-    assert illustrative_issued_offers(
-        delivery_hours, forecasts, capacity_mw=10.0
-    ) == (3.0, 3.0, 3.0)
+    assert illustrative_issued_offers(delivery_hours, forecasts, capacity_mw=10.0) == (
+        3.0,
+        3.0,
+        3.0,
+    )
 
 
 def test_naive_datetime_and_conflicting_same_issue_are_rejected() -> None:
@@ -107,9 +108,9 @@ def test_realized_future_outcomes_are_not_control_inputs() -> None:
     future_observations.update(
         realized_power_mw=0.0, weather_ms=100.0, realized_price=900.0
     )
-    assert illustrative_issued_offers(
-        [delivery], [forecast], capacity_mw=10.0
-    ) == original
+    assert (
+        illustrative_issued_offers([delivery], [forecast], capacity_mw=10.0) == original
+    )
     assert future_observations["realized_price"] == 900.0
 
 
