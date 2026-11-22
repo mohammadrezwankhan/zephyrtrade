@@ -1,0 +1,31 @@
+{
+  "version": 1,
+  "classification": "invented_illustrative_only",
+  "gate_assumption": "Europe/Copenhagen previous-local-day 12:00",
+  "capacity_mw": 10.0,
+  "delivery_hours_utc": [
+    "2024-03-31T00:00:00Z",
+    "2024-03-31T01:00:00Z"
+  ],
+  "forecast_vintages": [
+    {
+      "delivery_utc": "2024-03-31T00:00:00Z",
+      "issued_at_utc": "2024-03-30T09:00:00Z",
+      "available_at_utc": "2024-03-30T09:05:00Z",
+      "power_mw": 3.0
+    },
+    {
+      "delivery_utc": "2024-03-31T01:00:00Z",
+      "issued_at_utc": "2024-03-30T09:00:00Z",
+      "available_at_utc": "2024-03-30T09:05:00Z",
+      "power_mw": 4.0
+    },
+    {
+      "delivery_utc": "2024-03-31T01:00:00Z",
+      "issued_at_utc": "2024-03-30T11:01:00Z",
+      "available_at_utc": "2024-03-30T11:02:00Z",
+      "power_mw": 9.0
+    }
+  ],
+  "expected_offers_mw": [3.0, 4.0]
+}

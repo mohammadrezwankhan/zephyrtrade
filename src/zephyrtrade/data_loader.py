@@ -365,8 +365,24 @@ def filter_negative_price_intervals(
     missing = set(PRICE_COLUMNS).difference(market_prices.columns)
     if missing:
         raise ValueError(f"Market-price columns are missing: {sorted(missing)}")
+    if market_prices.empty:
+        raise ValueError("Market-price table must contain at least one interval.")
 
-    keep_mask = market_prices.loc[:, list(PRICE_COLUMNS)].ge(0.0).all(axis=1)
+    # A duplicate delivery time can create contradictory prices and bias masks.
+    # Check timestamps before dropping any rows so anomalies cannot disappear.
+    if "timestamp_utc" in market_prices.columns:
+        timestamps = market_prices["timestamp_utc"]
+        if timestamps.isna().any():
+            raise ValueError("Market-price timestamps must not be missing.")
+        if timestamps.duplicated().any():
+            raise ValueError("Market-price timestamps must be unique before filtering.")
+
+    prices = market_prices.loc[:, list(PRICE_COLUMNS)]
+    if not np.isfinite(prices.to_numpy(dtype=float)).all():
+        raise ValueError("Market prices must be finite before filtering.")
+    keep_mask = prices.ge(0.0).all(axis=1)
+    if not keep_mask.any():
+        raise ValueError("No nonnegative price intervals remain after filtering.")
     filtered = market_prices.loc[keep_mask].reset_index(drop=True)
     total_rows = len(market_prices)
     removed_rows = int((~keep_mask).sum())
@@ -398,6 +414,18 @@ def validate_data_bundle(bundle: DataBundle) -> None:
         if frame.isna().any().any():
             raise ValueError(f"Missing values found in {frame_name}.")
 
+    # Missing-value checks do not catch +/-infinity in numeric source cells.
+    # Refuse nonfinite values before they can contaminate model inputs or prices.
+    for frame_name, frame in (
+        ("farm_metadata", bundle.farm_metadata),
+        ("wind_power", bundle.wind_power),
+        ("climate", bundle.climate),
+        ("market_prices", bundle.market_prices),
+    ):
+        numeric = frame.select_dtypes(include="number")
+        if not np.isfinite(numeric.to_numpy(dtype=float)).all():
+            raise ValueError(f"Nonfinite numeric values found in {frame_name}.")
+
     if (bundle.wind_power["actual_power_mw"] < 0.0).any():
         raise ValueError("Wind production cannot be negative.")
     if (
@@ -412,6 +440,9 @@ def validate_data_bundle(bundle: DataBundle) -> None:
 
 def generate_synthetic_data(config: SyntheticDataConfig) -> DataBundle:
     """Generate, filter, validate, and return a deterministic Phase 1 data bundle."""
+    probability = config.negative_price_probability
+    if not np.isfinite(probability) or not 0.0 <= probability < 1.0:
+        raise ValueError("Negative-price probability must be finite and in [0, 1).")
     timestamps = _build_timestamps(config)
     rng = np.random.default_rng(config.seed)
     drivers = _generate_weather_drivers(timestamps, rng, config.timezone_name)
