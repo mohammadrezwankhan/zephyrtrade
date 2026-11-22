@@ -130,12 +130,16 @@ def test_bundle_validator_rejects_infinite_numeric_values(
     """An infinity must not pass as a valid observation or market price."""
     bundle = generate_synthetic_data(
         SyntheticDataConfig(
-            start="2024-01-01", end="2024-01-10", seed=5,
+            start="2024-01-01",
+            end="2024-01-10",
+            seed=5,
             negative_price_probability=0.0,
         )
     )
     altered = getattr(bundle, frame_name).copy()
     altered.loc[altered.index[0], column] = float("inf")
     invalid = replace(bundle, **{frame_name: altered})
-    with pytest.raises(ValueError, match=f"Nonfinite numeric values found in {frame_name}"):
+    with pytest.raises(
+        ValueError, match=f"Nonfinite numeric values found in {frame_name}"
+    ):
         validate_data_bundle(invalid)
