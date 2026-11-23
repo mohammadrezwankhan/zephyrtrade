@@ -100,6 +100,56 @@ def test_replay_rejects_impossible_record_chronology(
         )
 
 
+@pytest.mark.parametrize(
+    "delivery,local_gate,utc_gate,error",
+    [
+        (
+            "2026-11-23",
+            "2026-11-22T12:30:00+01:00",
+            "2026-11-22T11:30:00Z",
+            "DK2 gate must be noon Copenhagen time on the previous local day",
+        ),
+        (
+            "2026-11-23",
+            "2026-11-23T12:00:00+01:00",
+            "2026-11-23T11:00:00Z",
+            "DK2 gate must be noon Copenhagen time on the previous local day",
+        ),
+        (
+            "2026-03-30",
+            "2026-03-29T13:00:00+02:00",
+            "2026-03-29T11:00:00Z",
+            "DK2 gate must be noon Copenhagen time on the previous local day",
+        ),
+        (
+            "2026-03-30",
+            "2026-03-29T12:00:00+02:00",
+            "2026-03-29T10:00:00Z",
+            "recorded proxy schedule was observed after the gate",
+        ),
+    ],
+)
+def test_replay_validates_the_standard_dk2_gate(
+    tmp_path: Path, delivery: str, local_gate: str, utc_gate: str, error: str
+) -> None:
+    manifest = json.loads(DEFAULT_MANIFEST.read_text(encoding="utf-8"))
+    manifest["delivery_date_local"] = delivery
+    manifest["gate"].update(local=local_gate, utc=utc_gate)
+    manifest_path = tmp_path / "manifest.json"
+    manifest_path.write_text(json.dumps(manifest), encoding="utf-8")
+    unused = tmp_path / "unused"
+    with pytest.raises(ValueError, match=error):
+        replay(
+            manifest_path=manifest_path,
+            weather_snapshot=unused,
+            price_input_csv=unused,
+            price_source_response_json=unused,
+            price_observation_receipt_json=unused,
+            auction_outcome_json=unused,
+            auction_observation_receipt_json=unused,
+        )
+
+
 def test_naive_source_timestamp_is_rejected() -> None:
     with pytest.raises(ValueError, match="timezone-aware"):
         same_local_interval_next_day_utc(

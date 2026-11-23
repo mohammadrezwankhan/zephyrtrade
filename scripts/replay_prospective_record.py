@@ -11,7 +11,7 @@ import csv
 import hashlib
 import json
 import sys
-from datetime import UTC, date, datetime, timedelta
+from datetime import UTC, date, datetime, time, timedelta
 from email.utils import parsedate_to_datetime
 from math import isfinite
 from pathlib import Path
@@ -355,12 +355,21 @@ def replay(
         raise ValueError(
             "local and UTC gate timestamps do not identify the same instant"
         )
+    timezone_name = manifest["timezone"]
+    if timezone_name != "Europe/Copenhagen":
+        raise ValueError("the DK2 replay requires the Europe/Copenhagen time zone")
     gate_local = datetime.fromisoformat(manifest["gate"]["local"])
     if (
-        gate_local.astimezone(ZoneInfo(manifest["timezone"])).isoformat()
+        gate_local.astimezone(ZoneInfo(timezone_name)).isoformat()
         != manifest["gate"]["local"]
     ):
         raise ValueError("gate local time does not match the declared time zone")
+    delivery_date = date.fromisoformat(manifest["delivery_date_local"])
+    previous_day = delivery_date - timedelta(days=1)
+    if gate_local.date() != previous_day or gate_local.time() != time(12):
+        raise ValueError(
+            "DK2 gate must be noon Copenhagen time on the previous local day"
+        )
 
     weather_meta = manifest["inputs"]["weather"]
     price_meta = manifest["inputs"]["price_input"]
@@ -419,8 +428,7 @@ def replay(
         price_observation_receipt_json,
         manifest,
     )
-    delivery_date = date.fromisoformat(manifest["delivery_date_local"])
-    delivery_starts = expected_delivery_starts_utc(delivery_date, manifest["timezone"])
+    delivery_starts = expected_delivery_starts_utc(delivery_date, timezone_name)
     price_by_target = {point.delivery_utc: point for point in price_forecasts}
     proxy = manifest["proxy"]
     if proxy["power_curve_ms"] != {"cut_in": 3.0, "rated": 12.0, "cut_out": 25.0}:
