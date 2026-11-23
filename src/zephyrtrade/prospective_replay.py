@@ -215,6 +215,7 @@ def build_proxy_schedule(
 
     This is an educational power-curve control, not a fitted strategy. It must
     receive no realized weather, generation, auction outcome, or settlement.
+    Callers must verify source availability at the gate before scheduling.
     """
     if not isfinite(capacity_mw) or capacity_mw <= 0.0:
         raise ValueError("capacity_mw must be finite and positive")
@@ -247,6 +248,7 @@ def build_proxy_schedule(
             raise ValueError("weather wind speed must be finite and non-negative")
         weather[timestamp] = speed
 
+    zone = ZoneInfo("Europe/Copenhagen")
     schedule: list[ProxySchedulePoint] = []
     for delivery in deliveries:
         weather_hour = delivery.replace(minute=0)
@@ -260,6 +262,9 @@ def build_proxy_schedule(
         price = float(forecast.price_eur_mwh)
         if not isfinite(price):
             raise ValueError("price forecast must be finite")
+        _price_point_is_prior_local_interval(
+            forecast, delivery_date=delivery.astimezone(zone).date(), zone=zone
+        )
         speed = weather[weather_hour]
         scheduled = (
             capacity_mw * wake_efficiency * availability * _power_curve_fraction(speed)

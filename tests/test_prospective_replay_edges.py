@@ -284,6 +284,28 @@ def test_schedule_rejects_corrupted_weather_and_price_inputs(
         )
 
 
+@pytest.mark.parametrize(
+    "source,pattern",
+    [
+        (START, "previous local delivery day"),
+        (START - timedelta(days=1, minutes=15), "previous local delivery day"),
+        (START - timedelta(days=1) + timedelta(minutes=15), "same local quarter-hour"),
+        (START.replace(tzinfo=None), "timezone-aware"),
+    ],
+)
+def test_schedule_rejects_price_from_wrong_source_interval(
+    source: datetime, pattern: str
+) -> None:
+    with pytest.raises(ValueError, match=pattern):
+        build_proxy_schedule(
+            [START],
+            {START: 10.0},
+            {START: _forecast(source=source)},
+            capacity_mw=30.0,
+            wake_efficiency=0.94,
+        )
+
+
 @pytest.mark.parametrize("wind,price", [(2.0, 10.0), (26.0, 10.0), (10.0, -5.0)])
 def test_proxy_schedule_zeroes_unsafe_or_negative_price_operating_regions(
     wind: float, price: float
