@@ -2,12 +2,19 @@
 version: 2
 updates:
 - package-ecosystem: pip
-  directory: /
+  directories:
+  - /
+  - /scripts/portfolio
   schedule:
     interval: weekly
   open-pull-requests-limit: 5
   cooldown:
     default-days: 7
+  groups:
+    guide-parser:
+      patterns:
+      - defusedxml
+      group-by: dependency-name
 - package-ecosystem: github-actions
   directory: /
   schedule:
