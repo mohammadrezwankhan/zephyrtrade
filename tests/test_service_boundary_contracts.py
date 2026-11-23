@@ -12,6 +12,7 @@ from collections.abc import Iterator
 from http.server import ThreadingHTTPServer
 from pathlib import Path
 from typing import NoReturn
+from unittest.mock import Mock, call
 
 import pytest
 
@@ -149,6 +150,34 @@ def test_worker_capacity_rejects_excess_requests_then_recovers(
     assert request(service, "GET", "/api/health")[0] == 200
 
 
+def test_overload_sends_503_before_draining_pending_request_bytes() -> None:
+    connection = Mock(spec=socket.socket)
+    request_line = b"GET /api/health HTTP/1.1\r\n"
+    headers = b"Host: localhost\r\n\r\n"
+    connection.recv.side_effect = [request_line, headers, b""]
+    with app.LocalServer(0) as server:
+        for _ in range(8):
+            assert server.workers.acquire(timeout=1)
+        server.process_request(connection, ("127.0.0.1", 50000))
+
+    wire_calls = [
+        item
+        for item in connection.method_calls
+        if item[0] in {"sendall", "shutdown", "recv", "close"}
+    ]
+    assert wire_calls == [
+        call.sendall(
+            b"HTTP/1.0 503 Service Unavailable\r\nContent-Length: 0\r\n"
+            b"Connection: close\r\n\r\n"
+        ),
+        call.shutdown(socket.SHUT_WR),
+        call.recv(8192),
+        call.recv(8192 - len(request_line)),
+        call.recv(8192 - len(request_line) - len(headers)),
+        call.close(),
+    ]
+
+
 def test_failed_thread_dispatch_does_not_leak_a_worker_slot(
     monkeypatch: pytest.MonkeyPatch,
 ) -> None:
@@ -169,6 +198,15 @@ def test_failed_thread_dispatch_does_not_leak_a_worker_slot(
             server.workers.release()
     finally:
         server.server_close()
+
+
+def test_local_server_rejects_second_listener_on_occupied_port() -> None:
+    with app.LocalServer(0) as server:
+        port = server.server_port
+        with pytest.raises(OSError), app.LocalServer(port):
+            pass
+    with app.LocalServer(port):
+        pass
 
 
 def test_local_cli_rejects_privileged_ports_and_reports_an_occupied_port(

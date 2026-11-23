@@ -9,12 +9,14 @@ from __future__ import annotations
 import argparse
 import json
 import math
+import socket
 import sys
 import threading
 import webbrowser
 from http import HTTPStatus
 from http.server import BaseHTTPRequestHandler, ThreadingHTTPServer
 from pathlib import Path
+from time import monotonic
 from typing import Any
 from urllib.parse import urlsplit
 
@@ -24,6 +26,7 @@ from zephyrtrade import __version__
 from zephyrtrade.optimize import solve_single_period_offer_lp
 
 MAX_BODY = 32_768
+OVERLOAD_IO_TIMEOUT = 0.05
 WEB_ROOT = Path(__file__).with_name("web")
 ASSETS = {
     "/": ("index.html", "text/html; charset=utf-8"),
@@ -104,6 +107,7 @@ class LocalServer(ThreadingHTTPServer):
 
     daemon_threads = True
     request_queue_size = 8
+    allow_reuse_address = sys.platform != "win32"
 
     def __init__(self, port: int = 8765) -> None:
         """Bind an isolated single-user service to the IPv4 loopback interface."""
@@ -111,16 +115,40 @@ class LocalServer(ThreadingHTTPServer):
         self.workers = threading.BoundedSemaphore(8)
         self.solver = threading.Lock()
 
+    def server_bind(self) -> None:
+        """Reserve the listening endpoint before binding on Windows."""
+        if sys.platform == "win32":
+            self.socket.setsockopt(socket.SOL_SOCKET, socket.SO_EXCLUSIVEADDRUSE, 1)
+        super().server_bind()
+
     def process_request(self, request: Any, client_address: Any) -> None:
         """Reject excess work rather than creating an unbounded thread pool."""
         if not self.workers.acquire(blocking=False):
             try:
+                request.settimeout(OVERLOAD_IO_TIMEOUT)
                 request.sendall(
                     b"HTTP/1.0 503 Service Unavailable\r\n"
                     b"Content-Length: 0\r\nConnection: close\r\n\r\n"
                 )
+                request.shutdown(socket.SHUT_WR)
+
+                # Drain late input after the response so Windows does not
+                # reset the connection before the client can read the 503.
+                deadline = monotonic() + OVERLOAD_IO_TIMEOUT
+                remaining = 8192
+                while remaining:
+                    timeout = deadline - monotonic()
+                    if timeout <= 0:
+                        break
+                    request.settimeout(timeout)
+                    data = request.recv(remaining)
+                    if not data:
+                        break
+                    remaining -= len(data)
+            except OSError:
+                pass
             finally:
-                self.shutdown_request(request)
+                self.close_request(request)
             return
         try:
             super().process_request(request, client_address)
