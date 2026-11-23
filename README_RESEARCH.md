@@ -172,6 +172,13 @@ proxies without forecast issuance/vintage timestamps, and the offer backtest
 uses realised test-period prices ex post. Model rankings and revenue estimates
 are retrospective synthetic results, not validated prospective bidding outcomes.
 
+A separate [23 November 2026 shadow record](docs/champion/PROSPECTIVE_CONTRACT.md#source-backed-23-november-shadow-record)
+replays one pre-gate ECMWF IFS run and one previous-day DK2 price-persistence
+feature against a later auction result. Its 96-interval score is price-only; the
+power schedule is for an educational geographic proxy with no metered generation
+or accepted order. It does not validate historic forecast publication times or
+score the retained Phase 1–3 offer models.
+
 ## Phase 2 indirect-model experiment
 
 Run the complete forecast-then-optimize backtest:

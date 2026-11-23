@@ -211,6 +211,12 @@ operational forecast. Forecast issuance, gate-closure availability, current mark
 rules, transaction costs and real settlement data are not validated. Synthetic
 capture percentages do not establish investable or live trading performance.
 
+There is one separately documented, source-backed 23 November 2026 shadow replay
+([information-vintage record](docs/champion/PROSPECTIVE_CONTRACT.md#source-backed-23-november-shadow-record)).
+It scores a simple prior-day DK2 price feature on one common 96-interval UTC mask
+and builds an educational proxy schedule. It does not score an original ZephyrTrade
+strategy or establish physical generation, accepted orders, settlement, or farm revenue.
+
 ## Verification and known limits
 
 - 86 Python tests pass with warnings treated as errors, including real local HTTP requests.
