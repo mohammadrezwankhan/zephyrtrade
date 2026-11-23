@@ -171,6 +171,15 @@ def test_failed_thread_dispatch_does_not_leak_a_worker_slot(
         server.server_close()
 
 
+def test_local_server_rejects_second_listener_on_occupied_port() -> None:
+    with app.LocalServer(0) as server:
+        port = server.server_port
+        with pytest.raises(OSError), app.LocalServer(port):
+            pass
+    with app.LocalServer(port):
+        pass
+
+
 def test_local_cli_rejects_privileged_ports_and_reports_an_occupied_port(
     service: app.LocalServer,
     monkeypatch: pytest.MonkeyPatch,
