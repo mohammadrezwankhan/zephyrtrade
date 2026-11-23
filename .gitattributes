@@ -3,3 +3,6 @@
 *.jpg binary
 *.zip binary
 *.gz binary
+
+# The engineering hero release verifies the committed bytes by SHA-256.
+assets/engineering-hero/v1/** -text
