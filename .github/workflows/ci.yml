@@ -115,5 +115,5 @@ jobs:
         run: |
           python -m pip install -e ".[dev]"
           python -m pip check
-      - name: Verify Windows listener exclusivity and service security
-        run: python -m pytest -W error tests/test_service_boundary_contracts.py
+      - name: Verify Windows listener and wheel checkout containment
+        run: python -m pytest -W error tests/test_service_boundary_contracts.py tests/test_evidence_tool_contracts.py
