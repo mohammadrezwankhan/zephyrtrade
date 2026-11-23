@@ -9,6 +9,7 @@ from __future__ import annotations
 import argparse
 import json
 import math
+import socket
 import sys
 import threading
 import webbrowser
@@ -104,12 +105,19 @@ class LocalServer(ThreadingHTTPServer):
 
     daemon_threads = True
     request_queue_size = 8
+    allow_reuse_address = sys.platform != "win32"
 
     def __init__(self, port: int = 8765) -> None:
         """Bind an isolated single-user service to the IPv4 loopback interface."""
         super().__init__(("127.0.0.1", port), Handler)
         self.workers = threading.BoundedSemaphore(8)
         self.solver = threading.Lock()
+
+    def server_bind(self) -> None:
+        """Reserve the listening endpoint before binding on Windows."""
+        if sys.platform == "win32":
+            self.socket.setsockopt(socket.SOL_SOCKET, socket.SO_EXCLUSIVEADDRUSE, 1)
+        super().server_bind()
 
     def process_request(self, request: Any, client_address: Any) -> None:
         """Reject excess work rather than creating an unbounded thread pool."""
