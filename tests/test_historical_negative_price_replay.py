@@ -90,10 +90,9 @@ def test_historical_mask_and_fixed_offers_on_the_same_generated_hours() -> None:
         settled = realized_market_revenue(
             np.full(len(prices), offer, dtype=float),
             power.to_numpy(dtype=float),
-            *(
-                prices[column].to_numpy(dtype=float)
-                for column in data_loader.PRICE_COLUMNS
-            ),
+            prices["day_ahead_price_dkk_mwh"].to_numpy(dtype=float),
+            prices["up_reg_price_dkk_mwh"].to_numpy(dtype=float),
+            prices["down_reg_price_dkk_mwh"].to_numpy(dtype=float),
         )
         np.testing.assert_allclose(
             [
