@@ -163,7 +163,10 @@ def _parse_price_input(
         raise ValueError("price observation receipt hash chain mismatch")
     if receipt["rows"] != 192:
         raise ValueError("price observation receipt does not contain 192 source rows")
-    http_date = parsedate_to_datetime(receipt["http_date"]).astimezone(UTC)
+    http_date = parsedate_to_datetime(receipt["http_date"])
+    if http_date.tzinfo is None or http_date.utcoffset() is None:
+        raise ValueError("HTTP date must include a UTC offset")
+    http_date = http_date.astimezone(UTC)
     observed_at = _parse_utc(receipt["observed_by_utc"], "price observation")
     deadline = _parse_utc(receipt["next_bid_deadline_utc"], "next bid deadline")
     if not http_date <= observed_at <= gate or deadline != gate:

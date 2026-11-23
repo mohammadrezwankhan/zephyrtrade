@@ -432,3 +432,50 @@ def test_scoring_excludes_unmatched_inputs_without_inventing_scores(case: str) -
         "previous_day_same_interval": None,
         "previous_day_area_mean": None,
     }
+
+
+def test_price_receipt_rejects_naive_http_date(
+    tmp_path: Path, monkeypatch: pytest.MonkeyPatch
+) -> None:
+    from scripts import replay_prospective_record as record
+
+    monkeypatch.setattr(record, "_verify_file", lambda *_args: None)
+    monkeypatch.setattr(record, "_sha256", lambda _path: "forecast-hash")
+    source = tmp_path / "source.json"
+    source.write_text("{}", encoding="utf-8")
+    receipt = tmp_path / "receipt.json"
+    receipt.write_text(
+        json.dumps(
+            {
+                "provider": "Nord Pool",
+                "source_version": "v1",
+                "source_updated_at": "2026-11-22T09:00:00Z",
+                "observed_by_utc": "2026-11-22T10:00:00Z",
+                "url": "https://example.test",
+                "raw_sha256": "raw-hash",
+                "forecast_sha256": "forecast-hash",
+                "rows": 192,
+                "http_date": "Sun, 22 Nov 2026 10:30:00 -0000",
+                "next_bid_deadline_utc": "2026-11-22T11:00:00Z",
+            }
+        ),
+        encoding="utf-8",
+    )
+    manifest = {
+        "timezone": "Europe/Copenhagen",
+        "delivery_date_local": "2026-11-23",
+        "gate": {"utc": "2026-11-22T11:00:00Z"},
+        "inputs": {
+            "price_input": {
+                "derived_input_csv_sha256": "x",
+                "raw_response_sha256": "raw-hash",
+                "observation_receipt_sha256": "x",
+                "source_version": "v1",
+                "source_updated_at_utc": "2026-11-22T09:00:00Z",
+                "observed_at_utc": "2026-11-22T10:00:00Z",
+                "source_url": "https://example.test",
+            }
+        },
+    }
+    with pytest.raises(ValueError, match="HTTP date must include a UTC offset"):
+        record._parse_price_input(tmp_path / "prices.csv", source, receipt, manifest)
