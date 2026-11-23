@@ -123,6 +123,17 @@ class LocalServer(ThreadingHTTPServer):
         """Reject excess work rather than creating an unbounded thread pool."""
         if not self.workers.acquire(blocking=False):
             try:
+                # Unread HTTP request bytes can turn a graceful close into
+                # TCP RST on Windows, hiding the 503 response from clients.
+                # Consume only one bounded, immediately available chunk;
+                # never wait for a full request on the saturated accept loop.
+                request.setblocking(False)
+                try:
+                    request.recv(8192)
+                except BlockingIOError:
+                    pass
+                finally:
+                    request.setblocking(True)
                 request.sendall(
                     b"HTTP/1.0 503 Service Unavailable\r\n"
                     b"Content-Length: 0\r\nConnection: close\r\n\r\n"
