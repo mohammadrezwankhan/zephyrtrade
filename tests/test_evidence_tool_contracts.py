@@ -167,11 +167,23 @@ def test_wheel_verifier_rejects_empty_or_stale_sources_before_install(
 
 
 def test_wheel_verifier_refuses_a_wheel_outside_the_checkout(tmp_path: Path) -> None:
-    outside = tmp_path / "outside.whl"
-    outside.touch()
     root = tmp_path / "checkout"
     wheel = root / "dist/zephyrtrade-1.1.0-py3-none-any.whl"
-    wheel.parent.mkdir(parents=True)
-    wheel.symlink_to(outside)
+    outside = tmp_path / "outside"
+    outside.mkdir()
+    outside_wheel = outside / wheel.name
+    outside_wheel.touch()
+
+    if sys.platform == "win32":
+        from _winapi import CreateJunction
+
+        # Directory junctions work without Windows' file-symlink privilege.
+        root.mkdir()
+        CreateJunction(str(outside), str(wheel.parent))
+    else:
+        wheel.parent.mkdir(parents=True)
+        wheel.symlink_to(outside_wheel)
+
+    assert wheel.resolve(strict=True) == outside_wheel.resolve(strict=True)
     with pytest.raises(ValueError, match="inside its repository"):
         verify_wheel_install.verify_wheel(root)
