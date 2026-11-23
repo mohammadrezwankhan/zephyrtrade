@@ -373,6 +373,13 @@ def replay(
     weather_available_upper = _parse_utc(
         weather_meta["observed_upper_bound_utc"], "weather observation upper bound"
     )
+    price_observed = _parse_utc(price_meta["observed_at_utc"], "price observation")
+    if schedule_observed < weather_available_upper:
+        raise ValueError(
+            "schedule was recorded before the weather observation window ended"
+        )
+    if schedule_observed < price_observed:
+        raise ValueError("schedule was recorded before the price input was observed")
     require_pre_gate_availability(
         gate,
         weather_issued_at_utc=_parse_utc(
@@ -386,6 +393,19 @@ def replay(
             price_meta["observed_at_utc"], "price observation"
         ),
     )
+
+    # Validate post-gate outcome provenance before reading its values.
+    outcome_meta = manifest["inputs"]["auction_outcome"]
+    outcome_observed = _parse_utc(
+        outcome_meta["observed_at_utc"], "auction observation"
+    )
+    outcome_updated = _parse_utc(
+        outcome_meta["source_updated_at_utc"], "auction source update"
+    )
+    if outcome_updated <= gate or outcome_observed <= gate:
+        raise ValueError("auction outcomes must be timestamped after the decision gate")
+    if outcome_observed < outcome_updated:
+        raise ValueError("auction was observed before its source version was published")
 
     # Construct the policy output before loading any post-gate auction outcome.
     weather, weather_hash = _parse_weather(weather_snapshot, manifest)
@@ -416,17 +436,6 @@ def replay(
     schedule_hash = _schedule_csv_sha256(schedule, manifest["timezone"])
     if schedule_hash != manifest["recorded_output"]["schedule_csv_sha256"]:
         raise ValueError(f"replayed schedule SHA-256 mismatch: {schedule_hash}")
-
-    # Validate post-gate outcome provenance before reading its values.
-    outcome_meta = manifest["inputs"]["auction_outcome"]
-    outcome_observed = _parse_utc(
-        outcome_meta["observed_at_utc"], "auction observation"
-    )
-    outcome_updated = _parse_utc(
-        outcome_meta["source_updated_at_utc"], "auction source update"
-    )
-    if outcome_updated <= gate or outcome_observed <= gate:
-        raise ValueError("auction outcomes must be timestamped after the decision gate")
 
     # Auction values are intentionally read only after the decision is frozen.
     auction, clearing_by_target, auction_hash = _parse_auction_outcomes(

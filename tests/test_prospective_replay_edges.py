@@ -2,10 +2,13 @@
 
 from __future__ import annotations
 
+import json
 from datetime import UTC, date, datetime, timedelta
+from pathlib import Path
 
 import pytest
 
+from scripts.replay_prospective_record import DEFAULT_MANIFEST, replay
 from zephyrtrade.prospective_replay import (
     ClearingPricePoint,
     PriceForecastPoint,
@@ -50,6 +53,51 @@ def _score(
         delivery_date=delivery_date,
         timezone_name=ZONE,
     )
+
+
+@pytest.mark.parametrize(
+    "record,field,timestamp,error",
+    [
+        (
+            "recorded_output",
+            "schedule_observed_at_utc",
+            "2026-11-22T07:59:30Z",
+            "schedule was recorded before the weather observation window ended",
+        ),
+        (
+            "price_input",
+            "observed_at_utc",
+            "2026-11-22T08:02:00Z",
+            "schedule was recorded before the price input was observed",
+        ),
+        (
+            "auction_outcome",
+            "observed_at_utc",
+            "2026-11-22T11:15:00Z",
+            "auction was observed before its source version was published",
+        ),
+    ],
+)
+def test_replay_rejects_impossible_record_chronology(
+    tmp_path: Path, record: str, field: str, timestamp: str, error: str
+) -> None:
+    manifest = json.loads(DEFAULT_MANIFEST.read_text(encoding="utf-8"))
+    target = manifest if record == "recorded_output" else manifest["inputs"]
+    target[record][field] = timestamp
+    manifest_path = tmp_path / "manifest.json"
+    manifest_path.write_text(json.dumps(manifest), encoding="utf-8")
+    unused = tmp_path / "unused"
+
+    with pytest.raises(ValueError, match=error):
+        replay(
+            manifest_path=manifest_path,
+            weather_snapshot=unused,
+            price_input_csv=unused,
+            price_source_response_json=unused,
+            price_observation_receipt_json=unused,
+            auction_outcome_json=unused,
+            auction_observation_receipt_json=unused,
+        )
 
 
 def test_naive_source_timestamp_is_rejected() -> None:
