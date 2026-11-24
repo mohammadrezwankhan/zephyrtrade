@@ -34,10 +34,10 @@ jobs:
       - run: npm ci --prefix tests/browser/audit
       - name: Use Canonical Ubuntu archives for browser dependencies
         run: |
-          # Azure's mirror repeatedly stalled before the browser tests could start.
+          # Cloud mirrors on Azure and EC2 timed out while installing browser packages.
           for sources in /etc/apt/sources.list /etc/apt/apt-mirrors*.txt /etc/apt/sources.list.d/*.list /etc/apt/sources.list.d/*.sources; do
             if [ -f "$sources" ]; then
-              sudo sed -i -E 's|https?://azure\.archive\.ubuntu\.com/ubuntu|https://archive.ubuntu.com/ubuntu|g' "$sources"
+              sudo sed -i -E 's#https?://(azure|[[:alnum:]-]+\.ec2)\.archive\.ubuntu\.com/ubuntu([/[:space:]]|$)#https://archive.ubuntu.com/ubuntu\2#g' "$sources"
             fi
           done
       - run: node tests/browser/audit/node_modules/playwright/cli.js install --with-deps chromium firefox webkit
