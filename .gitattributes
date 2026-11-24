@@ -4,5 +4,11 @@
 *.zip binary
 *.gz binary
 
+# Cloudflare exports embed these files and hash the emitted browser runtime.
+/ZephyrTrade-Champion.html text eol=lf
+/LICENSE text eol=lf
+/scripts/cloudflare-site.css text eol=lf
+/assets/brand-uniformity/avatar.svg text eol=lf
+
 # The engineering hero release verifies the committed bytes by SHA-256.
 assets/engineering-hero/v1/** -text
