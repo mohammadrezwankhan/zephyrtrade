@@ -28,8 +28,26 @@ jobs:
       - name: Check out the repository
         uses: actions/checkout@3d3c42e5aac5ba805825da76410c181273ba90b1 # v7.0.1
         with:
+          fetch-depth: 0
           persist-credentials: false
 
+
+      - name: Reject AI author, committer, and co-author attribution
+        if: github.event_name == 'pull_request'
+        shell: bash
+        env:
+          EVENT_NAME: ${{ github.event_name }}
+          PR_BASE_SHA: ${{ github.event.pull_request.base.sha }}
+          PR_HEAD_SHA: ${{ github.event.pull_request.head.sha }}
+        run: |
+          set -euo pipefail
+          checker_path=.github/scripts/check_human_authorship.py
+          if git cat-file -e "${PR_BASE_SHA}:${checker_path}" 2>/dev/null; then
+            trusted_checker="$RUNNER_TEMP/check_human_authorship.py"
+            git show "${PR_BASE_SHA}:${checker_path}" > "$trusted_checker"
+            checker_path="$trusted_checker"
+          fi
+          python3 "$checker_path"
       - name: Check local and live traceability
         env:
           GH_TOKEN: ${{ github.token }}
